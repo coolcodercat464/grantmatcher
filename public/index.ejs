@@ -2,13 +2,15 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <title>Presentation Layer Tests</title>
+    <title>GrantMatcher</title>
+    <!-- EJS partial (for code reuse and efficiency) -->
     <%- head %>
 </head>
 <body>
+    <!-- Navigation (sticky header). Links and dropdown collapse into a hamburger menu when the screen size is small. -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light px-3" id="navbar">
         <!-- Brand on the left -->
-        <a class="navbar-brand bigBrand" href="#" id="navbar-brand">Grant Matcher</a>
+        <a class="navbar-brand bigBrand" href="/" id="navbar-brand">Grant Matcher</a>
 
         <!-- Toggler (for mobile view) -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -18,23 +20,27 @@
         <!-- Navbar links on the right -->
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
+                <!-- Links here -->
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Dashboard</a>
+                    <a class="nav-link" href="/">Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Tickets</a>
+                    <a class="nav-link" href="/tickets">Tickets</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Tutorial</a>
+                    <a class="nav-link" href="/tutorial">Tutorial</a>
                 </li>
+
+                <!-- Dropdown (user menu) -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fa fa-user-circle-o"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="#">Profile</a></li>
-                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="/settings">Settings</a></li>
                         <li><hr class="dropdown-divider"></li>
+                        <!-- Logout button (opens a modal) -->
                         <li><button class="dropdown-item" id="modalBtn1" onclick="openModal(1)">Logout</button></li>
                     </ul>
                 </li>
@@ -42,29 +48,35 @@
         </div>
     </nav>
 
+    <!-- The modal the logout button in the navigation bar opens -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Log out</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close1">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to log out?</p>
+            <div class="together">
+                <form method="post" action="/">
+                    <input type="submit" value="Logout!">
+                </form>
+                <button id='cancel1'>Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The main content -->
     <section style="margin-bottom: 5px;">
+        <!-- Testing EJS variable passing (allows passing information directly from the backend to the presentation layer without a JS intermediate) -->
         <h2>EJS Stuff:</h2>
         <b>User: <%= user %></b><br>
         <b>Biography: <%= biography %></b><br>
         <b>Message: <%= message %></b><br>
 
-        <div id="modal1" class="modal">
-            <div class="modal-content">
-                <div class="together">
-                    <h2>Log out</h2>
-                    <span class="close" id="close1">&times;</span>
-                </div>
-                
-                <p>Are you sure you want to log out?</p>
-                <div class="together">
-                    <form method="post" action="/">
-                        <input type="submit" value="Logout!">
-                    </form>
-                    <button id='cancel1'>Cancel</button>
-                </div>
-            </div>
-        </div>
-
+        <!-- Checklist for feasibility tests on presentation layer -->
         <h2>THINGS TO TEST</h2>
         <h3>Completed:</h3>
         <ul>
@@ -80,25 +92,34 @@
             <li>Footer is at bottom of the page</li>
         </ul>
 
+        <!-- Inline tooltip example -->
         <h2>Tool-tips</h2>
         <p>
             Some Text here... 
             <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Explanation Here">
+                <!-- Makes the tooltip circular -->
                 <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
             </button>
         </p>
         
-
+        <!-- Add keywords -->
         <h2>Keyword Selector</h2>
         <div class="listbox">
             <div class="listboxdiv">
+                <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                <!-- All keywords displayed here -->
                 <ul class="listboxul" id="list1">
                 </ul>
             </div>
+
+            <!-- The two elements in the div are on the same line -->
             <div class="listboxinput">
+                <!-- User enters keywords here -->
                 <div class="listboxtextdiv">
                     <input class="listboxtext" type="text" id="keyword1" name="keyword1" placeholder="Enter a keyword" required>
                 </div>
+
+                <!-- User presses this button to add the keyword to the list -->
                 <div class="listboxsubmitdiv">
                     <button class="listboxsubmit" onclick="addKeyword(1)"><i class="fa fa-arrow-right"></i></button>
                 </div>
@@ -106,9 +127,11 @@
         </div>
         <br>
 
+        <!-- Ensure that duplicates of the same selector don't interfere with each other (so I can use many keyword selectors on the same page) -->
         <h2>Keyword Selector Duplication Test</h2>
         <div class="listbox">
             <div class="listboxdiv">
+                <!-- Numbering the IDs so I can use many selectors (code reuse) -->
                 <ul class="listboxul" id="list2">
                 </ul>
             </div>
@@ -125,23 +148,30 @@
 
         <h2>Cluster Selector</h2>
         <div class="together clusterselector">
+            <!-- List of the unselected clusters -->
             <div class="unselected">
                 <div class="listboxinput">
                     <div class="listboxtextdiv">
+                        <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                        <!-- This is where the user enters some text that is matched to the clusters in the unselectedClusters list -->
                         <input class="listboxtext" type="text" id="searchUnselectedClusters1" name="searchUnselectedClusters1" placeholder="Enter a cluster" required>
                     </div>
                     <div class="listboxsubmitdiv">
+                        <!-- User can press this button to search from the list -->
                         <button class="listboxsubmit" onclick="findUnselectedCluster(1)"><i class="fa fa-search"></i></button>
                     </div>
                     <div class="listboxsubmitdiv">
+                        <!-- Added a reset button so its easier for the user to reset the form (displaying all clusters in the list) -->
                         <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
                     </div>
                 </div>
+                <!-- Contains all unselected clusters -->
                 <div class="listboxdiv unselectedClusters" id="unselectedClusters1">
                 </div>
                 <div class="clustersort">
                     <label for="sortUnselected1">Sort By:</label>
 
+                    <!-- Sort-by dropdown -->
                     <select name="sortUnselected1" id="sortUnselected1">
                         <option value="id">ID</option>
                         <option value="name">Name</option>
@@ -150,8 +180,10 @@
                 </div>
             </div>
 
+            <!-- Adds space between the selected and unselected lists -->
             <div class="spacer"></div>
 
+            <!-- Duplicate of the unselected list (for consistency and symmetrical balance) but with different names -->
             <div class="selected">
                 <div class="listboxinput">
                     <div class="listboxtextdiv">
@@ -179,11 +211,13 @@
         </div>
         <br>
 
+        <!-- Ensure that duplicates of the same selector don't interfere with each other (so I can use many cluster selectors on the same page) -->
         <h2>Cluster Selector Duplication Test</h2>
         <div class="together clusterselector">
             <div class="unselected">
                 <div class="listboxinput">
                     <div class="listboxtextdiv">
+                        <!-- Numbering the IDs so I can use many selectors (code reuse) -->
                         <input class="listboxtext" type="text" id="searchUnselectedClusters2" name="searchUnselectedClusters2" placeholder="Enter a cluster" required>
                     </div>
                     <div class="listboxsubmitdiv">
@@ -235,20 +269,26 @@
         </div>
         <br>
 
+        <!-- The table should be paginated (as per my designs in Criterion 5) -->
         <h2>Paginated Table</h2>
         <div class="container">
             <table class="table table-bordered" style="margin-bottom: 0; border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;">
                 <thead>
+                    <!-- Column names -->
                     <tr>
                     <th>#</th>
                     <th>Name</th>
                     </tr>
                 </thead>
+                <!-- Table items -->
                 <tbody id="tableBody1"></tbody>
             </table>
 
+            <!-- Table footer (with pagination controls and download button) -->
             <div class="pagination-controls" style="border: 1px solid black; margin-top: 0;">
-                <div class="d-flex align-items-center gap-2 d-flex w-100 px-3 py-2 align-items-center">
+                <!-- The download button should be left-aligned while the rest is right-aligned -->
+                <!-- align-items-center ensures that the text and icons are aligned properly (otherwise the text sticks out vertically and its distracting) -->
+                <div class="d-flex align-items-center gap-2 d-flex w-100 px-3 py-2">
                     <div>
                         <div class="dropdown">
                             <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -261,8 +301,10 @@
                         </div>
                     </div>
                     <div class="ms-auto">
+                        <!-- Numbering the IDs so I can use many tables (code reuse) -->
                         <button class="btn" id="firstNav1" onclick="goToFirst(1)"><i class="fa fa-angle-double-left"></i></button>
                         <button class="btn" id="prevNav1" onclick="goToPrev(1)"><i class="fa fa-angle-left"></i></button>
+                        <!-- Tells the user what page they are on -->
                         <span id="pageStats1"></span>
                         <button class="btn" id="nextNav1" onclick="goToNext(1)"><i class="fa fa-angle-right"></i></button>
                         <button class="btn" id="lastNav1" onclick="goToLast(1)"><i class="fa fa-angle-double-right"></i></button>
@@ -272,6 +314,7 @@
         </div>
         <br>
 
+        <!-- Ensure that tables don't interfere with each other (so I can use many tables on the same page) -->
         <h2>Paginated Table Duplication Test</h2>
         <div class="container">
             <table class="table table-bordered" style="margin-bottom: 0; border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;">
@@ -309,15 +352,24 @@
         </div>
         <br>
 
+        <!-- Accordions (for version history) -->
         <h2>Accordions</h2>
+        <!-- Note to future me -->
         <p>This would contain some HTML, so I would have to be careful about XSS attacks. To prevent this, I could add a template instead of forming the template in the JS</p>
+        
+        <!-- Accordion items are added here -->
         <div class="accordion" id="accordion">
         </div>
     </section>
 
+    <!-- EJS partial (for code reuse and efficiency) -->
     <%- footer %>
+
+    <!-- Bootstrap for CSS -->
     <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <!-- This file allows for the user to interact with the elements on the site and for the site to give feedback to the user -->
     <script src="script.js"></script>
+    <!-- JQuery for the tooltip -->
     <script>
         $(function () {
   $('[data-toggle="tooltip"]').tooltip()

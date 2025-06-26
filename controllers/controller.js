@@ -6,7 +6,7 @@ var theuser;
 // password hashing stuff
 // password = MD5(x.password.trim() + salt).toString();
 var MD5 = require("crypto-js/md5");
-const salt = "SALT";
+const salt = "SALT"; // add to a .env file
 var userid = 0;
 
 // passport authentication stuff
@@ -115,7 +115,7 @@ const indexget = async (req, res)=>{
         
         res.render('index.ejs', {root: path.join(__dirname, '../public'), head: headpartial, user: req.session.username, biography: theuser.biography, footer: partialfooter, message: "SUCCESSFUL AUTHENTICATION"});
     } else {
-        res.redirect('/login')
+        res.render('landing.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter});
     }
 } 
 

@@ -1,4 +1,14 @@
 //TODO: Replace by call to server
+
+/* 
+DATA STRUCTURE JUSTIFICATION - List of Dictionaries:
+Allows the program to loop through it easily. I didn't use a dictionary
+as that would make it harder to sort by fields other than the key. This
+is also the format it would come in once I call the database, thus reducing
+the processing time.
+*/
+
+// contains the data relevant to the clusters
 clustersData = [
     {
         'name': 'Cluster A',
@@ -32,6 +42,8 @@ clustersData = [
     }
 ]
 
+// contains all the data for the accordions
+// TODO: remove HTML and replace with fields
 accordionData = [
     {
         "title": "Accordion #1",
@@ -50,11 +62,14 @@ accordionData = [
     }
 ]
 
+// goes through each accordion item represented by the accordionData list
 for (i in accordionData) {
+    // get the information from the dictionary
     title = accordionData[i]["title"]
     html = accordionData[i]["html"]
     id = accordionData[i]["id"]
 
+    // create the HTML to display the accordion item on the main page
     accordionItem = `<div class="accordion-item">
         <h2 class="accordion-header" id="heading${id}">
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${id}" aria-expanded="true" aria-controls="collapse${id}">
@@ -68,15 +83,22 @@ for (i in accordionData) {
         </div>
     </div>`
 
+    // add the accordion item to the accordion
+    // TODO: add an accordionNumber so it can work with many accordions
     document.getElementById("accordion").innerHTML += accordionItem
 }
 
+// get all the lists of unselected clusters
 unselectedClustersDivs = document.getElementsByClassName('unselectedClusters')
 
+// initialise the list by adding all the cluster data to the unselected cluster (no clusters selected at the beginning)
 for (var i = 0; i < unselectedClustersDivs.length; i++) {
+    // get the number of the div (e.g., the number is 5 for a div with an ID called unselectedClusters5)
     selectorNumber = unselectedClustersDivs[i].id.replace("unselectedClusters", "")
+    // this string holds the HTMl code for the cluster list
     clusterHTML = ''
     for (x in clustersData) {
+        // create a single HTML button for each button and add it to the total list
         c = clustersData[x]
         clusterName = c.name
         clusterId = c['id']
@@ -85,13 +107,17 @@ for (var i = 0; i < unselectedClustersDivs.length; i++) {
     unselectedClustersDivs[i].innerHTML += clusterHTML;
 }
 
+// select a cluster from the unselected list
 function selectCluster(buttonId) {
+    // remove it from the unselected list
     document.getElementById(buttonId).remove()
 
+    // get the selector number (see the previous for loop for more details)
     buttonId = buttonId.split('U')
     selectorNumber = buttonId[0] 
     clusterId = buttonId[1]
 
+    // find the cluster from clustersData that is 
     clusterName = undefined
     for (x in clustersData) {
         c = clustersData[x]
@@ -101,13 +127,17 @@ function selectCluster(buttonId) {
         }
     }
 
+    // create html for that selected cluster
     clusterHTML = `<button class='selectedClusterButton' id='${selectorNumber}S${clusterId}' onclick="unselectCluster('${selectorNumber}S${clusterId}')">${clusterName}</button>`
 
+    // add it to the appropriate selected cluster list
     newSelectorId = 'selectedClusters' + selectorNumber
     newSelector = document.getElementById(newSelectorId)
     newSelector.innerHTML += clusterHTML
 }
 
+// same logic as the selecting a cluster, but instead we are moving the cluster
+// from the selected list to the unselected list
 function unselectCluster(buttonId) {
     document.getElementById(buttonId).remove()
 
@@ -131,12 +161,15 @@ function unselectCluster(buttonId) {
     newSelector.innerHTML += clusterHTML
 }
 
+// get all the names of the clusters in the unselected list
 function getUnselectedClusterNames(selectorId) {
+    // get all elements in the list
     selector = document.getElementById("unselectedClusters" + selectorId)
     clusters = selector.getElementsByClassName("unselectedClusterButton")
     clusterNames = []
     clusterIds = []
 
+    // get the name and cluster ID from those elements
     for (var i = 0; i < clusters.length; i ++) {
         clusterNames.push(clusters[i].textContent)
         clusterIds.push(clusters[i].id)
@@ -145,15 +178,22 @@ function getUnselectedClusterNames(selectorId) {
     return [clusterNames, clusterIds]
 }
 
+// find a cluster from the list of unselected clusters
 function findUnselectedCluster(selectorId) {
+    // get all the unselected clusters
     clusters = getUnselectedClusterNames(selectorId)
     clusterNames = clusters[0]
     clusterIds = clusters[1]
 
+    // get the search field
     searchField = document.getElementById("searchUnselectedClusters" + selectorId).value.toLowerCase()
+
+    // initialise lists
     excluded = []
     included = []
 
+    // go through each item in the list of all clusters and then check if it matches the search field
+    // add it to included if it does and excluded if it doesnt
     for (var i = 0; i < clusterNames.length; i ++) {
         clusterName = clusterNames[i].toLowerCase()
         if (clusterName.indexOf(searchField) == -1) {
@@ -163,20 +203,26 @@ function findUnselectedCluster(selectorId) {
         }
     }
 
+    // hide all the clusters in the excluded list
     for (var i = 0; i < excluded.length; i ++) {
         document.getElementById(excluded[i]).classList.add("hidden");
     }
 
+    // show all the clusters in the included list
     for (var i = 0; i < included.length; i ++) {
         document.getElementById(included[i]).classList.remove("hidden");
     }
 }
 
+// reset the search and show all clusters in the unselected cluster list
 function resetUnselectedClusterSearch(selectorId) {
+    // make the search field an empty string and use the search function
     document.getElementById("searchUnselectedClusters" + selectorId).value = ''
     findUnselectedCluster(selectorId)
 }
 
+// same logic as getting all unselected cluster names
+// but this time we are doing it on the selected list
 function getSelectedClusterNames(selectorId) {
     selector = document.getElementById("selectedClusters" + selectorId)
     clusters = selector.getElementsByClassName("selectedClusterButton")
@@ -191,6 +237,8 @@ function getSelectedClusterNames(selectorId) {
     return [clusterNames, clusterIds]
 }
 
+// same logic as finding clusters from the unselected list,
+// but this time we are doing it on the selected list
 function findSelectedCluster(selectorId) {
     clusters = getSelectedClusterNames(selectorId)
     clusterNames = clusters[0]
@@ -218,6 +266,8 @@ function findSelectedCluster(selectorId) {
     }
 }
 
+// same logic as resetting for the unselected cluster list,
+// but this time we are doing it for the selected list
 function resetSelectedClusterSearch(selectorId) {
     document.getElementById("searchSelectedClusters" + selectorId).value = ''
     findSelectedCluster(selectorId)
