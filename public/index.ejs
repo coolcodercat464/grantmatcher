@@ -42,9 +42,8 @@
         </div>
     </nav>
 
-    <section>
+    <section style="margin-bottom: 5px;">
         <h2>EJS Stuff:</h2>
-        <p>Testing Github works when I edit the code on another device</p>
         <b>User: <%= user %></b><br>
         <b>Biography: <%= biography %></b><br>
         <b>Message: <%= message %></b><br>
@@ -77,12 +76,8 @@
             <li>Tooltips</li>
             <li>Sticky Header</li>
             <li>Complete Table Footer</li>
-        </ul>
-
-        <h3>Uncompleted:</h3>
-        <ul>
             <li>Accordions</li>
-            <li>MAKE SURE THAT FOOTER IS AT BOTTOM OF PAGE</li>
+            <li>Footer is at bottom of the page</li>
         </ul>
 
         <h2>Tool-tips</h2>
@@ -313,6 +308,11 @@
             </div>
         </div>
         <br>
+
+        <h2>Accordions</h2>
+        <p>This would contain some HTML, so I would have to be careful about XSS attacks. To prevent this, I could add a template instead of forming the template in the JS</p>
+        <div class="accordion" id="accordion">
+        </div>
     </section>
 
     <%- footer %>

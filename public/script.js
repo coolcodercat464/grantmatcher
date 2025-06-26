@@ -32,6 +32,45 @@ clustersData = [
     }
 ]
 
+accordionData = [
+    {
+        "title": "Accordion #1",
+        "html": "<b>Test1</b> <i>yippeee</i>",
+        "id": 1
+    },
+    {
+        "title": "Accordion #2",
+        "html": "<b>Test2</b> <i>yippeee</i>",
+        "id": 2
+    },
+    {
+        "title": "Accordion #3",
+        "html": "<b>Test3</b> <i>yippeee</i>",
+        "id": 3
+    }
+]
+
+for (i in accordionData) {
+    title = accordionData[i]["title"]
+    html = accordionData[i]["html"]
+    id = accordionData[i]["id"]
+
+    accordionItem = `<div class="accordion-item">
+        <h2 class="accordion-header" id="heading${id}">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${id}" aria-expanded="true" aria-controls="collapse${id}">
+            ${title}
+        </button>
+        </h2>
+        <div id="collapse${id}" class="accordion-collapse collapse" aria-labelledby="heading${id}" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+            ${html}
+        </div>
+        </div>
+    </div>`
+
+    document.getElementById("accordion").innerHTML += accordionItem
+}
+
 unselectedClustersDivs = document.getElementsByClassName('unselectedClusters')
 
 for (var i = 0; i < unselectedClustersDivs.length; i++) {

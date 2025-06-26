@@ -7,11 +7,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Holtwood+One+SC&family=Joti+One&family=Peralta&display=swap');
 
 /* GENERAL SETTINGS */
+
+/* Ensures that footer stays at bottom
+even if the page is too short */
 body {
-  background-color: rgb(229, 224, 255);
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 section {
+  flex: 1;
   margin-left: 20vw !important;
   margin-right: 20vw !important;
 }
