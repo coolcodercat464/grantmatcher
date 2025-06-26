@@ -6,13 +6,48 @@
     <%- head %>
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light px-3" id="navbar">
+        <!-- Brand on the left -->
+        <a class="navbar-brand bigBrand" href="#" id="navbar-brand">Grant Matcher</a>
+
+        <!-- Toggler (for mobile view) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links on the right -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Tickets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Tutorial</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><button class="dropdown-item" id="modalBtn1" onclick="openModal(1)">Logout</button></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
     <section>
         <h2>EJS Stuff:</h2>
         <b>User: <%= user %></b><br>
         <b>Biography: <%= biography %></b><br>
         <b>Message: <%= message %></b><br>
 
-        <button id="modalBtn1" onclick="openModal(1)">Logout</button>
         <div id="modal1" class="modal">
             <div class="modal-content">
                 <div class="together">
@@ -39,11 +74,11 @@
             <li>Cluster Selector</li>
             <li>Paginated Table</li>
             <li>Tooltips</li>
+            <li>Sticky Header</li>
         </ul>
 
         <h3>Uncompleted:</h3>
         <ul>
-            <li>Sticky Header</li>
             <li>Accordions</li>
             <li>MAKE SURE THAT FOOTER IS AT BOTTOM OF PAGE</li>
         </ul>
@@ -99,10 +134,10 @@
                         <input class="listboxtext" type="text" id="searchUnselectedClusters1" name="searchUnselectedClusters1" placeholder="Enter a cluster" required>
                     </div>
                     <div class="listboxsubmitdiv">
-                        <button class="listboxsubmit" onclick="findUnselectedCluster(1)">Search</button>
+                        <button class="listboxsubmit" onclick="findUnselectedCluster(1)"><i class="fa fa-search"></i></button>
                     </div>
                     <div class="listboxsubmitdiv">
-                        <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(1)">Reset</button>
+                        <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
                     </div>
                 </div>
                 <div class="listboxdiv unselectedClusters" id="unselectedClusters1">
@@ -126,10 +161,10 @@
                         <input class="listboxtext" type="text" id="searchSelectedClusters1" name="searchSelectedClusters1" placeholder="Enter a cluster" required>
                     </div>
                     <div class="listboxsubmitdiv">
-                        <button class="listboxsubmit" onclick="findSelectedCluster(1)">Search</button>
+                        <button class="listboxsubmit" onclick="findSelectedCluster(1)"><i class="fa fa-search"></i></button>
                     </div>
                     <div class="listboxsubmitdiv">
-                        <button class="listboxsubmit" onclick="resetSelectedClusterSearch(1)">Reset</button>
+                        <button class="listboxsubmit" onclick="resetSelectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
                     </div>
                 </div>
                 <div class="listboxdiv selectedClusters" id="selectedClusters1">
@@ -155,10 +190,10 @@
                         <input class="listboxtext" type="text" id="searchUnselectedClusters2" name="searchUnselectedClusters2" placeholder="Enter a cluster" required>
                     </div>
                     <div class="listboxsubmitdiv">
-                        <button class="listboxsubmit" onclick="findUnselectedCluster(2)">Search</button>
+                        <button class="listboxsubmit" onclick="findUnselectedCluster(2)"><i class="fa fa-search"></i></button>
                     </div>
                     <div class="listboxsubmitdiv">
-                        <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(2)">Reset</button>
+                        <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(2)"><i class="fa fa-refresh"></i></button>
                     </div>
                 </div>
                 <div class="listboxdiv unselectedClusters" id="unselectedClusters2">
@@ -182,10 +217,10 @@
                         <input class="listboxtext" type="text" id="searchSelectedClusters2" name="searchSelectedClusters2" placeholder="Enter a cluster" required>
                     </div>
                     <div class="listboxsubmitdiv">
-                        <button class="listboxsubmit" onclick="findSelectedCluster(2)">Search</button>
+                        <button class="listboxsubmit" onclick="findSelectedCluster(2)"><i class="fa fa-search"></i></button>
                     </div>
                     <div class="listboxsubmitdiv">
-                        <button class="listboxsubmit" onclick="resetSelectedClusterSearch(2)">Reset</button>
+                        <button class="listboxsubmit" onclick="resetSelectedClusterSearch(2)"><i class="fa fa-refresh"></i></button>
                     </div>
                 </div>
                 <div class="listboxdiv selectedClusters" id="selectedClusters2">
@@ -237,10 +272,10 @@
             </table>
 
             <div class="pagination-controls">
-                <button class="btn btn-secondary" id="firstNav2" onclick="goToFirst(2)">First</button>
-                <button class="btn btn-secondary" id="prevNav2" onclick="goToPrev(2)">Previous</button>
-                <button class="btn btn-secondary" id="nextNav2" onclick="goToNext(2)">Next</button>
-                <button class="btn btn-secondary" id="lastNav2" onclick="goToLast(2)">Last</button>
+                <button class="btn btn-secondary" id="firstNav2" onclick="goToFirst(2)"><i class="fa fa-angle-double-left "></i></button>
+                <button class="btn btn-secondary" id="prevNav2" onclick="goToPrev(2)"><i class="fa fa-angle-left"></i></button>
+                <button class="btn btn-secondary" id="nextNav2" onclick="goToNext(2)"><i class="fa fa-angle-right"></i></button>
+                <button class="btn btn-secondary" id="lastNav2" onclick="goToLast(2)"><i class="fa fa-angle-double-right "></i></button>
             </div>
         </div>
         <br>

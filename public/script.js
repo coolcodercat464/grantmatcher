@@ -428,3 +428,23 @@ function goToLast(tableNumber) {
 
 renderTable(1);
 renderTable(2);
+
+window.onscroll = function() {scrollFunction()};
+
+function scrollFunction() {
+  if (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) {
+    document.getElementById("navbarNav").classList.add("hidden");
+    document.getElementById("navbarNav").style.setProperty("visibility", "hidden", "important");
+    document.getElementById("navbarNav").style.opacity = '0';
+    
+    document.getElementById("navbar-brand").classList.add("smallBrand");
+    document.getElementById("navbar-brand").classList.remove("bigBrang");
+  } else {
+    document.getElementById("navbarNav").classList.remove("hidden");
+    document.getElementById("navbarNav").style.visibility = 'visible';
+    document.getElementById("navbarNav").style.opacity = '1';
+    
+    document.getElementById("navbar-brand").classList.add("bigBrand");
+    document.getElementById("navbar-brand").classList.remove("smallBrand");
+  }
+}

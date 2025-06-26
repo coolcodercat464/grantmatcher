@@ -71,7 +71,31 @@ blockquote cite:before {
 }
 
 /* Sticky Header */
-/* TODO */
+.navbar {
+  position: sticky !important;
+  z-index: 9999;
+  top: 0;
+}
+
+#navbarNav {
+  transition: visibility 0s, opacity 0.5s ease-out;
+}
+
+#navbarNav.hidden {
+  transition: opacity 0.5s ease-out, visibility 0s linear 0.5s;
+}
+
+.bigBrand {
+  font-size: 30px !important;
+}
+
+.smallBrand {
+  font-size: 20px !important;
+}
+
+#navbar-brand {
+  transition: font-size 1s;
+}
 
 /* Alerts */
 .alert {
