@@ -383,6 +383,8 @@ function renderTable(tableNumber) {
     const start = (tableData[tableNumber]["currentPage"] - 1) * rowsPerPage;
     const end = start + rowsPerPage;
     const pageItems = tableData[tableNumber]["dataSet"].slice(start, end);
+    
+    document.getElementById('pageStats' + tableNumber).textContent = `Page ${tableData[tableNumber]["currentPage"]} / ${tableData[tableNumber]["totalPages"]}`
 
     pageItems.forEach(item => {
         const row = `<tr><td>${item.id}</td><td>${item.name}</td></tr>`;
