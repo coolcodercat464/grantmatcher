@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Presentation Layer Tests</title>
+    <%- head %>
+</head>
+<body>
+    <section>
+        <h2>EJS Stuff:</h2>
+        <b>User: <%= user %></b><br>
+        <b>Biography: <%= biography %></b><br>
+        <b>Message: <%= message %></b><br>
+
+        <button id="modalBtn1" onclick="openModal(1)">Logout</button>
+        <div id="modal1" class="modal">
+            <div class="modal-content">
+                <div class="together">
+                    <h2>Log out</h2>
+                    <span class="close" id="close1">&times;</span>
+                </div>
+                
+                <p>Are you sure you want to log out?</p>
+                <div class="together">
+                    <form method="post" action="/">
+                        <input type="submit" value="Logout!">
+                    </form>
+                    <button id='cancel1'>Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <h2>THINGS TO TEST</h2>
+        <h3>Completed:</h3>
+        <ul>
+            <li>Passport Authentication (Logout AND Login)</li>
+            <li>Keyword Selector</li>
+            <li>Modals</li>
+            <li>Cluster Selector</li>
+            <li>Paginated Table</li>
+            <li>Tooltips</li>
+        </ul>
+
+        <h3>Uncompleted:</h3>
+        <ul>
+            <li>Sticky Header</li>
+            <li>Accordions</li>
+            <li>MAKE SURE THAT FOOTER IS AT BOTTOM OF PAGE</li>
+        </ul>
+
+        <h2>Tool-tips</h2>
+        <p>
+            Some Text here... 
+            <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Explanation Here">
+                <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+            </button>
+        </p>
+        
+
+        <h2>Keyword Selector</h2>
+        <div class="listbox">
+            <div class="listboxdiv">
+                <ul class="listboxul" id="list1">
+                </ul>
+            </div>
+            <div class="listboxinput">
+                <div class="listboxtextdiv">
+                    <input class="listboxtext" type="text" id="keyword1" name="keyword1" placeholder="Enter a keyword" required>
+                </div>
+                <div class="listboxsubmitdiv">
+                    <button class="listboxsubmit" onclick="addKeyword(1)">Submit</button>
+                </div>
+            </div>
+        </div>
+        <br>
+
+        <h2>Keyword Selector Duplication Test</h2>
+        <div class="listbox">
+            <div class="listboxdiv">
+                <ul class="listboxul" id="list2">
+                </ul>
+            </div>
+            <div class="listboxinput">
+                <div class="listboxtextdiv">
+                    <input class="listboxtext" type="text" id="keyword2" name="keyword2" placeholder="Enter a keyword" required>
+                </div>
+                <div class="listboxsubmitdiv">
+                    <button class="listboxsubmit" onclick="addKeyword(2)">Submit</button>
+                </div>
+            </div>
+        </div>
+        <br>
+
+        <h2>Cluster Selector</h2>
+        <div class="together clusterselector">
+            <div class="unselected">
+                <div class="listboxinput">
+                    <div class="listboxtextdiv">
+                        <input class="listboxtext" type="text" id="searchUnselectedClusters1" name="searchUnselectedClusters1" placeholder="Enter a cluster" required>
+                    </div>
+                    <div class="listboxsubmitdiv">
+                        <button class="listboxsubmit" onclick="findUnselectedCluster(1)">Search</button>
+                    </div>
+                    <div class="listboxsubmitdiv">
+                        <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(1)">Reset</button>
+                    </div>
+                </div>
+                <div class="listboxdiv unselectedClusters" id="unselectedClusters1">
+                </div>
+                <div class="clustersort">
+                    <label for="sortUnselected1">Sort By:</label>
+
+                    <select name="sortUnselected1" id="sortUnselected1">
+                        <option value="id">ID</option>
+                        <option value="name">Name</option>
+                        <option value="number"># of Researchers</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="selected">
+                <div class="listboxinput">
+                    <div class="listboxtextdiv">
+                        <input class="listboxtext" type="text" id="searchSelectedClusters1" name="searchSelectedClusters1" placeholder="Enter a cluster" required>
+                    </div>
+                    <div class="listboxsubmitdiv">
+                        <button class="listboxsubmit" onclick="findSelectedCluster(1)">Search</button>
+                    </div>
+                    <div class="listboxsubmitdiv">
+                        <button class="listboxsubmit" onclick="resetSelectedClusterSearch(1)">Reset</button>
+                    </div>
+                </div>
+                <div class="listboxdiv selectedClusters" id="selectedClusters1">
+                </div>
+                <div class="clustersort">
+                    <label for="sortSelected1">Sort By:</label>
+
+                    <select name="sortSelected1" id="sortSelected1">
+                        <option value="id">ID</option>
+                        <option value="name">Name</option>
+                        <option value="number"># of Researchers</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <br>
+
+        <h2>Cluster Selector Duplication Test</h2>
+        <div class="together clusterselector">
+            <div class="unselected">
+                <div class="listboxinput">
+                    <div class="listboxtextdiv">
+                        <input class="listboxtext" type="text" id="searchUnselectedClusters2" name="searchUnselectedClusters2" placeholder="Enter a cluster" required>
+                    </div>
+                    <div class="listboxsubmitdiv">
+                        <button class="listboxsubmit" onclick="findUnselectedCluster(2)">Search</button>
+                    </div>
+                    <div class="listboxsubmitdiv">
+                        <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(2)">Reset</button>
+                    </div>
+                </div>
+                <div class="listboxdiv unselectedClusters" id="unselectedClusters2">
+                </div>
+                <div class="clustersort">
+                    <label for="sortUnselected2">Sort By:</label>
+
+                    <select name="sortUnselected2" id="sortUnselected2">
+                        <option value="id">ID</option>
+                        <option value="name">Name</option>
+                        <option value="number"># of Researchers</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="selected">
+                <div class="listboxinput">
+                    <div class="listboxtextdiv">
+                        <input class="listboxtext" type="text" id="searchSelectedClusters2" name="searchSelectedClusters2" placeholder="Enter a cluster" required>
+                    </div>
+                    <div class="listboxsubmitdiv">
+                        <button class="listboxsubmit" onclick="findSelectedCluster(2)">Search</button>
+                    </div>
+                    <div class="listboxsubmitdiv">
+                        <button class="listboxsubmit" onclick="resetSelectedClusterSearch(2)">Reset</button>
+                    </div>
+                </div>
+                <div class="listboxdiv selectedClusters" id="selectedClusters2">
+                </div>
+                <div class="clustersort">
+                    <label for="sortSelected2">Sort By:</label>
+
+                    <select name="sortSelected2" id="sortSelected2">
+                        <option value="id">ID</option>
+                        <option value="name">Name</option>
+                        <option value="number"># of Researchers</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <br>
+
+        <h2>Paginated Table</h2>
+        <div class="container">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody1"></tbody>
+            </table>
+
+            <div class="pagination-controls">
+                <button class="btn btn-secondary" id="firstNav1" onclick="goToFirst(1)">First</button>
+                <button class="btn btn-secondary" id="prevNav1" onclick="goToPrev(1)">Previous</button>
+                <button class="btn btn-secondary" id="nextNav1" onclick="goToNext(1)">Next</button>
+                <button class="btn btn-secondary" id="lastNav1" onclick="goToLast(1)">Last</button>
+            </div>
+        </div>
+        <br>
+
+        <h2>Paginated Table Duplication Test</h2>
+        <div class="container">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody2"></tbody>
+            </table>
+
+            <div class="pagination-controls">
+                <button class="btn btn-secondary" id="firstNav2" onclick="goToFirst(2)">First</button>
+                <button class="btn btn-secondary" id="prevNav2" onclick="goToPrev(2)">Previous</button>
+                <button class="btn btn-secondary" id="nextNav2" onclick="goToNext(2)">Next</button>
+                <button class="btn btn-secondary" id="lastNav2" onclick="goToLast(2)">Last</button>
+            </div>
+        </div>
+        <br>
+    </section>
+
+    <%- footer %>
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+    </script>
+</body>
+</html>

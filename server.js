@@ -1,0 +1,49 @@
+// setup
+const express = require('express');                       // import express
+const path = require('path');                             // install path
+const options = {root: path.join(__dirname, '/public')};  // set options root
+const app = express();                                    // initialise app
+const port = 3000;                                        // set port
+const cors = require('cors');
+app.use(cors());
+
+const bodyParser = require('body-parser');                // bodyparser for forms
+const routes = require('./routes/routing');               // set routing path
+const { v4: uuidv4 } = require("uuid");                   // random strings
+const session = require('express-session')                // sessions for remembering
+const FileStore = require('session-file-store')(session); // session file store
+
+// dot environment variables
+//require('dotenv').config({path:'C:/Users/elect/OneDrive/Documents/.vscode/project/.env'})
+
+app.engine('html', require('ejs').renderFile);            // allow html file rendering
+app.use(express.static(path.join(__dirname, 'public')))   // set static files
+app.set('view engine', 'html');                           // as ejs
+app.set('views', path.join(__dirname, 'public'));         // set up views (static)
+app.use(express.json())
+
+// Sessions
+app.use(session({
+  genid: (req) => {
+    return uuidv4()
+  },
+  store: new FileStore({path: path.join(__dirname, 'sessions')}),
+  resave: false,
+  //secret: process.env.SESSIONS_SECRET,
+  secret: "keyboard cat",
+  saveUninitialized: true,
+  cookie: { maxAge: 3600000,secure: false, httpOnly: true }
+}))
+
+app.use(bodyParser.urlencoded({extended: true}));         // use bodyparser
+const db = require('./databases/postgres.js')             // database stuff
+
+// get and post routing
+app.get(['/', '/login'], routes)
+app.post(['/', '/login'], routes)
+
+// listen to port
+app.listen(port, () => {
+    console.log("Backend is listening on port 3000");
+})
+
