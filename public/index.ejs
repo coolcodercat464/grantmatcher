@@ -172,7 +172,7 @@
                     <label for="sortUnselected1">Sort By:</label>
 
                     <!-- Sort-by dropdown -->
-                    <select name="sortUnselected1" id="sortUnselected1">
+                    <select name="sortUnselected1" id="sortUnselected1" onchange="sortUnelected(1)">
                         <option value="id">ID</option>
                         <option value="name">Name</option>
                         <option value="number"># of Researchers</option>
@@ -201,7 +201,7 @@
                 <div class="clustersort">
                     <label for="sortSelected1">Sort By:</label>
 
-                    <select name="sortSelected1" id="sortSelected1">
+                    <select name="sortSelected1" id="sortSelected1" onchange="sortSelected(1)">
                         <option value="id">ID</option>
                         <option value="name">Name</option>
                         <option value="number"># of Researchers</option>
@@ -232,7 +232,7 @@
                 <div class="clustersort">
                     <label for="sortUnselected2">Sort By:</label>
 
-                    <select name="sortUnselected2" id="sortUnselected2">
+                    <select name="sortUnselected2" id="sortUnselected2" onchange="sortUnelected(2)">
                         <option value="id">ID</option>
                         <option value="name">Name</option>
                         <option value="number"># of Researchers</option>
@@ -259,7 +259,7 @@
                 <div class="clustersort">
                     <label for="sortSelected2">Sort By:</label>
 
-                    <select name="sortSelected2" id="sortSelected2">
+                    <select name="sortSelected2" id="sortSelected2" onchange="sortSelected(2)">
                         <option value="id">ID</option>
                         <option value="name">Name</option>
                         <option value="number"># of Researchers</option>
@@ -271,13 +271,24 @@
 
         <!-- The table should be paginated (as per my designs in Criterion 5) -->
         <h2>Paginated Table</h2>
-        <div class="container">
+        <div class="tableContainer" id="tableContainer1">
+            <div class="tablesort">
+                <label for="sortTable1">Sort By:</label>
+
+                <select name="sortTable1" id="sortTable1" onchange="sortTable(1)" style="margin-bottom: 5px;">
+                    <option value="id">ID</option>
+                    <option value="name">Name</option>
+                    <option value="number">Number</option>
+                </select>
+            </div>
+
             <table class="table table-bordered" style="margin-bottom: 0; border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;">
                 <thead>
                     <!-- Column names -->
                     <tr>
-                    <th>#</th>
                     <th>Name</th>
+                    <th>Number</th>
+                    <th>ID</th>
                     </tr>
                 </thead>
                 <!-- Table items -->
@@ -316,7 +327,16 @@
 
         <!-- Ensure that tables don't interfere with each other (so I can use many tables on the same page) -->
         <h2>Paginated Table Duplication Test</h2>
-        <div class="container">
+        <div class="tableContainer" id="tableContainer2">
+            <div class="tablesort">
+                <label for="sortTable2">Sort By:</label>
+
+                <select name="sortTable2" id="sortTable2" onchange="sortTable(2)" style="margin-bottom: 5px;">
+                    <option value="id">ID</option>
+                    <option value="name">Name</option>
+                </select>
+            </div>
+
             <table class="table table-bordered" style="margin-bottom: 0; border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;">
                 <thead>
                     <tr>

@@ -442,104 +442,86 @@ function sortDictionaryList(dictionaryList, field) {
     return arr
 }
 
-// get all unselected and selected cluster lists
-unselectedClustersDivs = document.getElementsByClassName('unselectedClusters')
-selectedClustersDivs = document.getElementsByClassName('selectedClusters')
+// sort an unselected cluster list
+function sortUnselected(selectorNumber) {
+    // get the new sort value
+    const selectedValue = event.target.value
 
-// go through each unselected cluster list
-for (var i = 0; i < unselectedClustersDivs.length; i++) {
-    unselectedClustersDiv = unselectedClustersDivs[i]
+    // get all cluster names
+    clusters = getUnselectedClusterNames(selectorNumber)
 
-    // get the selector number
-    selectorNumber = unselectedClustersDiv.id.replace("unselectedClusters", "")
+    // turn the cluster IDs into numbers (e.g., 2U5 becomes 5 because 2 represents the selector number, not the actual cluster ID)
+    clusterIds = clusters[1]
+    for (x in clusterIds) {
+        clusterIds[x] = parseInt(clusterIds[x].split('U')[1])
+    }
 
-    // add an event listener when the sort dropdown is changed
-    document.getElementById("sortUnselected" + selectorNumber).addEventListener('change', function(event) {
-        // get the new sort value
-        const selectedValue = event.target.value
+    // this should be a list of dictionaries in the same format as clustersData
+    unselectedClusterData = []
 
-        // get all cluster names
-        clusters = getUnselectedClusterNames(selectorNumber)
-
-        // turn the cluster IDs into numbers (e.g., 2U5 becomes 5 because 2 represents the selector number, not the actual cluster ID)
-        clusterIds = clusters[1]
-        for (x in clusterIds) {
-            clusterIds[x] = parseInt(clusterIds[x].split('U')[1])
+    // loop through clustersData and only add clusters to unselectedClusterData
+    // if its ID is in the clusterIds list
+    for (x in clustersData) {
+        if (clusterIds.includes(clustersData[x]["id"])) {
+            unselectedClusterData.push(clustersData[x])
         }
+    }
 
-        // this should be a list of dictionaries in the same format as clustersData
-        unselectedClusterData = []
+    // sort the list according to the field selected in the dropdown
+    unselectedClusterData = sortDictionaryList(unselectedClusterData, selectedValue)
 
-        // loop through clustersData and only add clusters to unselectedClusterData
-        // if its ID is in the clusterIds list
-        for (x in clustersData) {
-            if (clusterIds.includes(clustersData[x]["id"])) {
-                unselectedClusterData.push(clustersData[x])
-            }
-        }
+    // remove all items in the cluster list
+    unselectedClustersDiv = document.getElementById('unselectedClusters' + selectorNumber)
+    unselectedClustersDiv.innerHTML = '';
 
-        // sort the list according to the field selected in the dropdown
-        unselectedClusterData = sortDictionaryList(unselectedClusterData, selectedValue)
+    // and replace it with the clusters in the new correct order
+    // note that this code is the same as when the unselected lists
+    // got initialised in the beginning of the code
+    clusterHTML = ''
+    for (x in unselectedClusterData) {
+        c = unselectedClusterData[x]
+        clusterName = c.name
+        clusterId = c['id']
+        clusterHTML += `<button class='unselectedClusterButton' id='${selectorNumber}U${clusterId}' onclick="selectCluster('${selectorNumber}U${clusterId}')">${clusterName}</button>`
+    }
 
-        // remove all items in the cluster list
-        unselectedClustersDiv = document.getElementById('unselectedClusters' + selectorNumber)
-        unselectedClustersDiv.innerHTML = '';
-
-        // and replace it with the clusters in the new correct order
-        // note that this code is the same as when the unselected lists
-        // got initialised in the beginning of the code
-        clusterHTML = ''
-        for (x in unselectedClusterData) {
-            c = unselectedClusterData[x]
-            clusterName = c.name
-            clusterId = c['id']
-            clusterHTML += `<button class='unselectedClusterButton' id='${selectorNumber}U${clusterId}' onclick="selectCluster('${selectorNumber}U${clusterId}')">${clusterName}</button>`
-        }
-
-        unselectedClustersDiv.innerHTML += clusterHTML;
-    });
+    unselectedClustersDiv.innerHTML += clusterHTML;
 }
 
-// exactly the same as the sorting loop for unselected cluster lists
-// but this time its for the selected cluster lists (nothing but the names change)
-for (var i = 0; i < selectedClustersDivs.length; i++) {
-    selectedClustersDiv = selectedClustersDivs[i]
-    selectorNumber = selectedClustersDiv.id.replace("selectedClusters", "")
+// sort a selected cluster list
+// logic is exactly the same as sorting unselected lists
+function sortSelected(selectorNumber) {
+    const selectedValue = event.target.value
+    clusters = getSelectedClusterNames(selectorNumber)
 
-    document.getElementById("sortSelected" + selectorNumber).addEventListener('change', function(event) {
-        const selectedValue = event.target.value
+    clusterIds = clusters[1]
+    for (x in clusterIds) {
+        // note that the selected cluster lists, the separator is 'S' not 'U'
+        clusterIds[x] = parseInt(clusterIds[x].split('S')[1])
+    }
 
-        clusters = getSelectedClusterNames(selectorNumber)
+    selectedClusterData = []
 
-        clusterIds = clusters[1]
-        for (x in clusterIds) {
-            // note that the selected cluster lists, the separator is 'S' not 'U'
-            clusterIds[x] = parseInt(clusterIds[x].split('S')[1])
+    for (x in clustersData) {
+        if (clusterIds.includes(clustersData[x]["id"])) {
+            selectedClusterData.push(clustersData[x])
         }
+    }
 
-        selectedClusterData = []
+    selectedClusterData = sortDictionaryList(selectedClusterData, selectedValue)
 
-        for (x in clustersData) {
-            if (clusterIds.includes(clustersData[x]["id"])) {
-                selectedClusterData.push(clustersData[x])
-            }
-        }
+    selectedClustersDiv = document.getElementById('selectedClusters' + selectorNumber)
+    selectedClustersDiv.innerHTML = '';
 
-        selectedClusterData = sortDictionaryList(selectedClusterData, selectedValue)
+    clusterHTML = ''
+    for (x in selectedClusterData) {
+        c = selectedClusterData[x]
+        clusterName = c.name
+        clusterId = c['id']
+        clusterHTML += `<button class='selectedClusterButton' id='${selectorNumber}S${clusterId}' onclick="unselectCluster('${selectorNumber}S${clusterId}')">${clusterName}</button>`
+    }
 
-        selectedClustersDiv = document.getElementById('selectedClusters' + selectorNumber)
-        selectedClustersDiv.innerHTML = '';
-
-        clusterHTML = ''
-        for (x in selectedClusterData) {
-            c = selectedClusterData[x]
-            clusterName = c.name
-            clusterId = c['id']
-            clusterHTML += `<button class='selectedClusterButton' id='${selectorNumber}S${clusterId}' onclick="unselectCluster('${selectorNumber}S${clusterId}')">${clusterName}</button>`
-        }
-
-        selectedClustersDiv.innerHTML += clusterHTML;
-    });
+    selectedClustersDiv.innerHTML += clusterHTML;
 }
 
 // PAGINATED TABLES
@@ -552,7 +534,7 @@ Allows the program to loop through it and sort it easily. This
 is also the format it would come in once I call the database, 
 thus reducing the processing time.
 */
-const dataSet1 = Array.from({ length: 53 }, (_, i) => ({ id: i + 1, name: `Item ${i + 1}` }));
+const dataSet1 = clustersData
 const dataSet2 = Array.from({ length: 32 }, (_, i) => ({ id: i + 1, name: `Item ${i + 1}` }));
 const rowsPerPage = 10;
 
@@ -597,7 +579,19 @@ function renderTable(tableNumber) {
     document.getElementById('pageStats' + tableNumber).textContent = `Page ${tableData[tableNumber]["currentPage"]} / ${tableData[tableNumber]["totalPages"]}`
 
     pageItems.forEach(item => {
-        const row = `<tr><td>${item.id}</td><td>${item.name}</td></tr>`;
+        // make the HTML for the row
+        row = '<tr>'
+        // get the column names
+        columns = Object.keys(item)
+
+        for (c in columns) {
+            col = columns[c]
+            // get the value of item for that column
+            value = item[col]
+            row += `<td>${value}</td>`
+        }
+        row += '</tr>'
+
         tableBody.insertAdjacentHTML('beforeend', row);
     });
 
@@ -655,10 +649,32 @@ function goToLast(tableNumber) {
     renderTable(tableNumber);
 }
 
-// initialise the tables
-// TODO: don't hard-code this.
-renderTable(1);
-renderTable(2);
+// sort the contents of a table based on the table number
+function sortTable(tableNumber) {
+    // get the new sort value
+    const selectedValue = event.target.value
+
+    // get all data in the table
+    values = tableData[tableNumber]["dataSet"]
+
+    // sort the list according to the field selected in the dropdown
+    values = sortDictionaryList(values, selectedValue)
+
+    // refresh the table
+    renderTable(tableNumber)
+}
+
+// get all the tables
+tables = document.getElementsByClassName("tableContainer")
+
+// go through each table
+for (var i = 0; i < tables.length; i++) {
+    // get the table number of the table
+    tableNumber = tables[i].id.replace("tableContainer", "")
+
+    // initialise the table
+    renderTable(tableNumber);
+}
 
 // HEADER TRANSITIONS
 // run scrollFunction() when the user has scrolled

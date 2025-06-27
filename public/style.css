@@ -236,7 +236,7 @@ blockquote cite:before {
   padding: 10px  !important;
 }
 
-.clustersort {
+.clustersort, .tablesort {
   float: right;
 }
 
