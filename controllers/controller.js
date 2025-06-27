@@ -37,9 +37,9 @@ async function users_list() {
 var urlinit = '/';
 
 // templates
-const partialfooter = `<footer style="margin: 0; padding: 1em; background-color: rgb(66, 37, 211); color: white; position: relative; bottom: 0; width: 100%;"><h2>The Footer</h2></footer>`
+const partialfooter = `<footer style="margin: 0; padding: 1em; background-color: #272727; color: white; position: relative; bottom: 0; width: 100%;"><h2>The Footer</h2></footer>`
 
-const headpartial = `<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧪</text></svg>">
+const headpartial = `<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔬</text></svg>">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link rel="stylesheet" href="/style.css">

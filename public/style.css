@@ -6,6 +6,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Holtwood+One+SC&family=Joti+One&family=Peralta&display=swap');
 
+/*
+For the header, I will use: https://fonts.google.com/specimen/Arvo 
+For the title of the page, I will use: https://fonts.google.com/specimen/Lexend 
+For the sub-headings, I will use: https://fonts.google.com/specimen/Montserrat
+For the normal text, I will use: https://fonts.google.com/noto/specimen/Noto+Sans
+*/
+
 /* GENERAL SETTINGS */
 
 /* Ensures that footer stays at bottom
@@ -17,8 +24,11 @@ body {
   flex-direction: column;
 }
 
-section {
+main {
   flex: 1;
+}
+
+section {
   margin-left: 20vw !important;
   margin-right: 20vw !important;
 }
@@ -79,6 +89,8 @@ blockquote cite:before {
 
 /* Sticky Header */
 .navbar {
+  background-color: #272727 !important;
+  color: white !important;
   position: sticky !important;
   z-index: 9999;
   top: 0;

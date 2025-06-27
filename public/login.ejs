@@ -6,22 +6,24 @@
     <%- head %>
 </head>
 <body>
-    <section>
-        <h1>Login Form</h1>
-        <b>Message: <%= message %></b><br>
+    <main>
+        <section>
+            <h1>Login Form</h1>
+            <b>Message: <%= message %></b><br>
 
-        <form method="post" action="/login">
-            <p><b>Username: </b></p>
-            <input type="text" id="username" name="username" placeholder="Enter Your Username" required>
-            <br>
+            <form method="post" action="/login">
+                <p><b>Username: </b></p>
+                <input type="text" id="username" name="username" placeholder="Enter Your Username" required>
+                <br>
 
-            <p><b>Password:</b> </p>
-            <input type="text" id="password" name="password" placeholder="Enter Your Password" required>
-            <br>
+                <p><b>Password:</b> </p>
+                <input type="text" id="password" name="password" placeholder="Enter Your Password" required>
+                <br>
 
-            <input type="submit" value="Login!">
-        </form>
-    </section>
+                <input type="submit" value="Login!">
+            </form>
+        </section>
+    </main>
     <%- footer %>
     <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
 </body>
