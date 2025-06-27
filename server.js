@@ -31,8 +31,8 @@ app.use(session({
   resave: false,
   //secret: process.env.SESSIONS_SECRET,
   secret: "keyboard cat",
-  saveUninitialized: true,
-  cookie: { maxAge: 3600000,secure: false, httpOnly: true }
+  saveUninitialized: false,
+  cookie: { maxAge: null}
 }))
 
 app.use(bodyParser.urlencoded({extended: true}));         // use bodyparser

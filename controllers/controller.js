@@ -1,19 +1,30 @@
-const path = require('path');                             // install path
-const options = {root: path.join(__dirname, '../public')};// set options root
+const path = require('path');                                // install path
+const options = {root: path.join(__dirname, '../public')};   // set options root
+
+// allow the backend to access the database
 const db = require(path.join(__dirname, '../databases/postgres.js'))
+
+// ensure the app knows who the user is
 var theuser;
+var userid = 0;
 
 // password hashing stuff
+// SAMPLE CODE:
 // password = MD5(x.password.trim() + salt).toString();
 var MD5 = require("crypto-js/md5");
 const salt = "SALT"; // add to a .env file
-var userid = 0;
 
 // passport authentication stuff
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 
+// get a list of dictionaries of users
+// JUSTIFICATION: this data structure is used as it is how
+// db.query() returns things as default, reducing processing
+// time. Additionally, it is easy to loop through the contents
+// of all the users.
 async function users_list() {
+    // TODO: Replace with database method
     // res = await db.query('SELECT * FROM users');
     // res = res.rows
     res = [
@@ -37,7 +48,26 @@ async function users_list() {
 var urlinit = '/';
 
 // templates
-const partialfooter = `<footer style="margin: 0; padding: 1em; background-color: #272727; color: white; position: relative; bottom: 0; width: 100%;"><h2>The Footer</h2></footer>`
+const partialfooter = `
+<footer style="margin: 0; padding: 1em; background-color: #272727; color: white; position: relative; bottom: 0; width: 100%;">
+    <section>
+        <div class="together">
+            <h2>GrantMatcher</h2>
+            <div class="spacer"></div>
+            <p>"If we knew what we were doing, it would not be called research, would it?" - Albert Einstein</p>
+        </div>
+        <div class="together" style="justify-content: center;">
+            <div><a>Login</a></div> 
+            <div class="spacer"></div>
+            <div><a>Signup</a></div> 
+            <div class="spacer"></div>
+            <div><a>Tutorial</a></div> 
+            <div class="spacer"></div>
+            <div><a>Contact</a></div> 
+        </div>
+    </section>
+</footer>
+`
 
 const headpartial = `<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔬</text></svg>">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -125,7 +155,7 @@ const loginget = async (req, res)=>{
     if (req.isAuthenticated()) {
         res.redirect('/')
     } else {
-        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, message: "NONE"});
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'no'});
     }
 } 
 
@@ -140,11 +170,27 @@ const loginpost = (req, res, next) => {
         console.log("LOGIN POST")
         if (info) {
             console.log("FAILURE")
-            return res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, message: info.message});
+            return res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'yes'});
         }
         req.login(user, (err) => {
             console.log("SUCCESS")
 
+            // check if the rememberme checkbox is ticked
+            if (req.body.rememberme) {
+                // if so, remember them for 30 days
+                req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 30; // 30 days
+                console.log("REMEMBERED");
+            } else {
+                // otherwise, just make it a regular cookie that will delete itself when the tab is closed
+                delete req.session.cookie.expires;
+                delete req.session.cookie.maxAge;
+                console.log("NOT REMEMBERED");
+            }
+
+            // add information about the user to the cookie
+            // so that it could be accessed later (for instance,
+            // in the profile page, the app has to know who
+            // the user is)
             req.session.username = user.name;
             req.session.userid = user.id;
 

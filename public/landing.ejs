@@ -12,7 +12,7 @@
         <a class="navbar-brand bigBrand" href="/" id="navbar-brand">Grant Matcher</a>
 
         <!-- Toggler (for mobile view) -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" id="navbar-toggler">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -29,49 +29,86 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/tutorial">Tutorial</a>
                 </li>
-
-                <!-- Dropdown (user menu) -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-user-circle-o"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
-                        <li><a class="dropdown-item" href="/settings">Settings</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <!-- Logout button (opens a modal) -->
-                        <li><button class="dropdown-item" id="modalBtn1" onclick="openModal(1)">Logout</button></li>
-                    </ul>
-                </li>
             </ul>
         </div>
     </nav>
 
-    <!-- The modal the logout button in the navigation bar opens -->
-    <div id="modal1" class="modal">
-        <div class="modal-content">
-            <div class="together">
-                <h2>Log out</h2>
-                <!-- Numbering the IDs so I can use many modals (code reuse) -->
-                <span class="close" id="close1">&times;</span>
-            </div>
-            
-            <!-- Confirmation message (for user control) -->
-            <p>Are you sure you want to log out?</p>
-            <div class="together">
-                <form method="post" action="/">
-                    <input type="submit" value="Logout!">
-                </form>
-                <button id='cancel1'>Cancel</button>
-            </div>
-        </div>
-    </div>
+    <!-- The main content -->
     <main>
-        <section>
-            <h1>Test</h1>
+        <!-- overflow: hidden ensures that the section elements resizes to the child div (note that float: left that I'm using on the div disturbs the normal document flow)-->
+        <section style="padding: 20px; margin-top: 5px; overflow: hidden;">
+            <div class="landingLeft">
+                <h1>Help Your University Diversify Grants</h1>
+                <p>
+                    Do you know about a non-government grant, but don't know who would be eligible?
+                    If you are a Researcher Development Officer at the University of Sydney,
+                    Grant Matcher can help you find a list of all eligible USYD researchers in the 
+                    Faculty of Science at one click! This will help USYD meet its goal by 
+                    diversifying the grants researchers apply to!<br><br>
+                    <!-- The contact-me link doesn't always work, so I've also provided my email so they can manually enter it in. -->
+                    Not in USYD but want to diversify your university's grants? No worries! Contact me
+                    at <a class="link-opacity-100" onclick="window.location.href = 'mailto:flyingbutter213@gmail.com?subject=Hello&body=Message'">flyingbutter213@gmail.com</a> and I'll create a new database for your university!
+                </p>
+                <button class="blue buttonStyle" onclick="location.href='/login'" style="margin-right: 15px; margin-bottom: 15px;">Login</button> <button class="pink buttonStyle" onclick="location.href='/signup'">Signup</button>
+            </div>
         </section>
-
         <hr/>
+        <section style="padding: 20px; margin-top: 5px; overflow: hidden;">
+            <div class="landingRight">
+                <h1>Sick of Unorganised Data?</h1>
+                <p>
+                    It is excruciatingly difficulty to find a researcher or grant database with 
+                    well-organised fields. Grant Matcher can help you turn unorganised data into 
+                    a database that has all the information you need to support your researchers.
+                </p>
+                <p><a class="link-opacity-100" href="/signup">Signup</a> or <a class="link-opacity-100" onclick="window.location.href = 'mailto:flyingbutter213@gmail.com?subject=Hello&body=Message'">Contact Me</a>.</p>
+            </div>
+        </section>
+        <hr/>
+        <section>
+            <h1>Meet the Team</h1>
+            <div class="row">
+                <div class="col-sm">
+                    <!-- height:100% ensures that all of the cards are the same height, adding to consistency-->
+                    <div class="card" style="height: 100%;">
+                        <img class="card-img-top" src="static/emma.jpg" alt="Card image" style="width:100%">
+                        <div class="card-body">
+                            <h5 class="card-title">Emma</h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">DEVELOPER</h6>
+                            <p class="card-text">Hi, I'm Emma! I developed this app from the ground up. The secret ingredient? Love! Contact me if you would like a remarkable website like Grant Matcher.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm">
+                    <div class="card" style="height: 100%;">
+                        <img class="card-img-top" src="static/jodie.webp" alt="Card image" style="width:100%">
+                        <div class="card-body">
+                            <h5 class="card-title">Jodie</h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">MANAGER</h6>
+                            <p class="card-text">Hello, I'm Jodie! I manage the Research Manager at the Faculty of Science and I support researchers to apply for grants.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm">
+                    <div class="card" style="height: 100%;">
+                        <img class="card-img-top" src="static/bo.avif" alt="Card image" style="width:100%">
+                        <div class="card-body">
+                            <h5 class="card-title">Bo</h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">CLIENT</h6>
+                            <p class="card-text">Hi! I'm Bo. I am a Research Development Officer at USYD. I help sharpen our researchers' writing skills when they apply for grants.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <hr/>
+        <section>
+            <h1>So what are you waiting for?</h1> 
+            <p>Grant Matcher is a revolutionary technology that can help you support your USYD researchers in a few clicks <b>FOR FREE</b>. So why wait? Signup now!</p>
+            <button class="pink buttonStyle" onclick="location.href='/signup'">Start now!</button><br><br>
+            <p>Not a USYD staff member or don't have an authentication code? No worries! <a class="link-opacity-100" onclick="window.location.href = 'mailto:flyingbutter213@gmail.com?subject=Hello&body=Message'">Contact Me</a> and I will set you up with a separate database and an authentication code ASAP!</p>
+        </section>
+        <br><br>
     </main>
     <%- footer %>
     <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>

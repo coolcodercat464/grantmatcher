@@ -121,7 +121,6 @@ for (var i = 0; i < accordions.length; i++) {
         </div>`
 
         // add the accordion item to the accordion
-        // TODO: add an accordionNumber so it can work with many accordions
         document.getElementById(accordion.id).innerHTML += accordionItem
     }
 }
@@ -687,6 +686,7 @@ function scrollFunction() {
     document.getElementById("navbarNav").classList.add("hidden");
     document.getElementById("navbarNav").style.setProperty("visibility", "hidden", "important");
     document.getElementById("navbarNav").style.opacity = '0';
+    document.getElementById("navbar-toggler").style.opacity = '0';
     
     // make the brand smaller
     document.getElementById("navbar-brand").classList.add("smallBrand");
@@ -697,6 +697,7 @@ function scrollFunction() {
     document.getElementById("navbarNav").classList.remove("hidden");
     document.getElementById("navbarNav").style.visibility = 'visible';
     document.getElementById("navbarNav").style.opacity = '1';
+    document.getElementById("navbar-toggler").style.opacity = '1';
     
     // make the brand bigger
     document.getElementById("navbar-brand").classList.add("bigBrand");

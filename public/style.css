@@ -1,17 +1,11 @@
 /* Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Courgette&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Luckiest+Guy&family=Nerko+One&family=Rowdies:wght@300;400;700&family=Shadows+Into+Light&family=Yantramanav:wght@100;300;400;500;700;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Protest+Guerrilla&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Holtwood+One+SC&family=Joti+One&family=Peralta&display=swap');
-
-/*
+/* FROM THE FINAL DESIGN DOCUMENT:
 For the header, I will use: https://fonts.google.com/specimen/Arvo 
 For the title of the page, I will use: https://fonts.google.com/specimen/Lexend 
 For the sub-headings, I will use: https://fonts.google.com/specimen/Montserrat
 For the normal text, I will use: https://fonts.google.com/noto/specimen/Noto+Sans
 */
+@import url('https://fonts.googleapis.com/css2?family=Arvo:ital,wght@0,400;0,700;1,400;1,700&family=Lexend:wght@100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
 
 /* GENERAL SETTINGS */
 
@@ -28,12 +22,82 @@ main {
   flex: 1;
 }
 
+/* Reduced width for main content */
 section {
   margin-left: 20vw !important;
   margin-right: 20vw !important;
 }
 
 /* GENERAL STYLING */
+/* Adding fonts */
+/* the "GrantMatcher" text on the navigation bar */
+#navbar-brand {
+  font-family: "Arvo", serif;
+  font-style: normal;
+}
+
+/* page title */
+h1 {
+  font-family: "Lexend", sans-serif;
+  font-size: 25px !important;
+  font-optical-sizing: auto;
+  padding-top: 15px; /* adds spacing between nav-bar and the title */
+  font-style: normal;
+}
+
+/* subheadings */
+h2 {
+  font-size: 20px !important;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  text-transform: uppercase; /* make it all uppercase */
+}
+
+/* normal text */
+* {
+  font-family: "Noto Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+
+/* button styles */
+.buttonStyle {
+  text-decoration: none;
+  cursor: pointer;
+  /* makes the button raised (affordances) */
+  border: 3px solid black;
+  padding: 0.25em 0.75em;
+  box-shadow: 1px 1px 0px 0px black, 2px 2px 0px 0px black, 3px 3px 0px 0px black, 4px 4px 0px 0px black, 5px 5px 0px 0px black;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.buttonStyle:active {
+  box-shadow: 0px 0px 0px 0px black;
+  top: 5px;
+  left: 5px;
+}
+
+.pink {
+  background-color: #e02063;
+  color: white;
+}
+
+.blue {
+  background-color: #3eaae3;
+  color: black;
+}
+
+/* divider styles */
+hr {
+  opacity: 0.9 !important;
+}
+
+/* Making a better blockquote (with an actual quote on it) */
 blockquote {
   position: relative;
   margin: 0.5em;
@@ -60,8 +124,18 @@ blockquote cite:before {
   content: "\2013"
 }
 
-/* MEDIA ADAPTIVITY */
+/* MEDIA ADAPTIVITY - IMPORTANT FOR RESPONSITIVITY */
 /* TODO */
+/* TODO: Modals */
+
+/* add more horizontal padding when the screen is large */
+@media (min-width: 768px) {
+  button {
+    padding: 0.25em 1em;
+  }
+}
+
+/* Make the content fill up the whole screen if the screen itself is small */
 @media (max-width: 700px) {
   section {
     margin-right: 15px !important;
@@ -69,10 +143,55 @@ blockquote cite:before {
   }
 }
 
+/* horizontal alignment should collapse when the screen is too small */
+@media (max-width: 550px) {
+  .together {
+    display: block !important;
+    align-items: normal !important;
+  }
+
+  /* ensures that there is space between the elements */
+  .together > * {
+    margin-bottom: 15px;
+  }
+}
+
+/* Reduce the size of the spacer when the screen is small */
+@media (max-width: 650px) {
+  .spacer {
+    width: 5% !important;
+  }
+}
+
+/* Expand the blocks in the landing page when the screen is small */
+@media (max-width: 550px) {
+  .landingRight {
+    width: 100% !important;
+  }
+
+  .landingLeft {
+    width: 100% !important;
+  }
+}
+
 /* IMPORTANT CLASSES */
+/* Landing Page */
+.landingLeft {
+  float: left;
+  width: 70%;
+  border: 2px solid black;
+  padding: 10px;
+}
+
+.landingRight {
+  float: right;
+  width: 70%;
+  border: 2px solid black;
+  padding: 10px;
+}
+
 /* On one line */
 .together {
-  /* Media responsivity */
   display: flex;
   align-items: center;
 }
@@ -89,57 +208,42 @@ blockquote cite:before {
 
 /* Sticky Header */
 .navbar {
+  /* make sure its always at the top */
   background-color: #272727 !important;
   color: white !important;
   position: sticky !important;
-  z-index: 9999;
   top: 0;
+
+  /* make sure it doesn't go under other elements */
+  z-index: 9999; 
 }
 
+/* navbar links transition from visible to hidden */
 #navbarNav {
   transition: visibility 0s, opacity 0.5s ease-out;
 }
 
+/* navbar links transition from hidden to visible */
 #navbarNav.hidden {
   transition: opacity 0.5s ease-out, visibility 0s linear 0.5s;
 }
 
+/* navbar brand is big when scrolled up */
 .bigBrand {
   font-size: 30px !important;
 }
 
+/* navbar brand is small when scrolled down */
 .smallBrand {
   font-size: 20px !important;
 }
 
+/* navbar brand transition size */
 #navbar-brand {
   transition: font-size 1s;
 }
 
-/* Alerts */
-.alert {
-  padding-left: 20px;
-  background-color: #f44336; /* Red */
-  color: white;
-  margin-bottom: 15px;
-}
-
-.closebtn {
-  margin-left: 15px;
-  color: white;
-  font-weight: 1000;
-  float: right;
-  font-size: 22px;
-  line-height: 20px;
-  cursor: pointer;
-  transition: 0.3s;
-  margin-right: 20px;
-}
-
-.closebtn:hover {
-  color: black;
-}
-
+/* Tables */
 .pagination-controls {
   margin-top: 1rem;
   display: flex;
@@ -148,7 +252,7 @@ blockquote cite:before {
 }
 
 /* CUSTOM FORM ELEMENTS */
-/* Keyword Selector */
+/* Selectors */
 .listbox {
   display: inline-grid;
   width: 100% !important;
@@ -192,6 +296,7 @@ blockquote cite:before {
 
 .listboxtext {
   width: 100% !important;
+  height: 100% !important;
 }
 
 .listboxsubmit {
@@ -206,47 +311,48 @@ blockquote cite:before {
 .unselected {
   position: relative;
   float: left !important;
-  /* Media responsivity */
-  width: 45% !important;
+  /* For media responsivity */
+  width: 100% !important;
 }
 
 .selected {
   position: relative;
   float: right !important;
-  /* Media responsivity */
-  width: 45% !important;
+  /* For media responsivity */
+  width: 100% !important;
 }
 
 .unselectedClusterButton {
-  /* Lighter colours? */
+  /* TODO: Lighter colours? */
   background-color: #3eaae3;
   /* Media responsivity */
   margin: 10px;
 }
 
 .selectedClusterButton {
-  /* Lighter colours? */
+  /* TODO: Lighter colours? */
   background-color: #e02063;
-  /* Media responsivity */
   margin: 10px;
 }
 
+/* ensure the text is readable by adding a padding */
 .unselectedClusters, .selectedClusters {
-  /* Media responsivity */
   padding: 10px  !important;
 }
 
+/* sorting dropdown always floats right */
 .clustersort, .tablesort {
   float: right;
 }
 
-/* Radio */
+/* Customer Radio Button */
 input[type=radio] {
   height: 1.1rem;
   width: 1.1rem;
   appearance: none;
   -webkit-appearance: none;
   border-radius: 50%;
+  /* TODO: Change the colors */
   background-color: #b2f5ff;
   border: 3px solid #FFF;
   box-shadow: 0 0 0 1px #57b1be;
@@ -255,12 +361,14 @@ input[type=radio] {
 }
 
 input[type=radio]:hover {
+  /* TODO: Change the colors */
   background-color: #71ecff;
   border: 3px solid #71ecff;
   box-shadow: 0 0 0 1px #57b1be;
 }
 
 input[type=radio]:checked {
+  /* TODO: Change the colors */
   background: #57b1be;
   border: 3px solid white;
   box-shadow: 0 0 0 1px #57b1be;

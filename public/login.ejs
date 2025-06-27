@@ -6,25 +6,82 @@
     <%- head %>
 </head>
 <body>
+    <!-- Navigation (sticky header). Links and dropdown collapse into a hamburger menu when the screen size is small. -->
+    <nav class="navbar navbar-expand-lg navbar-dark px-3" id="navbar">
+        <!-- Brand on the left -->
+        <a class="navbar-brand bigBrand" href="/" id="navbar-brand">Grant Matcher</a>
+
+        <!-- Toggler (for mobile view) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" id="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links on the right -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Links here -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/signup">Signup</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tutorial">Tutorial</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- The error modal when the credentials are invalid -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Error!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close1">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Your credentials are invalid. Please retry.</p>
+        </div>
+    </div>
+
+    <!-- The main content -->
     <main>
-        <section>
-            <h1>Login Form</h1>
-            <b>Message: <%= message %></b><br>
+        <section class="d-flex justify-content-center flex-grow-1">
+            <div style="margin: 0 auto; display:inline-block; max-width: fit-content; width: 200px; overflow: hidden; padding-bottom: 10px;">
+                <h1 style="text-align: center;">Login</h1>
+                <p>Don't have an account yet? <a href="/signup">Signup</a> instead!</p>
+                <form method="post" action="/login">
+                    <label><b>USERNAME</b></label><br>
+                    <input type="text" id="username" name="username" placeholder="Enter Your Username" required><br><br>
 
-            <form method="post" action="/login">
-                <p><b>Username: </b></p>
-                <input type="text" id="username" name="username" placeholder="Enter Your Username" required>
-                <br>
+                    <label><b>PASSWORD</b></label><br>
+                    <input type="password" id="password" name="password" placeholder="Enter Your Password" required><br>
 
-                <p><b>Password:</b> </p>
-                <input type="text" id="password" name="password" placeholder="Enter Your Password" required>
-                <br>
+                    <div style="float: right;">
+                        <input type="checkbox" id="rememberme" name="rememberme" value="rememberme">
+                        <label for="rememberme"> Remember Me</label><br>
+                    </div><br><br>
 
-                <input type="submit" value="Login!">
-            </form>
+                    <input type="submit" value="Login!" class="buttonStyle">
+                </form>
+            </div>
         </section>
     </main>
     <%- footer %>
     <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+    </script>
+    <script>
+        if ("<%= showAlert %>" == "yes") {
+            openModal(1);
+        }
+    </script>
 </body>
 </html>

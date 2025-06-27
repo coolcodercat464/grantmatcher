@@ -12,7 +12,7 @@
         <a class="navbar-brand bigBrand" href="/" id="navbar-brand">Grant Matcher</a>
 
         <!-- Toggler (for mobile view) -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" id="navbar-toggler">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -66,6 +66,8 @@
             </div>
         </div>
     </div>
+
+    <!-- The main content -->
     <main>
         <section>
             <h1>Test</h1>
@@ -73,9 +75,15 @@
 
         <hr/>
     </main>
+    
+    <!-- EJS partial (for code reuse and efficiency) -->
     <%- footer %>
+
+    <!-- Bootstrap for CSS -->
     <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <!-- This file allows for the user to interact with the elements on the site and for the site to give feedback to the user -->
     <script src="script.js"></script>
+    <!-- JQuery for the tooltip -->
     <script>
         $(function () {
   $('[data-toggle="tooltip"]').tooltip()
