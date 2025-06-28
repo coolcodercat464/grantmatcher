@@ -6,7 +6,6 @@ const db = require(path.join(__dirname, '../databases/postgres.js'))
 
 // password hashing stuff
 var MD5 = require("crypto-js/md5");
-const salt = "SALT"; // add to a .env file
 
 // passport authentication stuff
 const passport = require('passport');
@@ -33,7 +32,7 @@ async function save_user(newUser, role) {
     email = newUser.email
 
     // hash the password
-    password = MD5(newUser.password.trim() + salt).toString();
+    password = MD5(newUser.password.trim() + process.env.PASSWORD_SALT).toString();
 
     // get the date
     now = new Date();
@@ -149,7 +148,8 @@ passport.use(new LocalStrategy(
         for (u in users) {
             user = users[u];
             // email (primary key) and password must match
-            if (email === user.email && password === user.password) {
+            hashedPassword = MD5(password.trim() + process.env.PASSWORD_SALT).toString();
+            if (email === user.email && hashedPassword === user.password) {
                 success = user
                 break;
             }
@@ -212,7 +212,6 @@ const indexget = async (req, res)=>{
     if (req.isAuthenticated()) {
         // find the user
         theuser = await get_user_by_email(req.session.useremail)
-        console.log(theuser)
         // TODO: check if user exists
         res.render('dashboard.ejs', {root: path.join(__dirname, '../public'), head: headpartial, user: theuser.name, footer: partialfooter});
     } else {

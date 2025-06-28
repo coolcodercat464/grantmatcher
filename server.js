@@ -29,8 +29,7 @@ app.use(session({
   },
   store: new FileStore({path: path.join(__dirname, 'sessions')}),
   resave: false,
-  //secret: process.env.SESSIONS_SECRET,
-  secret: "keyboard cat",
+  secret: process.env.SESSIONS_SECRET,
   saveUninitialized: false,
   cookie: { maxAge: null}
 }))
