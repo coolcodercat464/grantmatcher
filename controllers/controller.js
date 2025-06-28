@@ -36,8 +36,9 @@ userList = [
 // get a list of dictionaries of users
 async function users_list() {
     // TODO: Replace with database method
-    // res = await db.query('SELECT field1, field2 FROM users');
-    // res = res.rows
+    res = await db.query('SELECT name, "userEmail", password FROM users');
+    res = res.rows
+    console.log(res)
     
     return userList
 }

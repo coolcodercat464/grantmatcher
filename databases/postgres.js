@@ -1,11 +1,12 @@
 const { Pool } = require("pg");
+require('dotenv').config();
 
 // TODO: add actual names to .env
 const pool = new Pool({
   user: "postgres",
   host: "localhost",
-  database: "DATABASE NAME",
-  password: "PASSWORD",
+  database: "grantmatcher",
+  password: process.env.DB_PASSWORD,
   port: 5432,
 })
 
