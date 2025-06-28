@@ -14,7 +14,7 @@ const session = require('express-session')                // sessions for rememb
 const FileStore = require('session-file-store')(session); // session file store
 
 // dot environment variables
-//require('dotenv').config({path:'C:/Users/elect/OneDrive/Documents/.vscode/project/.env'})
+require('dotenv').config()
 
 app.engine('html', require('ejs').renderFile);            // allow html file rendering
 app.use(express.static(path.join(__dirname, 'public')))   // set static files
@@ -40,6 +40,20 @@ const db = require('./databases/postgres.js')             // database stuff
 // get and post routing
 app.get(['/', '/login', '/signup'], routes)
 app.post(['/', '/login', '/signup'], routes)
+
+// database routes
+
+// for code reuse
+async function queryAll(table) {
+  result = await db.query(`SELECT * FROM ${table}`);
+  result = result.rows
+    
+  return result
+}
+
+app.get('/db/researchers', async (req, res) => {
+  res.send(await queryAll('researchers'))
+})
 
 // listen to port
 app.listen(port, () => {
