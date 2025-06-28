@@ -55,6 +55,10 @@ app.get('/db/researchers', async (req, res) => {
   res.send(await queryAll('researchers'))
 })
 
+app.get('/db/grants', async (req, res) => {
+  res.send(await queryAll('grants'))
+})
+
 // listen to port
 app.listen(port, () => {
     console.log("Backend is listening on port 3000");

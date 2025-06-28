@@ -1,4 +1,32 @@
-//TODO: Replace by call to server
+// HEADER TRANSITIONS
+// run scrollFunction() when the user has scrolled
+window.onscroll = function() {scrollFunction()};
+
+function scrollFunction() {
+  // if the user scrolled below a certain point
+  if (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) {
+    // hide the links (this might seem like a detour, but it allows for a transition since display: none doesn't result in a smooth transition)
+    document.getElementById("navbarNav").classList.add("hidden");
+    document.getElementById("navbarNav").style.setProperty("visibility", "hidden", "important");
+    document.getElementById("navbarNav").style.opacity = '0';
+    document.getElementById("navbar-toggler").style.opacity = '0';
+    
+    // make the brand smaller
+    document.getElementById("navbar-brand").classList.add("smallBrand");
+    document.getElementById("navbar-brand").classList.remove("bigBrang");
+  // otherwise,
+  } else {
+    // show the links (this might seem like a detour, but it allows for a transition since display: none doesn't result in a smooth transition)
+    document.getElementById("navbarNav").classList.remove("hidden");
+    document.getElementById("navbarNav").style.visibility = 'visible';
+    document.getElementById("navbarNav").style.opacity = '1';
+    document.getElementById("navbar-toggler").style.opacity = '1';
+    
+    // make the brand bigger
+    document.getElementById("navbar-brand").classList.add("bigBrand");
+    document.getElementById("navbar-brand").classList.remove("smallBrand");
+  }
+}
 
 /* 
 DATA STRUCTURE JUSTIFICATION - List of Dictionaries:
@@ -10,6 +38,7 @@ the processing time.
 
 // HARD-CODED DATA
 // contains the data relevant to the clusters
+// TODO: Replace by server call
 clustersData = [
     {
         'name': 'Cluster A',
@@ -43,6 +72,7 @@ clustersData = [
     }
 ]
 
+// TODO: Don't keep in this file. Move it to the <script></script> thing in the HTML file
 /* 
 DATA STRUCTURE JUSTIFICATION - Dictionary of Lists of Dictionaries:
 Makes it easy to access the data for a particular accordion based on the accordion's
@@ -524,18 +554,7 @@ function sortSelected(selectorNumber) {
 }
 
 // PAGINATED TABLES
-// hard-coded data
-
-// TODO: replace with data from the database
-/* 
-DATA STRUCTURE JUSTIFICATION - List of Dictionaries:
-Allows the program to loop through it and sort it easily. This
-is also the format it would come in once I call the database, 
-thus reducing the processing time.
-*/
-const dataSet1 = clustersData
-const dataSet2 = Array.from({ length: 32 }, (_, i) => ({ id: i + 1, name: `Item ${i + 1}` }));
-const rowsPerPage = 10;
+const rowsPerPage = 5;
 
 /* 
 DATA STRUCTURE JUSTIFICATION - Dictionary of Dictionaries:
@@ -546,16 +565,20 @@ table number a lot. Thus making the table number the key makes it very
 efficient to access the table's data and information. This allows for my 
 presentation layer to include multiple tables which all work.
 */
+
+// actual data calculated later on
 tableData = {
     1 : {
-        "dataSet": dataSet1,
+        "dataSet": [],
         "currentPage": 1,
-        "totalPages": Math.ceil(dataSet1.length / rowsPerPage)
+        "totalPages": 1,
+        "showFields": []
     },
     2 : {
-        "dataSet": dataSet2,
+        "dataSet": [],
         "currentPage": 1,
-        "totalPages": Math.ceil(dataSet2.length / rowsPerPage)
+        "totalPages": 1,
+        "showFields": []
     },
 }
 
@@ -580,8 +603,8 @@ function renderTable(tableNumber) {
     pageItems.forEach(item => {
         // make the HTML for the row
         row = '<tr>'
-        // get the column names
-        columns = Object.keys(item)
+        // get the column names (only show some columns)
+        columns = tableData[tableNumber].showFields
 
         for (c in columns) {
             col = columns[c]
@@ -663,44 +686,53 @@ function sortTable(tableNumber) {
     renderTable(tableNumber)
 }
 
-// get all the tables
-tables = document.getElementsByClassName("tableContainer")
+/*
+DATA STRUCTURE JUSTIFICATION - List of Dictionaries:
+Allows the program to loop through it and sort it easily. This
+is also the format it would come in once I call the database, 
+thus reducing the processing time.
+*/
 
-// go through each table
-for (var i = 0; i < tables.length; i++) {
-    // get the table number of the table
-    tableNumber = tables[i].id.replace("tableContainer", "")
+fetch('/db/researchers').then(response => response.json()).then(data => {
+    for (var i = 0; i < data.length; i++) {
+        row = data[i]
 
-    // initialise the table
-    renderTable(tableNumber);
-}
+        // the name should be a link
+        uniqueId = row.email.split("@")[0].replace(".", "")
+        row.name = `<a href='/researcher/${uniqueId}'>${row.name}</a>`
 
-// HEADER TRANSITIONS
-// run scrollFunction() when the user has scrolled
-window.onscroll = function() {scrollFunction()};
+        // get the number of edits (for sorting)
+        if (row.versionInformation == null) {
+            row.editNumber = 0
+        } else {
+            row.editNumber = row.versionInformation.length
+        }
 
-function scrollFunction() {
-  // if the user scrolled below a certain point
-  if (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) {
-    // hide the links (this might seem like a detour, but it allows for a transition since display: none doesn't result in a smooth transition)
-    document.getElementById("navbarNav").classList.add("hidden");
-    document.getElementById("navbarNav").style.setProperty("visibility", "hidden", "important");
-    document.getElementById("navbarNav").style.opacity = '0';
-    document.getElementById("navbar-toggler").style.opacity = '0';
-    
-    // make the brand smaller
-    document.getElementById("navbar-brand").classList.add("smallBrand");
-    document.getElementById("navbar-brand").classList.remove("bigBrang");
-  // otherwise,
-  } else {
-    // show the links (this might seem like a detour, but it allows for a transition since display: none doesn't result in a smooth transition)
-    document.getElementById("navbarNav").classList.remove("hidden");
-    document.getElementById("navbarNav").style.visibility = 'visible';
-    document.getElementById("navbarNav").style.opacity = '1';
-    document.getElementById("navbar-toggler").style.opacity = '1';
-    
-    // make the brand bigger
-    document.getElementById("navbar-brand").classList.add("bigBrand");
-    document.getElementById("navbar-brand").classList.remove("smallBrand");
-  }
-}
+        // add to the table data
+        tableData[1].dataSet.push(row)
+        tableData[1].showFields = ['name', 'keywords', 'activity']
+    }
+    tableData[1].totalPages = Math.ceil(data.length / rowsPerPage)
+    renderTable(1)
+})
+
+fetch('/db/grants').then(response => response.json()).then(data => {
+    for (var i = 0; i < data.length; i++) {
+        row = data[i]
+        // the name should be a link
+        uniqueId = row.grantID
+        row.grantName = `<a href='/grant/${uniqueId}'>${row.grantName}</a>`
+
+        // reformat date so its easier to sort
+        row.deadlineReformatted = row.deadline.split('-').reverse().join('/')
+
+        // get the number of researchers
+        row.researcherNumber = row.researchers.length
+
+        // add to the table data
+        tableData[2].dataSet.push(row)
+        tableData[2].showFields = ['grantName', 'keywords', 'deadline', 'matched']
+    }
+    tableData[2].totalPages = Math.ceil(data.length / rowsPerPage)
+    renderTable(2)
+})
