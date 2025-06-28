@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <title>GrantMatcher - Login</title>
     <%- head %>
+    <style>
+        .tooltip.wide-tooltip .tooltip-inner {
+            max-width: 300px;
+            white-space: normal;
+            padding: 5px;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation (sticky header). Links and dropdown collapse into a hamburger menu when the screen size is small. -->
@@ -62,10 +69,12 @@
                     <label>
                         <b>AUTHENTICATION CODE</b>
                     </label>
-                    <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Explanation Here">
-                        <!-- Makes the tooltip circular -->
+                    <!-- Explanation for authentication code -->
+                    <button type="button" class="btn" data-bs-toggle="tooltip" data-bs-placement="top" 
+                    title="For security reasons, only select USYD staff are allowed to use this site. An 8-character code should have been provided to you from your manager or from me. If you didn't receive it or aren't part of my client's team at USYD, please contact me at flyingbutter213@gmail.com.">
                         <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
                     </button>
+
                     <br>
                     <input type="text" id="authcode" name="authcode" placeholder="Enter Your Authentication Code" required><br><br>
 
@@ -73,7 +82,7 @@
                     <input type="password" id="password" name="password" placeholder="Enter Your Password" required><br><br>
 
                     <label><b>CONFIRM PASSPORT</b></label><br>
-                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Your Password" required><br>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Your Password" required><br><br>
 
                     <div style="float: right;">
                         <input type="checkbox" id="rememberme" name="rememberme" value="rememberme">
@@ -86,17 +95,25 @@
         </section>
     </main>
     <%- footer %>
-    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
     <script src="script.js"></script>
     <script>
+        // tooltip stuff
         $(function () {
             $('[data-toggle="tooltip"]').tooltip()
         })
     </script>
-        <script>
+    <script>
+        // show alerts
         if ("<%= showAlert %>" != "no") {
             openModal(1);
         }
+    </script>
+    <script>
+        // widen the tooltip
+        new bootstrap.Tooltip(document.querySelector('.btn'), {
+            customClass: 'wide-tooltip'
+        });
     </script>
 </body>
 </html>
