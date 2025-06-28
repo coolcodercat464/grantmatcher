@@ -94,6 +94,7 @@ h2 {
 
 /* divider styles */
 hr {
+  height: 0.5px !important;
   opacity: 0.9 !important;
 }
 
@@ -343,6 +344,10 @@ blockquote cite:before {
 /* sorting dropdown always floats right */
 .clustersort, .tablesort {
   float: right;
+}
+
+.tableicons {
+  float: left;
 }
 
 /* Customer Radio Button */

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>GrantMatcher</title>
+    <%- head %>
+</head>
+<body>
+    <!-- Navigation (sticky header). Links and dropdown collapse into a hamburger menu when the screen size is small. -->
+    <nav class="navbar navbar-expand-lg navbar-dark px-3" id="navbar">
+        <!-- Brand on the left -->
+        <a class="navbar-brand bigBrand" href="/" id="navbar-brand">Grant Matcher</a>
+
+        <!-- Toggler (for mobile view) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" id="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links on the right -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Links here -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tickets">Tickets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tutorial">Tutorial</a>
+                </li>
+
+                <!-- Dropdown (user menu) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <!-- Logout button (opens a modal) -->
+                        <li><button class="dropdown-item" id="modalBtn1" onclick="openModal(1)">Logout</button></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- The modal the logout button in the navigation bar opens -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Log out</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close1">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to log out?</p>
+            <div class="together">
+                <form method="post" action="/">
+                    <input type="submit" value="Logout!" class="buttonStyle">
+                </form>
+                <button id='cancel1' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The main content -->
+    <main>
+        <section>
+            <h1>Dashboard</h1>
+        </section>
+        <hr/>
+
+        <section>
+            <h2>Researchers</h2>
+            <div class="tableContainer" id="tableContainer1">
+                <div>
+                    <div class="tableicons">
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Filter Researchers">
+                            <i id="modalBtn2" onclick="openModal(2)" class=" fa fa-search"></i>
+                        </button>
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Add a Researcher">
+                            <i id="modalBtn3" onclick="openModal(3)" class=" fa fa-plus-square-o"></i>
+                        </button>
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Recalculate the Researchers' Data">
+                            <i id="modalBtn4" onclick="openModal(4)" class=" fa fa-refresh"></i>
+                        </button>
+                    </div>
+                    <div class="tablesort">
+                        <label for="sortTable1">Sort By:</label>
+
+                        <select name="sortTable1" id="sortTable1" onchange="sortTable(1)" style="margin-bottom: 5px;">
+                            <option value="id">ID</option>
+                            <option value="name">Name</option>
+                            <option value="number">Number</option>
+                        </select>
+                    </div>
+                </div>
+
+                <table class="table table-bordered" style="margin-bottom: 0; border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;">
+                    <thead>
+                        <!-- Column names -->
+                        <tr>
+                        <th>Name</th>
+                        <th>Number</th>
+                        <th>ID</th>
+                        </tr>
+                    </thead>
+                    <!-- Table items -->
+                    <tbody id="tableBody1"></tbody>
+                </table>
+
+                <!-- Table footer (with pagination controls and download button) -->
+                <div class="pagination-controls" style="border: 1px solid black; margin-top: 0;">
+                    <!-- The download button should be left-aligned while the rest is right-aligned -->
+                    <!-- align-items-center ensures that the text and icons are aligned properly (otherwise the text sticks out vertically and its distracting) -->
+                    <div class="d-flex align-items-center gap-2 d-flex w-100 px-3 py-2">
+                        <div>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-download"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#">XML</a></li>
+                                    <li><a class="dropdown-item" href="#">CSV</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="ms-auto">
+                            <!-- Numbering the IDs so I can use many tables (code reuse) -->
+                            <button class="btn" id="firstNav1" onclick="goToFirst(1)"><i class="fa fa-angle-double-left"></i></button>
+                            <button class="btn" id="prevNav1" onclick="goToPrev(1)"><i class="fa fa-angle-left"></i></button>
+                            <!-- Tells the user what page they are on -->
+                            <span id="pageStats1"></span>
+                            <button class="btn" id="nextNav1" onclick="goToNext(1)"><i class="fa fa-angle-right"></i></button>
+                            <button class="btn" id="lastNav1" onclick="goToLast(1)"><i class="fa fa-angle-double-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <hr/>
+
+        <section>
+            <h2>Grants</h2>
+            <div class="tableContainer" id="tableContainer2">
+                <div>
+                    <div class="tableicons">
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Filter Grants">
+                            <i id="modalBtn5" onclick="openModal(5)" class="fa fa-search"></i>
+                        </button>
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Add a Grant">
+                            <i id="modalBtn6" onclick="openModal(6)" class="fa fa-plus-square-o"></i>
+                        </button>
+                    </div>
+                    <div class="tablesort">
+                        <label for="sortTable2">Sort By:</label>
+
+                        <select name="sortTable2" id="sortTable2" onchange="sortTable(2)" style="margin-bottom: 5px;">
+                            <option value="id">ID</option>
+                            <option value="name">Name</option>
+                            <option value="number">Number</option>
+                        </select>
+                    </div>
+                </div>
+
+                <table class="table table-bordered" style="margin-bottom: 0; border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;">
+                    <thead>
+                        <!-- Column names -->
+                        <tr>
+                        <th>Name</th>
+                        <th>Number</th>
+                        <th>ID</th>
+                        </tr>
+                    </thead>
+                    <!-- Table items -->
+                    <tbody id="tableBody2"></tbody>
+                </table>
+
+                <!-- Table footer (with pagination controls and download button) -->
+                <div class="pagination-controls" style="border: 1px solid black; margin-top: 0;">
+                    <!-- The download button should be left-aligned while the rest is right-aligned -->
+                    <!-- align-items-center ensures that the text and icons are aligned properly (otherwise the text sticks out vertically and its distracting) -->
+                    <div class="d-flex align-items-center gap-2 d-flex w-100 px-3 py-2">
+                        <div>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-download"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#">XML</a></li>
+                                    <li><a class="dropdown-item" href="#">CSV</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="ms-auto">
+                            <!-- Numbering the IDs so I can use many tables (code reuse) -->
+                            <button class="btn" id="firstNav2" onclick="goToFirst(2)"><i class="fa fa-angle-double-left"></i></button>
+                            <button class="btn" id="prevNav2" onclick="goToPrev(2)"><i class="fa fa-angle-left"></i></button>
+                            <!-- Tells the user what page they are on -->
+                            <span id="pageStats2"></span>
+                            <button class="btn" id="nextNav2" onclick="goToNext(2)"><i class="fa fa-angle-right"></i></button>
+                            <button class="btn" id="lastNav2" onclick="goToLast(2)"><i class="fa fa-angle-double-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <hr/>
+
+        <section>
+            <h2>Clusters</h2>
+            <div class="tableContainer" id="tableContainer3">
+                <div>
+                    <div class="tableicons">
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Filter Clusters">
+                            <i id="modalBtn7" onclick="openModal(7)" class="fa fa-search"></i>
+                        </button>
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Edit Clusters">
+                            <i id="modalBtn8" onclick="openModal(8)" class="fa fa-pencil-square-o"></i>
+                        </button>
+                    </div>
+                    <div class="tablesort">
+                        <label for="sortTable3">Sort By:</label>
+
+                        <select name="sortTable3" id="sortTable3" onchange="sortTable(3)" style="margin-bottom: 5px;">
+                            <option value="id">ID</option>
+                            <option value="name">Name</option>
+                            <option value="number">Number</option>
+                        </select>
+                    </div>
+                </div>
+
+                <table class="table table-bordered" style="margin-bottom: 0; border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;">
+                    <thead>
+                        <!-- Column names -->
+                        <tr>
+                        <th>Name</th>
+                        <th>Number</th>
+                        <th>ID</th>
+                        </tr>
+                    </thead>
+                    <!-- Table items -->
+                    <tbody id="tableBody3"></tbody>
+                </table>
+
+                <!-- Table footer (with pagination controls and download button) -->
+                <div class="pagination-controls" style="border: 1px solid black; margin-top: 0;">
+                    <!-- The download button should be left-aligned while the rest is right-aligned -->
+                    <!-- align-items-center ensures that the text and icons are aligned properly (otherwise the text sticks out vertically and its distracting) -->
+                    <div class="d-flex align-items-center gap-2 d-flex w-100 px-3 py-2">
+                        <div>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-download"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#">XML</a></li>
+                                    <li><a class="dropdown-item" href="#">CSV</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="ms-auto">
+                            <!-- Numbering the IDs so I can use many tables (code reuse) -->
+                            <button class="btn" id="firstNav3" onclick="goToFirst(3)"><i class="fa fa-angle-double-left"></i></button>
+                            <button class="btn" id="prevNav3" onclick="goToPrev(3)"><i class="fa fa-angle-left"></i></button>
+                            <!-- Tells the user what page they are on -->
+                            <span id="pageStats3"></span>
+                            <button class="btn" id="nextNav3" onclick="goToNext(3)"><i class="fa fa-angle-right"></i></button>
+                            <button class="btn" id="lastNav3" onclick="goToLast(3)"><i class="fa fa-angle-double-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <hr/>
+
+        <section>
+            <h2>Users</h2>
+            <div class="tableContainer" id="tableContainer4">
+                <div>
+                    <div class="tableicons">
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Filter Users">
+                            <i id="modalBtn9" onclick="openModal(9)" class="fa fa-search"></i>
+                        </button>
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Manage Codes">
+                            <i id="modalBtn10" onclick="openModal(10)" class="fa fa-users"></i>
+                        </button>
+                    </div>
+                    <div class="tablesort">
+                        <label for="sortTable4">Sort By:</label>
+
+                        <select name="sortTable4" id="sortTable4" onchange="sortTable(4)" style="margin-bottom: 5px;">
+                            <option value="id">ID</option>
+                            <option value="name">Name</option>
+                            <option value="number">Number</option>
+                        </select>
+                    </div>
+                </div>
+
+                <table class="table table-bordered" style="margin-bottom: 0; border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;">
+                    <thead>
+                        <!-- Column names -->
+                        <tr>
+                        <th>Name</th>
+                        <th>Number</th>
+                        <th>ID</th>
+                        </tr>
+                    </thead>
+                    <!-- Table items -->
+                    <tbody id="tableBody4"></tbody>
+                </table>
+
+                <!-- Table footer (with pagination controls and download button) -->
+                <div class="pagination-controls" style="border: 1px solid black; margin-top: 0;">
+                    <!-- The download button should be left-aligned while the rest is right-aligned -->
+                    <!-- align-items-center ensures that the text and icons are aligned properly (otherwise the text sticks out vertically and its distracting) -->
+                    <div class="d-flex align-items-center gap-2 d-flex w-100 px-3 py-2">
+                        <div>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-download"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#">XML</a></li>
+                                    <li><a class="dropdown-item" href="#">CSV</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="ms-auto">
+                            <!-- Numbering the IDs so I can use many tables (code reuse) -->
+                            <button class="btn" id="firstNav4" onclick="goToFirst(4)"><i class="fa fa-angle-double-left"></i></button>
+                            <button class="btn" id="prevNav4" onclick="goToPrev(4)"><i class="fa fa-angle-left"></i></button>
+                            <!-- Tells the user what page they are on -->
+                            <span id="pageStats4"></span>
+                            <button class="btn" id="nextNav4" onclick="goToNext(4)"><i class="fa fa-angle-right"></i></button>
+                            <button class="btn" id="lastNav4" onclick="goToLast(4)"><i class="fa fa-angle-double-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <hr/>
+
+        <section>
+            <h2>Change Log</h2>
+            <div class="tableContainer" id="tableContainer5">
+                <div>
+                    <div class="tableicons">
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Filter Changes">
+                            <i id="modalBtn11" onclick="openModal(11)" class="fa fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="tablesort">
+                        <label for="sortTable5">Sort By:</label>
+
+                        <select name="sortTable5" id="sortTable5" onchange="sortTable(5)" style="margin-bottom: 5px;">
+                            <option value="id">ID</option>
+                            <option value="name">Name</option>
+                            <option value="number">Number</option>
+                        </select>
+                    </div>
+                </div>
+
+                <table class="table table-bordered" style="margin-bottom: 0; border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;">
+                    <thead>
+                        <!-- Column names -->
+                        <tr>
+                        <th>Name</th>
+                        <th>Number</th>
+                        <th>ID</th>
+                        </tr>
+                    </thead>
+                    <!-- Table items -->
+                    <tbody id="tableBody5"></tbody>
+                </table>
+
+                <!-- Table footer (with pagination controls and download button) -->
+                <div class="pagination-controls" style="border: 1px solid black; margin-top: 0;">
+                    <!-- The download button should be left-aligned while the rest is right-aligned -->
+                    <!-- align-items-center ensures that the text and icons are aligned properly (otherwise the text sticks out vertically and its distracting) -->
+                    <div class="d-flex align-items-center gap-2 d-flex w-100 px-3 py-2">
+                        <div>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-download"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#">XML</a></li>
+                                    <li><a class="dropdown-item" href="#">CSV</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="ms-auto">
+                            <!-- Numbering the IDs so I can use many tables (code reuse) -->
+                            <button class="btn" id="firstNav5" onclick="goToFirst(5)"><i class="fa fa-angle-double-left"></i></button>
+                            <button class="btn" id="prevNav5" onclick="goToPrev(5)"><i class="fa fa-angle-left"></i></button>
+                            <!-- Tells the user what page they are on -->
+                            <span id="pageStats5"></span>
+                            <button class="btn" id="nextNav5" onclick="goToNext(5)"><i class="fa fa-angle-right"></i></button>
+                            <button class="btn" id="lastNav5" onclick="goToLast(5)"><i class="fa fa-angle-double-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- EJS partial (for code reuse and efficiency) -->
+    <%- footer %>
+
+    <!-- Bootstrap for JS -->
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <!-- This file allows for the user to interact with the elements on the site and for the site to give feedback to the user -->
+    <script src="script.js"></script>
+    <!-- JQuery for the tooltip -->
+    <script>
+        $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+    </script>
+</body>
+</html>

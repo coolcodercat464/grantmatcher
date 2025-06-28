@@ -207,7 +207,7 @@ const indexget = async (req, res)=>{
         theuser = await get_user_by_email(req.session.useremail)
         console.log(theuser)
         // TODO: check if user exists
-        res.render('index.ejs', {root: path.join(__dirname, '../public'), head: headpartial, user: theuser.name, footer: partialfooter});
+        res.render('dashboard.ejs', {root: path.join(__dirname, '../public'), head: headpartial, user: theuser.name, footer: partialfooter});
     } else {
         res.render('landing.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter});
     }
