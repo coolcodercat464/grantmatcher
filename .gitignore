@@ -1,4 +1,5 @@
-# Ignore the .env file
+# ignore the .env file
 .env
 
+# ignore the black hole that is node modules
 node_modules/

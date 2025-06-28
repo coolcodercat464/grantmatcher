@@ -5,8 +5,6 @@ const options = {root: path.join(__dirname, '../public')};   // set options root
 const db = require(path.join(__dirname, '../databases/postgres.js'))
 
 // password hashing stuff
-// SAMPLE CODE:
-// password = MD5(x.password.trim() + salt).toString();
 var MD5 = require("crypto-js/md5");
 const salt = "SALT"; // add to a .env file
 
@@ -14,54 +12,62 @@ const salt = "SALT"; // add to a .env file
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 
-// JUSTIFICATION: this data structure is used as it is how
-// db.query() returns things as default, reducing processing
-// time. Additionally, it is easy to loop through the contents
-// of all the users.
-userList = [
-    {
-        "name": "Big Boss",
-        "email": "bigbossadmin@company.com",
-        "password": "irule",
-        "xp": 55
-    },
-    {
-        "name": "Employee",
-        "email": "firstname.lastname@company.com",
-        "password": "iwork",
-        "xp": 25
-    }
-]
-
 // get a list of dictionaries of users
 async function users_list() {
-    // TODO: Replace with database method
-    res = await db.query('SELECT name, "userEmail", password FROM users');
+    // res is a list of dictionaries
+
+    // JUSTIFICATION: this data structure is used as it is how
+    // db.query() returns things as default, reducing processing
+    // time. Additionally, it is easy to loop through the contents
+    // of all the users.
+    res = await db.query('SELECT name, email, password FROM users');
     res = res.rows
-    console.log(res)
     
-    return userList
+    return res
 }
 
 // add the new user to the user list
-async function save_user(newUser) {
-    // TODO: Replace with database method
-    /*
-        try {
-            const mq = 'INSERT INTO users (name, password, ...) VALUES ($1, $2, ...)'
-            const result1 = await db.query(mq, [name, password, ...]);
-            res.redirect(urlinit)
-        } catch (err) {
-            console.error(err);
-            res.status(500).send('Internal Server Error');
-        }
-    */
+async function save_user(newUser, role) {
+    // get the user's details
+    userName = newUser.name
+    email = newUser.email
 
-    // new users have 0 xp initially
-    newUser.xp = 0
+    // hash the password
+    password = MD5(newUser.password.trim() + salt).toString();
 
-    // add them to the list
-    userList.push(newUser)
+    // get the date
+    now = new Date();
+
+    // get the parts of the date in 2 digits
+    year = now.getFullYear()
+    month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+    day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+    // stringify it
+    date = `${day}-${month}-${year}`
+
+    // catch any errors
+    try {
+        // insert the user's data into the database
+        const mq = 'INSERT INTO users (name, email, password, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)'
+        const result1 = await db.query(mq, [userName, email, password, role, 0, 0, date, "light", false]);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// get a list of dictionaries of users
+async function get_codes() {
+    // res is a list of dictionaries
+
+    // JUSTIFICATION: this data structure is used as it is how
+    // db.query() returns things as default, reducing processing
+    // time. Additionally, it is easy to loop through the contents
+    // of all the codes.
+    res = await db.query('SELECT "userEmail", code, role FROM codes');
+    res = res.rows
+    
+    return res
 }
 
 // find a user by their email
@@ -248,7 +254,9 @@ const indexpost = (req, res, next) => {
 
 // when the user sumbits the login form, either redirect them to the dashboard if their
 // credentials are correct, or give them an error-popup.
-const loginpost = (req, res, next) => {
+const loginpost = async (req, res, next) => {
+    users = await users_list()
+
     // use passport to authenticate the user
     passport.authenticate('local', (err, user, info) => {
         console.log("LOGIN POST")
@@ -292,16 +300,15 @@ const loginpost = (req, res, next) => {
 const signuppost = async (req, res, next) => {
     console.log('SIGNUP POST')
     x = req.body;
-    console.log(x)
 
     users = await users_list();
-    console.log(users) // DEBUGGING ONLY PLEASE REMOVE
 
     // check if the user is already in the database
     for (u in users) {
         user = users[u];
         if(req.body.email === user.email) {
-            res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'A user with this email already exists. Please try again.'});
+            // give them an error pop-up if they are already in the database
+            res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'A user with this email already exists. Please try again or login instead.'});
             return
         }
     }
@@ -309,11 +316,34 @@ const signuppost = async (req, res, next) => {
     if(!req.body.email || !req.body.authcode || !req.body.password || !req.body.name){
         res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'Please ensure all fields are filled.'});
     } else {
-        //TODO: check if authentication code is correct
+        // get all the auth codes
+        codes = await get_codes()
+
+        // check whether the authentication code is correct
+        success = false
+        role = undefined
+        for (x in codes) {
+            code = codes[x]
+            if (code.code == req.body.authcode && code.userEmail == req.body.email) {
+                success = true;
+                role = code.role;
+                break
+            }
+        }
+
+        // if it failed (no code exists), give an error pop-up to the user
+        if (!success) {
+            res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'Your authentication code seems to be incorrect. If you haven\'t been provided with one, please contact me at flyingbutter213@gmail.com.'});
+            return
+        }
+
+        // new user object
         var newUser = {email: req.body.email, name: req.body.name, password: req.body.password};
 
-        await save_user(newUser);
+        // add the user to the database
+        await save_user(newUser, role);
 
+        // authenticate the user
         req.login(newUser, function(err) {
             if (err) { return next(err); }
 
