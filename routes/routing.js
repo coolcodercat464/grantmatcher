@@ -18,5 +18,8 @@ router.post('/', control.indexpost)
 router.get('/login', control.loginget)
 router.post('/login', control.loginpost)
 
+router.get('/signup', control.signupget)
+router.post('/signup', control.signuppost)
+
 module.exports = router;
 

@@ -42,7 +42,6 @@
                 <span class="close" id="close1">&times;</span>
             </div>
             
-            <!-- Confirmation message (for user control) -->
             <p>Your credentials are invalid. Please retry.</p>
         </div>
     </div>
@@ -54,8 +53,8 @@
                 <h1 style="text-align: center;">Login</h1>
                 <p>Don't have an account yet? <a href="/signup">Signup</a> instead!</p>
                 <form method="post" action="/login">
-                    <label><b>USERNAME</b></label><br>
-                    <input type="text" id="username" name="username" placeholder="Enter Your Username" required><br><br>
+                    <label><b>EMAIL</b></label><br>
+                    <input type="text" id="email" name="email" placeholder="Enter Your Email" required><br><br>
 
                     <label><b>PASSWORD</b></label><br>
                     <input type="password" id="password" name="password" placeholder="Enter Your Password" required><br>
@@ -75,8 +74,8 @@
     <script src="script.js"></script>
     <script>
         $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-})
+            $('[data-toggle="tooltip"]').tooltip()
+        })
     </script>
     <script>
         if ("<%= showAlert %>" == "yes") {

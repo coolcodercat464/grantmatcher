@@ -39,8 +39,8 @@ app.use(bodyParser.urlencoded({extended: true}));         // use bodyparser
 const db = require('./databases/postgres.js')             // database stuff
 
 // get and post routing
-app.get(['/', '/login'], routes)
-app.post(['/', '/login'], routes)
+app.get(['/', '/login', '/signup'], routes)
+app.post(['/', '/login', '/signup'], routes)
 
 // listen to port
 app.listen(port, () => {
