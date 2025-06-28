@@ -59,6 +59,18 @@ app.get('/db/grants', async (req, res) => {
   res.send(await queryAll('grants'))
 })
 
+app.get('/db/clusters', async (req, res) => {
+  res.send(await queryAll('clusters'))
+})
+
+app.get('/db/users', async (req, res) => {
+  res.send(await queryAll('users'))
+})
+
+app.get('/db/changelog', async (req, res) => {
+  res.send(await queryAll('changelog'))
+})
+
 // listen to port
 app.listen(port, () => {
     console.log("Backend is listening on port 3000");

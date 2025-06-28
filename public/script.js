@@ -580,6 +580,24 @@ tableData = {
         "totalPages": 1,
         "showFields": []
     },
+    3 : {
+        "dataSet": [],
+        "currentPage": 1,
+        "totalPages": 1,
+        "showFields": []
+    },
+    4 : {
+        "dataSet": [],
+        "currentPage": 1,
+        "totalPages": 1,
+        "showFields": []
+    },
+    5 : {
+        "dataSet": [],
+        "currentPage": 1,
+        "totalPages": 1,
+        "showFields": []
+    },
 }
 
 // present the table
@@ -714,6 +732,33 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
     }
     tableData[1].totalPages = Math.ceil(data.length / rowsPerPage)
     renderTable(1)
+
+    // THIS FETCH IS INSIDE HERE because it needs the researchers data
+    // to calculate how many researchers each cluster has
+    fetch('/db/clusters').then(response => response.json()).then(clusterData => {
+        for (var i = 0; i < clusterData.length; i++) {
+            row = clusterData[i]
+
+            clusterName = row.clusterID
+            times = 0
+
+            // count the number of times this cluster shows up
+            for (x in data) {
+                if (data[x].clusters.includes(clusterName)) {
+                    times += 1
+                }
+            }
+
+            // add it to the data
+            row.numberResearchers = times
+
+            // add to the table data
+            tableData[3].dataSet.push(row)
+            tableData[3].showFields = ['clusterID', 'name', 'numberResearchers']
+        }
+        tableData[3].totalPages = Math.ceil(clusterData.length / rowsPerPage)
+        renderTable(3)
+    })
 })
 
 fetch('/db/grants').then(response => response.json()).then(data => {
@@ -735,4 +780,46 @@ fetch('/db/grants').then(response => response.json()).then(data => {
     }
     tableData[2].totalPages = Math.ceil(data.length / rowsPerPage)
     renderTable(2)
+})
+
+fetch('/db/users').then(response => response.json()).then(data => {
+    for (var i = 0; i < data.length; i++) {
+        row = data[i]
+
+        // reformat date so its easier to sort
+        row.dateReformatted = row.dateJoined.split('-').reverse().join('/')
+
+        // add to the table data
+        tableData[4].dataSet.push(row)
+        tableData[4].showFields = ['name', 'email', 'role', 'xp']
+    }
+    tableData[4].totalPages = Math.ceil(data.length / rowsPerPage)
+    renderTable(4)
+
+    // THIS FETCH IS INSIDE HERE because it needs the user data
+    // to find the username based on email
+    fetch('/db/changelog').then(response => response.json()).then(dataChange => {
+        for (var i = 0; i < dataChange.length; i++) {
+            row = dataChange[i]
+            row.username = undefined
+
+            // loop through to find the user's name based on email
+            for (x in data) {
+                if (data[x].email == row.userEmail) {
+                    row.username = data[x].name;
+                    break;
+                }
+            }
+
+            // reformat date so its easier to sort
+            row.dateReformatted = row.date.split('-').reverse().join('/')
+
+            // add to the table data
+            tableData[5].dataSet.push(row)
+            tableData[5].showFields = ['date', 'type', 'username']
+        }
+        tableData[5].totalPages = Math.ceil(dataChange.length / rowsPerPage)
+        renderTable(5)
+    })
+
 })
