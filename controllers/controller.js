@@ -48,8 +48,27 @@ async function save_user(newUser, role) {
     // catch any errors
     try {
         // insert the user's data into the database
-        const mq = 'INSERT INTO users (name, email, password, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)'
-        const result1 = await db.query(mq, [userName, email, password, role, 0, 0, date, "light", false]);
+        const mq1 = 'INSERT INTO users (name, email, password, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)'
+        const result1 = await db.query(mq1, [userName, email, password, role, 0, 0, date, "light", false]);
+        
+        // get all changes
+        const mq2 = 'SELECT "changeID" FROM changelog'
+        const result2 = await db.query(mq2);
+        // calculate the maximum changeID
+        maxChangeID = 0
+        for (x in result2.rows) {
+            rowID = result2.rows[x].changeID
+            if (rowID > maxChangeID) {
+                maxChangeID = rowID
+            }
+        }
+        // calculate the next change ID
+        nextChangeID = maxChangeID + 1
+
+        // add 'user joined' change to changelog
+        const mq3 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
+        const result3 = await db.query(mq3, [nextChangeID, email, 'User Joined', date, `${newUser.name} joined Grant Matcher! Please make them feel welcome!`, '{}']);
+        
     } catch (err) {
         console.error(err);
     }
