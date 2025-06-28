@@ -375,6 +375,10 @@ input[type=radio]:checked {
 }
 
 /* Checkbox */
+input[type=text], input[type=password] {
+  width: 100%;
+}
+
 input[type=checkbox] {
   height: 1.2em;
   width: 1.2em;
