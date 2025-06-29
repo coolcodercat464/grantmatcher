@@ -785,6 +785,36 @@ function searchResearcher(tableNumber) {
     modal.style.display = "none";
 }
 
+// clear the researcher form and reset the table
+function resetResearcherSearch(tableNumber) {
+    // get the relevant data
+    researcherTable = tableData[tableNumber]
+    researcherData = researcherTable.dataSet
+
+    // reset the text inputs
+    document.getElementById('researcherName').value = ''
+    document.getElementById('researcherEmail').value = ''
+
+    // reset the dropdown inputs
+    document.getElementById('school').value = 'all'
+    document.getElementById('gender').value = 'all'
+    document.getElementById('career').value = 'all'
+
+    // reset the numeric inputs
+    document.getElementById('lower').value = ''
+    document.getElementById('higher').value = ''
+
+    // reset the visible row list
+    tableData[tableNumber].showRows = researcherData
+
+    // reset the table
+    renderTable(tableNumber)
+
+    // close the modal
+    var modal = document.getElementById("modal2");
+    modal.style.display = "none";
+}
+
 // SERVER DATABASE CALLS
 /*
 DATA STRUCTURE JUSTIFICATION - List of Dictionaries:
