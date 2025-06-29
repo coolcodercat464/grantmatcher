@@ -261,7 +261,7 @@ blockquote cite:before {
 
 .listboxdiv {
   padding: 0 !important;
-  height: 200px !important;
+  height: 200px;
   overflow-y: scroll;
   border: 2px solid black;
 }

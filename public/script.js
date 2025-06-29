@@ -28,50 +28,6 @@ function scrollFunction() {
   }
 }
 
-/* 
-DATA STRUCTURE JUSTIFICATION - List of Dictionaries:
-Allows the program to loop through it easily. I didn't use a dictionary
-as that would make it harder to sort by fields other than the key. This
-is also the format it would come in once I call the database, thus reducing
-the processing time.
-*/
-
-// HARD-CODED DATA
-// contains the data relevant to the clusters
-// TODO: Replace by server call
-clustersData = [
-    {
-        'name': 'Cluster A',
-        'number': 14,
-        'id': 1
-    },
-    {
-        'name': 'Cluster B',
-        'number': 54,
-        'id': 2
-    },
-    {
-        'name': 'Cluster C',
-        'number': 2,
-        'id': 3
-    },
-    {
-        'name': 'Cluster D',
-        'number': 32,
-        'id': 4
-    },
-    {
-        'name': 'Cluster E',
-        'number': 5,
-        'id': 5
-    },
-    {
-        'name': 'Cluster F',
-        'number': 17,
-        'id': 6
-    }
-]
-
 // TODO: Don't keep in this file. Move it to the <script></script> thing in the HTML file
 /* 
 DATA STRUCTURE JUSTIFICATION - Dictionary of Lists of Dictionaries:
@@ -155,24 +111,17 @@ for (var i = 0; i < accordions.length; i++) {
     }
 }
 
-// INITIALISE CLUSTER SELECTORS
-// get all the lists of unselected clusters
-unselectedClustersDivs = document.getElementsByClassName('unselectedClusters')
-
-// initialise the list by adding all the cluster data to the unselected cluster (no clusters selected at the beginning)
-for (var i = 0; i < unselectedClustersDivs.length; i++) {
-    // get the number of the div (e.g., the number is 5 for a div with an ID called unselectedClusters5)
-    selectorNumber = unselectedClustersDivs[i].id.replace("unselectedClusters", "")
-    // this string holds the HTMl code for the cluster list
-    clusterHTML = ''
+// CLUSTERS
+// get the cluster dictionary by ID
+function getClusterByID(id) {
+    // loop through clustersData
     for (x in clustersData) {
-        // create a single HTML button for each button and add it to the total list
-        c = clustersData[x]
-        clusterName = c.name
-        clusterId = c['id']
-        clusterHTML += `<button class='unselectedClusterButton' id='${selectorNumber}U${clusterId}' onclick="selectCluster('${selectorNumber}U${clusterId}')">${clusterName}</button>`
+        if (clustersData[x].id == id) {
+            return clustersData[x]
+        }
     }
-    unselectedClustersDivs[i].innerHTML += clusterHTML;
+    // return empty dictionary if none found
+    return {}
 }
 
 // MOVING CLUSTERS IN CLUSTER SELECTORS
@@ -572,31 +521,36 @@ tableData = {
         "dataSet": [],
         "currentPage": 1,
         "totalPages": 1,
-        "showFields": []
+        "showFields": [],
+        "showRows": []
     },
     2 : {
         "dataSet": [],
         "currentPage": 1,
         "totalPages": 1,
-        "showFields": []
+        "showFields": [],
+        "showRows": []
     },
     3 : {
         "dataSet": [],
         "currentPage": 1,
         "totalPages": 1,
-        "showFields": []
+        "showFields": [],
+        "showRows": []
     },
     4 : {
         "dataSet": [],
         "currentPage": 1,
         "totalPages": 1,
-        "showFields": []
+        "showFields": [],
+        "showRows": []
     },
     5 : {
         "dataSet": [],
         "currentPage": 1,
         "totalPages": 1,
-        "showFields": []
+        "showFields": [],
+        "showRows": []
     },
 }
 
@@ -613,8 +567,9 @@ function renderTable(tableNumber) {
     tableBody.innerHTML = '';
     const start = (tableData[tableNumber]["currentPage"] - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-    const pageItems = tableData[tableNumber]["dataSet"].slice(start, end);
-    
+    const pageItems = tableData[tableNumber]["showRows"].slice(start, end);
+    tableData[tableNumber].totalPages = Math.ceil(tableData[tableNumber]["showRows"].length / rowsPerPage)
+
     // present the data
     document.getElementById('pageStats' + tableNumber).textContent = `Page ${tableData[tableNumber]["currentPage"]} / ${tableData[tableNumber]["totalPages"]}`
 
@@ -692,10 +647,10 @@ function goToLast(tableNumber) {
 // sort the contents of a table based on the table number
 function sortTable(tableNumber) {
     // get the new sort value
-    const selectedValue = event.target.value
+    const selectedValue = document.getElementById("sortTable" + tableNumber).value
 
     // get all data in the table
-    values = tableData[tableNumber]["dataSet"]
+    values = tableData[tableNumber].showRows
 
     // sort the list according to the field selected in the dropdown
     values = sortDictionaryList(values, selectedValue)
@@ -704,6 +659,133 @@ function sortTable(tableNumber) {
     renderTable(tableNumber)
 }
 
+// SEARCHING
+// filter through the researchers table
+function searchResearcher(tableNumber) {
+    // get the relevant data
+    researcherTable = tableData[tableNumber]
+    researcherData = researcherTable.dataSet
+
+    // get the text inputs
+    researcherName = document.getElementById('researcherName').value
+    researcherEmail = document.getElementById('researcherEmail').value
+
+    // get the dropdown inputs
+    school = document.getElementById('school').value
+    gender = document.getElementById('gender').value
+    career = document.getElementById('career').value
+
+    // get the numeric inputs
+    lower = document.getElementById('lower').value
+
+    // if not given, then the lower bound is 0
+    if (lower == '') { lower = 0 }
+
+    higher = document.getElementById('higher').value
+
+    // if not given, then the higher bound is 1
+    if (higher == '') { higher = 1 }
+
+    // get the selected clusters
+    selectedClusters = document.getElementById('selectedClusters1')
+    selectedClusters = selectedClusters.getElementsByTagName('button') // list of each cluster (element)
+
+    // get a list of all the clusters
+    selectedClustersText = [] // list of each cluster (text)
+    for (var i = 0; i < selectedClusters.length; i++) {
+        selectedCluster = selectedClusters[i]
+        selectedClustersText.push(selectedCluster.textContent)
+    }
+
+    // get the inputted keywords
+    keywords = document.getElementById('list1')
+    keywords = keywords.getElementsByTagName('li') // list of each keyword (element)
+
+    // get a list of all the keywords
+    keywordsText = [] // list of each keyword (text)
+    for (var i = 0; i < keywords.length; i++) {
+        keyword = keywords[i].textContent.trim().toLowerCase() // ensure that its trimmed and lower-cased
+        keywordsText.push(keyword)
+    }
+
+    // reset the visible row list
+    tableData[tableNumber].showRows = []
+
+    // loop through each data row
+    for (var i = 0; i < researcherData.length; i++) {
+        // this is the particular data row
+        // we are checking to see if we should add it to the
+        // visible list (showRows)
+        researcher = researcherData[i]
+
+        // if the resarcher's name contains the inputted name, then they are included
+        nameCorrect = researcher.name.includes(researcherName)
+        emailCorrect = researcher.email.includes(researcherEmail)
+
+        // if the dropdown is set to 'all', then its true. otherwise, the researcher
+        // should match that column
+        schoolCorrect = (school == "all" || researcher.school == school)
+        genderCorrect = (gender == "all" || researcher.gender == gender)
+
+        // note that career stage is either 1, 2, 3, or 4. 1 is post-doc, 2 is ecr,
+        // 3 is mcr, and 4 is senior researcher. this is to make sorting easier. it will
+        // be converted between the number and text form throughout the app
+        careerCorrect = (career == "all" || researcher.careerStage == career) 
+
+        // ensure the activity is within the set range
+        activityCorrect = (researcher.activity >= lower && researcher.activity <= higher)
+
+        // if the cluster list is empty, then set this to true
+        clusterCorrect = (selectedClustersText.length == 0)
+        console.log(selectedClustersText)
+        // loop through each of the researcher's clusters
+        for (x in researcher.clusters) {
+            cl = researcher.clusters[x] // this isn't a string, but an id
+            cl = getClusterByID(cl) // this isn't a string, but a dictionary
+            cl = cl.name // finally this is a string
+
+            // check if the cluster is in the selected clusters list
+            if (selectedClustersText.includes(cl)) {
+                // once such a pair found, it matches and no further searching is necessary
+                clusterCorrect = true
+                break
+            }
+        }
+
+        // if the keywords list is empty, then set this to true
+        keywordCorrect = (keywordsText.length == 0)
+        // loop through each of the researcher's keywords
+        for (x in researcher.keywords) {
+            kw = researcher.keywords[x].toLowerCase()
+            // loop through each of the inputted keywords
+            for (y in keywordsText) {
+                skw = keywordsText[y]
+                // either the inputted one must include the researcher's one
+                // or the researcher's one includes the inputted one
+                if (skw.includes(kw) || kw.includes(skw)) {
+                    // once such a pair found, it matches and no further searching is necessary
+                    keywordCorrect = true
+                    break
+                }
+            }
+        }
+
+        // only make the row visible if it matches for all of the user inputs
+        if (nameCorrect && emailCorrect && schoolCorrect && genderCorrect && careerCorrect && activityCorrect && clusterCorrect && keywordCorrect) {
+            tableData[tableNumber].showRows.push(researcher)
+            console.log(researcher)
+        }
+    }
+
+    // reset the table
+    renderTable(tableNumber)
+
+    // close the modal
+    var modal = document.getElementById("modal2");
+    modal.style.display = "none";
+}
+
+// SERVER DATABASE CALLS
 /*
 DATA STRUCTURE JUSTIFICATION - List of Dictionaries:
 Allows the program to loop through it and sort it easily. This
@@ -711,13 +793,17 @@ is also the format it would come in once I call the database,
 thus reducing the processing time.
 */
 
+clustersData = [] // list of dictionaries
+
+// does two things at once - initialises the tables AND also initialises the cluster
+// selectors. this improves efficiency
 fetch('/db/researchers').then(response => response.json()).then(data => {
     for (var i = 0; i < data.length; i++) {
         row = data[i]
 
         // the name should be a link
         uniqueId = row.email.split("@")[0].replace(".", "")
-        row.name = `<a href='/researcher/${uniqueId}'>${row.name}</a>`
+        row.nameLink = `<a href='/researcher/${uniqueId}'>${row.name}</a>`
 
         // get the number of edits (for sorting)
         if (row.versionInformation == null) {
@@ -728,7 +814,8 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
 
         // add to the table data
         tableData[1].dataSet.push(row)
-        tableData[1].showFields = ['name', 'keywords', 'activity']
+        tableData[1].showRows.push(row)
+        tableData[1].showFields = ['nameLink', 'keywords', 'activity']
     }
     tableData[1].totalPages = Math.ceil(data.length / rowsPerPage)
     renderTable(1)
@@ -739,25 +826,54 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
         for (var i = 0; i < clusterData.length; i++) {
             row = clusterData[i]
 
-            clusterName = row.clusterID
+            rowDictionary = {}
+
+            // store the data in the row dictionary (will be appended the the clustersData variable)
+            rowDictionary.id = row.clusterID
+            rowDictionary.name = row.name
             times = 0
 
-            // count the number of times this cluster shows up
             for (x in data) {
-                if (data[x].clusters.includes(clusterName)) {
-                    times += 1
+                researcher = data[x]
+                if (researcher.clusters.includes(row.name)) {
+                    times += 1;
                 }
             }
 
             // add it to the data
             row.numberResearchers = times
+            rowDictionary.number = times
+            clustersData.push(rowDictionary)
 
             // add to the table data
             tableData[3].dataSet.push(row)
+            tableData[3].showRows.push(row)
             tableData[3].showFields = ['clusterID', 'name', 'numberResearchers']
         }
+
+        // initialise cluster table
         tableData[3].totalPages = Math.ceil(clusterData.length / rowsPerPage)
         renderTable(3)
+
+        // INITIALISE CLUSTER SELECTORS
+        // get all the lists of unselected clusters
+        unselectedClustersDivs = document.getElementsByClassName('unselectedClusters')
+
+        // initialise the list by adding all the cluster data to the unselected cluster (no clusters selected at the beginning)
+        for (var i = 0; i < unselectedClustersDivs.length; i++) {
+            // get the number of the div (e.g., the number is 5 for a div with an ID called unselectedClusters5)
+            selectorNumber = unselectedClustersDivs[i].id.replace("unselectedClusters", "")
+            // this string holds the HTMl code for the cluster list
+            clusterHTML = ''
+            for (x in clustersData) {
+                // create a single HTML button for each button and add it to the total list
+                c = clustersData[x]
+                clusterName = c.name
+                clusterId = c['id']
+                clusterHTML += `<button class='unselectedClusterButton' id='${selectorNumber}U${clusterId}' onclick="selectCluster('${selectorNumber}U${clusterId}')">${clusterName}</button>`
+            }
+            unselectedClustersDivs[i].innerHTML += clusterHTML;
+        }
     })
 })
 
@@ -766,7 +882,7 @@ fetch('/db/grants').then(response => response.json()).then(data => {
         row = data[i]
         // the name should be a link
         uniqueId = row.grantID
-        row.grantName = `<a href='/grant/${uniqueId}'>${row.grantName}</a>`
+        row.nameLink = `<a href='/grant/${uniqueId}'>${row.grantName}</a>`
 
         // reformat date so its easier to sort
         row.deadlineReformatted = row.deadline.split('-').reverse().join('/')
@@ -776,7 +892,8 @@ fetch('/db/grants').then(response => response.json()).then(data => {
 
         // add to the table data
         tableData[2].dataSet.push(row)
-        tableData[2].showFields = ['grantName', 'keywords', 'deadline', 'matched']
+        tableData[2].showRows.push(row)
+        tableData[2].showFields = ['nameLink', 'keywords', 'deadline', 'matched']
     }
     tableData[2].totalPages = Math.ceil(data.length / rowsPerPage)
     renderTable(2)
@@ -791,6 +908,7 @@ fetch('/db/users').then(response => response.json()).then(data => {
 
         // add to the table data
         tableData[4].dataSet.push(row)
+        tableData[4].showRows.push(row)
         tableData[4].showFields = ['name', 'email', 'role', 'xp']
     }
     tableData[4].totalPages = Math.ceil(data.length / rowsPerPage)
@@ -816,10 +934,10 @@ fetch('/db/users').then(response => response.json()).then(data => {
 
             // add to the table data
             tableData[5].dataSet.push(row)
+            tableData[5].showRows.push(row)
             tableData[5].showFields = ['date', 'type', 'username']
         }
         tableData[5].totalPages = Math.ceil(dataChange.length / rowsPerPage)
         renderTable(5)
     })
-
 })
