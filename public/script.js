@@ -872,6 +872,7 @@ function searchGrant(tableNumber) {
     deadlineLower = document.getElementById('deadlineLower').value
     deadlineHigher = document.getElementById('deadlineHigher').value
 
+    // get the numeric inputs
     durationLower = document.getElementById('durationLower').value
     durationHigher = document.getElementById('durationHigher').value
 
@@ -917,7 +918,6 @@ function searchGrant(tableNumber) {
 
     // loop through each data row
     for (var i = 0; i < grantData.length; i++) {
-        // yada yada yada
         grant = grantData[i]
 
         // if the grants's name or url contains the inputted name/url, then it is included
@@ -941,7 +941,6 @@ function searchGrant(tableNumber) {
         //console.log(grant.deadline, deadlineDate, deadlineCorrect)
 
         // ensure the duration is within the set range
-        // TODO
         durationCorrect = (grant.duration >= durationLower && grant.duration <= durationHigher)
         //console.log(grant.duration, durationLower, durationHigher, durationCorrect)
 
@@ -1038,6 +1037,121 @@ function resetGrantSearch(tableNumber) {
 
     // close the modal
     var modal = document.getElementById("modal3");
+    modal.style.display = "none";
+}
+
+// filter through the user table
+function searchUser(tableNumber) {
+    // get the relevant data
+    userTable = tableData[tableNumber]
+    userData = userTable.dataSet
+
+    // get the text inputs
+    userName = document.getElementById('userName').value.trim().toLowerCase()
+    email = document.getElementById('userEmail').value.trim().toLowerCase()
+
+    // get the dropdown inputs
+    role = document.getElementById('role').value
+
+    // get the date inputs
+    dateLower = document.getElementById('dateJoinedLower').value
+    dateHigher = document.getElementById('dateJoinedHigher').value
+
+    // get the numeric inputs
+    xpLower = document.getElementById('xpLower').value
+    xpHigher = document.getElementById('xpHigher').value
+
+    grantsLower = document.getElementById('grantsLower').value
+    grantsHigher = document.getElementById('grantsHigher').value
+
+    // max and min dates in case one of the inputs isnt provided
+    let maxDate = new Date(8640000000000000);
+    let minDate = new Date(-8640000000000000);
+
+    // deal with when one of the date inputs isn't provided
+    if (dateLower == '') { dateLower = minDate }
+    else { dateLower = new Date(dateLower) }
+
+    if (dateHigher == '') { dateHigher = maxDate }
+    else { dateHigher = new Date(dateHigher) }
+
+    // deal with when xp isn't given
+    if (xpLower == '') { xpLower = 0 }
+    if (xpHigher == '') { xpHigher = Number.MAX_SAFE_INTEGER }
+
+    // deal with when xp isn't given
+    if (grantsLower == '') { grantsLower = 0 }
+    if (grantsHigher == '') { grantsHigher = Number.MAX_SAFE_INTEGER }
+
+    // reset the visible row list
+    tableData[tableNumber].showRows = []
+
+    // loop through each data row
+    for (var i = 0; i < userData.length; i++) {
+        user = userData[i]
+
+        // check the text input matches
+        nameCorrect = (user.name.trim().toLowerCase().includes(userName))
+        emailCorrect = (user.email.trim().toLowerCase().includes(email))
+
+        // if the dropdown is set to 'all', then its true. otherwise, the user
+        // should match that column
+        roleCorrect = (role == "all" || user.role == role)
+
+        // ensure the dates is within the set range
+        dateSplit = user.dateJoined.split("-")
+        joinDate = new Date(dateSplit[2], dateSplit[1], dateSplit[0]) // convert to a date object for comparison
+        dateCorrect = (joinDate >= dateLower && joinDate <= dateHigher)
+
+        // ensure the numeric values are within the set range
+        xpCorrect = (user.xp >= xpLower && user.xp <= xpHigher)
+        grantsCorrect = (user.grantsMatched >= grantsLower && user.grantsMatched <= grantsHigher)
+
+        // only make the row visible if it matches for all of the user inputs
+        if (nameCorrect && emailCorrect && roleCorrect && dateCorrect && xpCorrect && grantsCorrect) {
+            tableData[tableNumber].showRows.push(user)
+        }
+    }
+
+    // reset the table
+    renderTable(tableNumber)
+
+    // close the modal
+    var modal = document.getElementById("modal5");
+    modal.style.display = "none";
+}
+
+// clear the user form and reset the table
+function resetUserSearch(tableNumber) {
+    // get the relevant data
+    userTable = tableData[tableNumber]
+    userData = userTable.dataSet
+
+    // reset the text inputs
+    document.getElementById('userName').value = ''
+    document.getElementById('userEmail').value = ''
+
+    // reset the dropdown inputs
+    document.getElementById('role').value = 'all'
+
+    // reset the date inputs
+    document.getElementById('dateJoinedLower').value = ''
+    document.getElementById('dateJoinedHigher').value = ''
+
+    // reset the numeric inputs
+    document.getElementById('xpLower').value = ''
+    document.getElementById('xpHigher').value = ''
+    document.getElementById('grantsLower').value = ''
+    document.getElementById('grantsHigher').value = ''
+
+    // reset the visible row list
+    tableData[tableNumber].showRows = userData
+
+    // reset the table
+    renderTable(tableNumber)
+
+    // close the modal
+    var modal = document.getElementById("modal5");
     modal.style.display = "none";
 }
 

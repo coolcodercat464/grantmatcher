@@ -137,7 +137,7 @@
             </div>
             <br>
 
-            <label><b>SE:ECT CLUSTERS</b></label><br>
+            <label><b>SE:ECT CLUSTERS</b></label>
             <p>Click clusters in the unselected list to select them, and click clusters in the selected list to deselect them. You can search and sort the two lists separately.</p>
             <div class="together clusterselector">
                 <!-- List of the unselected clusters -->
@@ -201,8 +201,9 @@
                     </div>
                 </div>
             </div>
+            <br>
 
-            <label><b>KEYWORDS</b></label><br>
+            <label><b>KEYWORDS</b></label>
             <div class="together" style="align-items: flex-start;">
                 <div style="width: 100%;">
                     <div class="listbox" style="overflow:auto; ">
@@ -277,7 +278,7 @@
                 <div class="spacer"></div>
                 <div style="width: 100%;">
                     <label><b>MATCHED?</b></label><br>
-                    <select name="matched" id="matched" style="width: 100%">
+                    <select name="matched" id="matched" style="width: 100%" class="form-control">
                         <option value="all">Any</option>
                         <option value="yes">Yes</option>
                         <option value="no">No</option>
@@ -288,19 +289,21 @@
             <div class="together">
                 <div style="width: 100%;">
                     <label><b>DEADLINE RANGE</b></label><br>
-                    <input type="date" id="deadlineLower" class="form-control" name="deadlineLower" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="date" class="form-control" id="deadlineHigher" name="deadlineHigher" style="width: 100%">
+                    <div class="together datetogether">
+                        <input type="date" id="deadlineLower" class="form-control" name="deadlineLower" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="date" class="form-control" id="deadlineHigher" name="deadlineHigher" style="width: 100%">
+                    </div>
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
                     <label><b>DURATION RANGE</b></label><br>
-                    <div class="together">
+                    <div class="together datetogether">
                         <input type="number" id="durationLower" name="durationLower" class="form-control" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="durationHigher" name="durationHigher" style="width: 100%">
                     </div>
                 </div>
             </div>
             <br>
 
-            <label><b>SE:ECT CLUSTERS</b></label><br>
+            <label><b>SE:ECT CLUSTERS</b></label>
             <p>Click clusters in the unselected list to select them, and click clusters in the selected list to deselect them. You can search and sort the two lists separately.</p>
             <div class="together clusterselector">
                 <!-- List of the unselected clusters -->
@@ -364,8 +367,9 @@
                     </div>
                 </div>
             </div>
+            <br>
 
-            <label><b>KEYWORDS</b></label><br>
+            <label><b>KEYWORDS</b></label>
             <div class="together" style="align-items: flex-start;">
                 <div style="width: 100%;">
                     <div class="listbox" style="overflow:auto; ">
@@ -407,8 +411,7 @@
                 <span class="close" id="close4">&times;</span>
             </div>
             <hr/>
-            
-            <p>Are you sure you want to log out?</p>
+     
         </div>
     </div>
 
@@ -421,7 +424,63 @@
             </div>
             <hr/>
             
-            <p>Are you sure you want to log out?</p>
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>NAME</b></label><br>
+                    <input type="text" id="userName" class="form-control" name="userName" placeholder="Enter the user's name">
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>EMAIL</b></label><br>
+                    <input type="text" id="userEmail" class="form-control" name="userEmail" placeholder="Enter the user's email">
+                </div>
+            </div>
+            <br>
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>ROLE</b></label><br>
+                    <select name="role" id="role" style="width: 100%" class="form-control">
+                        <option value="all">Any</option>
+                        <option value="user">User</option>
+                        <option value="manager">Manager</option>
+                        <option value="developer">Developer</option>
+                    </select>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>XP RANGE</b></label><br>
+                    <div class="together">
+                        <input type="number" id="xpLower" name="xpLower" class="form-control" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="xpHigher" name="xpHigher" style="width: 100%">
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>DATE JOINED</b></label><br>
+                    <div class="together datetogether">
+                        <input type="date" id="dateJoinedLower" class="form-control" name="dateJoinedLower" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="date" class="form-control" id="dateJoinedHigher" name="dateJoinedHigher" style="width: 100%">
+                    </div>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>GRANTS MATCHED</b></label><br>
+                    <div class="together datetogether">
+                        <input type="number" id="grantsLower" name="grantsLower" class="form-control" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="grantsHigher" name="grantsHigher" style="width: 100%">
+                    </div>
+                </div>
+            </div>
+            <br>
+
+            <div class="together" style="align-items: flex-start;">
+                <div style="width: 100%;">
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetUserSearch(4)">Reset Form</button>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchUser(4)">Search</button>
+                </div>
+            </div>
         </div>
     </div>
     

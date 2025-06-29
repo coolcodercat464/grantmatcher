@@ -157,6 +157,16 @@ blockquote cite:before {
   }
 }
 
+/* horizontal alignment should collapse when the screen is too small (especially for
+date inputs, which take up a lot of space in the modals */
+@media (max-width: 1350px) {
+  .datetogether {
+    display: block !important;
+    align-items: normal !important;
+  }
+}
+
+
 /* Reduce the size of the spacer when the screen is small */
 @media (max-width: 650px) {
   .spacer {
