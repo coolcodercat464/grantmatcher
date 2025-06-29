@@ -360,6 +360,16 @@ date inputs, which take up a lot of space in the modals */
   float: left;
 }
 
+/* allows x-scroll */
+table {
+  display: block;
+  max-width: -moz-fit-content;
+  max-width: fit-content;
+  margin: 0 auto;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
 /* Customer Radio Button */
 input[type=radio] {
   height: 1.1rem;
