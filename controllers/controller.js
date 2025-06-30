@@ -262,6 +262,18 @@ const signupget = async (req, res)=>{
     }
 } 
 
+// present the add grant page
+const addgrantget = async (req, res)=>{
+    console.log("ADD GRANT GET")
+
+    // only allow them to signup if they havent been authenticated yet
+    if (req.isAuthenticated()) {
+        res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'no'});
+    } else {
+        res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'no'});
+    }
+} 
+
 // POST
 // when user logs out
 const indexpost = (req, res, next) => {
@@ -389,13 +401,20 @@ const signuppost = async (req, res, next) => {
     }
 }
 
+// add a new grant
+const addgrantpost = async (req, res)=>{
+    console.log("ADD GRANT POST")
+} 
+
 // Export of all methods as object 
 module.exports = { 
     indexget,
     loginget,
     signupget,
+    addgrantget,
 
     indexpost,
     loginpost,
     signuppost,
+    addgrantpost,
 }

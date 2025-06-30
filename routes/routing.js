@@ -15,6 +15,9 @@ router.use(passport.session());
 router.get('/', control.indexget)
 router.post('/', control.indexpost)
 
+router.get('/addgrant', control.addgrantget)
+router.post('/addgrant', control.addgrantpost)
+
 router.get('/login', control.loginget)
 router.post('/login', control.loginpost)
 
