@@ -361,13 +361,10 @@ date inputs, which take up a lot of space in the modals */
 }
 
 /* allows x-scroll */
-table {
-  display: block;
-  max-width: -moz-fit-content;
-  max-width: fit-content;
-  margin: 0 auto;
+.scrollTableContainer {
   overflow-x: auto;
-  white-space: nowrap;
+  width: 100%;
+  display: block;
 }
 
 /* Customer Radio Button */
