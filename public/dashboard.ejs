@@ -412,6 +412,32 @@
             </div>
             <hr/>
      
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>NAME</b></label><br>
+                    <input type="text" id="clusterName" class="form-control" name="clusterName" placeholder="Enter the cluster's name">
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>MATCH TO</b></label><br>
+                    <input type="text" id="matchTo" class="form-control" name="matchTo" placeholder="Enter the something relevant to the cluster">
+                </div>
+            </div>
+            <br>
+
+            <label><b># OF RESEARCHERS</b></label><br>
+            <div class="together" style="align-items: flex-start;">
+                <div style="width: 100%;">
+                    <div class="together">
+                        <input type="number" id="researchersLower" class="form-control" name="researchersLower" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="researchersHigher" name="researchersHigher" style="width: 100%">
+                    </div>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetClusterSearch(3)">Reset Form</button><br>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchCluster(3)">Search</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -493,7 +519,54 @@
             </div>
             <hr/>
             
-            <p>Are you sure you want to log out?</p>
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>USER</b></label><br>
+                    <select name="changeUser" id="changeUser" style="width: 100%" class="form-control">
+                        <option value="all">Any</option>
+                    </select>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>TYPE</b></label><br>
+                    <select name="changeType" id="changeType" style="width: 100%" class="form-control">
+                        <option value="all">Any</option>
+                        <option value="Researcher Recalculated">Researcher Recalculated</option>
+                        <option value="Researcher Added">Researcher Added</option>
+                        <option value="Researcher Edited">Researcher Edited</option>
+                        <option value="Researcher Deleted">Researcher Deleted</option>
+                        <option value="Grant Added">Grant Added</option>
+                        <option value="Grant Edited">Grant Edited</option>
+                        <option value="Grant Deleted">Grant Deleted</option>
+                        <option value="User Joined">User Joined</option>
+                        <option value="User Edited">User Edited</option>
+                        <option value="User Deleted">User Deleted</option>
+                        <option value="User Suspended">User Suspended</option>
+                        <option value="User Unsuspended">User Unsuspended</option>
+                        <option value="Code Added">Code Added</option>
+                        <option value="Code Deleted">Code Deleted</option>
+                        <option value="Clusters Editted">Clusters Editted</option>
+                        <option value="Ticket Created">Ticket Created</option>
+                        <option value="Ticket Resolved">Ticket Resolved</option>
+                        <option value="Ticket Replied To">Ticket Replied To</option>
+                    </select>
+                </div>
+            </div>
+            <br>
+
+            <label><b>DATE</b></label><br>
+            <div class="together" style="align-items: flex-start;">
+                <div style="width: 100%;">
+                    <div class="together datetogether">
+                        <input type="date" id="dateLower" class="form-control" name="dateLower" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="date" class="form-control" id="dateHigher" name="dateHigher" style="width: 100%">
+                    </div>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetChangeSearch(5)">Reset Form</button><br>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchChange(5)">Search</button>
+                </div>
+            </div>
         </div>
     </div>
 

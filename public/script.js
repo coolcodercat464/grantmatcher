@@ -1100,7 +1100,7 @@ function searchUser(tableNumber) {
 
         // ensure the dates is within the set range
         dateSplit = user.dateJoined.split("-")
-        joinDate = new Date(dateSplit[2], dateSplit[1], dateSplit[0]) // convert to a date object for comparison
+        joinDate = new Date(dateSplit[2], parseInt(dateSplit[1]) - 1, dateSplit[0]) // convert to a date object for comparison
         dateCorrect = (joinDate >= dateLower && joinDate <= dateHigher)
 
         // ensure the numeric values are within the set range
@@ -1152,6 +1152,198 @@ function resetUserSearch(tableNumber) {
 
     // close the modal
     var modal = document.getElementById("modal5");
+    modal.style.display = "none";
+}
+
+// filter through the clusters table
+async function searchCluster(tableNumber) {
+    // get the relevant data
+    clusterTable = tableData[tableNumber]
+    clusterTableData = clusterTable.dataSet
+
+    // get the text inputs
+    clusterName = document.getElementById('clusterName').value.trim().toLowerCase()
+    matchTo = document.getElementById('matchTo').value.trim().toLowerCase()
+
+    // get the numeric inputs
+    researchersLower = document.getElementById('researchersLower').value
+    researchersHigher = document.getElementById('researchersHigher').value
+
+    // deal with when researchers number isn't given
+    if (researchersLower == '') { researchersLower = 0 }
+    if (researchersHigher == '') { researchersHigher = Number.MAX_SAFE_INTEGER }
+
+    // reset the visible row list
+    tableData[tableNumber].showRows = []
+
+    // if matchTo isn't provided ...
+    if (matchTo == '') {
+        // loop through each data row
+        for (var i = 0; i < clusterTableData.length; i++) {
+            cluster = clusterTableData[i]
+
+            // check the text input matches
+            nameCorrect = (cluster.name.trim().toLowerCase().includes(clusterName))
+            matchCorrect = true // TODO: Call an NLP function
+
+            // ensure the numeric values are within the set range
+            researchersCorrect = (cluster.numberResearchers >= researchersLower && cluster.numberResearchers <= researchersHigher)
+
+            // only make the row visible if it matches for all of the user inputs
+            if (nameCorrect && matchCorrect && researchersCorrect) {
+                tableData[tableNumber].showRows.push(cluster)
+            }
+        }
+
+        // reset the table
+        renderTable(tableNumber)
+
+        // close the modal
+        var modal = document.getElementById("modal4");
+        modal.style.display = "none";
+
+        return
+    }
+
+    // otherwise, filter for relevant clusters first
+    fetch('/clusterMatch', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ clusters: clusterTableData, matchTo: matchTo })
+    }).then(response => response.json()).then(data => {
+        clusterTableData = data.relevant
+
+        // loop through each data row
+        for (var i = 0; i < clusterTableData.length; i++) {
+            cluster = clusterTableData[i]
+
+            // check the text input matches
+            nameCorrect = (cluster.name.trim().toLowerCase().includes(clusterName))
+            matchCorrect = true // TODO: Call an NLP function
+
+            // ensure the numeric values are within the set range
+            researchersCorrect = (cluster.numberResearchers >= researchersLower && cluster.numberResearchers <= researchersHigher)
+
+            // only make the row visible if it matches for all of the user inputs
+            if (nameCorrect && matchCorrect && researchersCorrect) {
+                tableData[tableNumber].showRows.push(cluster)
+            }
+        }
+
+        // reset the table
+        renderTable(tableNumber)
+
+        // close the modal
+        var modal = document.getElementById("modal4");
+        modal.style.display = "none";
+    })
+}
+
+// clear the cluster form and reset the table
+function resetClusterSearch(tableNumber) {
+    // get the relevant data
+    clusterTable = tableData[tableNumber]
+    clusterTableData = clusterTable.dataSet
+
+    // reset the text inputs
+    document.getElementById('clusterName').value = ''
+    document.getElementById('matchTo').value = ''
+
+    // reset the numeric inputs
+    document.getElementById('researchersLower').value = ''
+    document.getElementById('researchersHigher').value = ''
+
+    // reset the visible row list
+    tableData[tableNumber].showRows = clusterTableData
+
+    // reset the table
+    renderTable(tableNumber)
+
+    // close the modal
+    var modal = document.getElementById("modal4");
+    modal.style.display = "none";
+}
+
+// filter through the changelog table
+function searchChange(tableNumber) {
+    // get the relevant data
+    changeTable = tableData[tableNumber]
+    changeData = changeTable.dataSet
+
+    // get the dropdown inputs
+    changeUser = document.getElementById('changeUser').value
+    changeType = document.getElementById('changeType').value
+
+    // get the date inputs
+    dateLower = document.getElementById('dateLower').value
+    dateHigher = document.getElementById('dateHigher').value
+
+    // max and min dates in case one of the inputs isnt provided
+    let maxDate = new Date(8640000000000000);
+    let minDate = new Date(-8640000000000000);
+
+    // deal with when one of the date inputs isn't provided
+    if (dateLower == '') { dateLower = minDate }
+    else { dateLower = new Date(dateLower) }
+
+    if (dateHigher == '') { dateHigher = maxDate }
+    else { dateHigher = new Date(dateHigher) }
+
+    // reset the visible row list
+    tableData[tableNumber].showRows = []
+
+    // loop through each data row
+    for (var i = 0; i < changeData.length; i++) {
+        change = changeData[i]
+
+        // if the dropdown is set to 'all', then its true. otherwise, the user
+        // should match that column
+        userCorrect = (changeUser == "all" || change.userEmail == changeUser)
+        typeCorrect = (changeType == "all" || change.type == changeType)
+
+        // ensure the dates is within the set range
+        dateSplit = change.date.split("-")
+        dateDate = new Date(dateSplit[2], parseInt(dateSplit[1]) - 1, dateSplit[0]) // convert to a date object for comparison
+        dateCorrect = (dateDate >= dateLower && dateDate <= dateHigher)
+
+        // only make the row visible if it matches for all of the user inputs
+        if (userCorrect && typeCorrect && dateCorrect) {
+            tableData[tableNumber].showRows.push(change)
+        }
+    }
+
+    // reset the table
+    renderTable(tableNumber)
+
+    // close the modal
+    var modal = document.getElementById("modal6");
+    modal.style.display = "none";
+}
+
+// clear the changelog form and reset the table
+function resetChangeSearch(tableNumber) {
+    // get the relevant data
+    changeTable = tableData[tableNumber]
+    changeData = changeTable.dataSet
+
+    // reset the dropdown inputs
+    document.getElementById('changeUser').value = 'all'
+    document.getElementById('changeType').value = 'all'
+
+    // reset the date inputs
+    document.getElementById('dateLower').value = ''
+    document.getElementById('dateHigher').value = ''
+
+    // reset the visible row list
+    tableData[tableNumber].showRows = changeData
+
+    // reset the table
+    renderTable(tableNumber)
+
+    // close the modal
+    var modal = document.getElementById("modal6");
     modal.style.display = "none";
 }
 
@@ -1211,7 +1403,7 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
 
             for (x in data) {
                 researcher = data[x]
-                if (researcher.clusters.includes(row.name)) {
+                if (researcher.clusters.includes(row.clusterID)) {
                     times += 1;
                 }
             }
@@ -1292,6 +1484,11 @@ fetch('/db/users').then(response => response.json()).then(data => {
         // add to the user dropdown
         // first in the grant search modal
         document.getElementById('grantUser').innerHTML += `
+        <option value="${row.email}">${row.name}</option>
+        `
+
+        // next in the change search modal
+        document.getElementById('changeUser').innerHTML += `
         <option value="${row.email}">${row.name}</option>
         `
     }
