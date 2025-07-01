@@ -67,6 +67,20 @@
         </div>
     </div>
 
+    <!-- Error modal -->
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Error!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close2">&times;</span>
+            </div>
+            <hr/>
+            
+            <p><%= showAlert %></p>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section>
@@ -183,6 +197,12 @@
             document.getElementById("keywordsArea").select();
             document.execCommand('copy');
             document.getElementById("keywordsArea").setAttribute("disabled", "");
+        }
+    </script>
+    <script>
+        // show alerts
+        if ("<%= showAlert %>" != "no") {
+            openModal(2);
         }
     </script>
 </body>

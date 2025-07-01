@@ -53,21 +53,23 @@
             <div style="margin: 0 auto; display:inline-block; max-width: fit-content; width: 200px; overflow: hidden; padding-bottom: 10px;">
                 <h1 style="text-align: center;">Login</h1>
                 <p>Don't have an account yet? <a href="/signup">Signup</a> instead!</p>
-                <form method="post" action="/login">
-                    <label><b>EMAIL</b></label><br>
-                    <input type="text" id="email" name="email" placeholder="Enter Your Email" required><br><br>
+                <label><b>EMAIL</b></label><br>
+                <input type="text" id="email" name="email" placeholder="Enter Your Email" required><br><br>
 
-                    <!-- TODO: Add toggle visibility -->
-                    <label><b>PASSWORD</b></label><br>
-                    <input type="password" id="password" name="password" placeholder="Enter Your Password" required><br>
+                <!-- TODO: Add toggle visibility -->
+                <label><b>PASSWORD</b></label><br>
+                <div class="together">
+                    <input type="password" id="password" name="password" placeholder="Enter Your Password" required>
+                    <button onclick="togglePassword()" id="passwordToggle"><i class="fa fa-eye"></i></button>
+                </div>
+                <br>
 
-                    <div style="float: right;">
-                        <input type="checkbox" id="rememberme" name="rememberme" value="rememberme">
-                        <label for="rememberme"> Remember Me</label><br>
-                    </div><br><br>
+                <div style="float: right;">
+                    <input type="checkbox" id="rememberme" name="rememberme" value="rememberme">
+                    <label for="rememberme"> Remember Me</label><br>
+                </div><br><br>
 
-                    <input type="submit" value="Login!" class="buttonStyle">
-                </form>
+                <button class="buttonStyle" onclick="submitForm()">Login!</button>
             </div>
         </section>
     </main>
@@ -81,8 +83,43 @@
         })
     </script>
     <script>
+        // open error modal if theres an error
         if ("<%= showAlert %>" == "yes") {
             openModal(1);
+        }
+    </script>
+    <script>
+        // toggle the password field
+        function togglePassword() {
+            password = document.getElementById('password') // get the password element
+
+            // if its hidden...
+            if (password.type == 'password') {
+                password.type = 'text' // make it visible
+                // change the toggle button
+                document.getElementById('passwordToggle').innerHTML = '<i class="fa fa-eye-slash"></i>'
+            // otherwise if its visible...
+            } else {
+                password.type = 'password' // make it hidden
+                // change the toggle button
+                document.getElementById('passwordToggle').innerHTML = '<i class="fa fa-eye"></i>'
+            }
+        }
+
+        function submitForm() {
+            data = {
+                "email": document.getElementById("email").value,
+                "password": document.getElementById("password").value,
+                "rememberme": document.getElementById("rememberme").value
+            }
+
+            fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(response => response.json()).then(data => {
+                window.location.href = '/'
+            });
         }
     </script>
 </body>

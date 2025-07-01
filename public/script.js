@@ -29,6 +29,7 @@ function scrollFunction() {
 }
 
 // TODO: Don't keep in this file. Move it to the <script></script> thing in the HTML file
+
 /* 
 DATA STRUCTURE JUSTIFICATION - Dictionary of Lists of Dictionaries:
 Makes it easy to access the data for a particular accordion based on the accordion's
@@ -39,6 +40,7 @@ that the data is easy to access.
 
 // contains all the data for the accordions
 // TODO: remove HTML and replace with fields
+// I will do this once I finished the edit page (complete with updating the versionInformation)
 accordionData = {
     "1": [
             {
@@ -1398,15 +1400,13 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
         tableData[1].showFields = ['nameLink', 'keywords', 'activity']
 
         // add to the grant search modal data list
-        // try catch in case the grantResearcherOptions doesnt exist in that specific page
-        try {
-            document.getElementById("grantResearcherOptions").innerHTML += `
+        // if statement in case the grantResearcherOptions doesnt exist in that specific page
+        researcherOptions = document.getElementById("grantResearcherOptions")
+        if (researcherOptions != null) {
+            researcherOptions.innerHTML += `
             <option data-value="${row.email}" value="${row.name}">
             `
-        } catch {
-
         }
-        
     }
 
     // try catch in case the table doesn't exist in that page
@@ -1448,15 +1448,6 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
             tableData[3].showFields = ['clusterID', 'name', 'numberResearchers']
         }
 
-        try {
-            // initialise cluster table
-            tableData[3].totalPages = Math.ceil(clusterData.length / rowsPerPage)
-            renderTable(3)
-        } catch {
-
-        }
-
-
         // INITIALISE CLUSTER SELECTORS
         // get all the lists of unselected clusters
         unselectedClustersDivs = document.getElementsByClassName('unselectedClusters')
@@ -1477,17 +1468,28 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
             unselectedClustersDivs[i].innerHTML += clusterHTML;
         }
 
-        // if there are a bunch of cluster IDs (not )
-        clusterIds = document.getElementById("clusterText").textContent.split(", ")
-        clusterNames = []
-        for (x in clustersData) {
-            if (clusterIds.includes(clustersData[x].id.toString())) {
-                clusterNames.push(clustersData[x].name)
-            }
+        try {
+            // initialise cluster table
+            tableData[3].totalPages = Math.ceil(clusterData.length / rowsPerPage)
+            renderTable(3)
+        } catch {
+
         }
 
-        document.getElementById("clusterText").textContent = clusterNames.join(", ")
+        try {
+            // if there are a bunch of cluster IDs (not names)
+            clusterIds = document.getElementById("clusterText").textContent.split(", ")
+            clusterNames = []
+            for (x in clustersData) {
+                if (clusterIds.includes(clustersData[x].id.toString())) {
+                    clusterNames.push(clustersData[x].name)
+                }
+            }
 
+            document.getElementById("clusterText").textContent = clusterNames.join(", ")
+        } catch {
+
+        }
     })
 })
 
@@ -1510,8 +1512,13 @@ fetch('/db/grants').then(response => response.json()).then(data => {
         tableData[2].showRows.push(row)
         tableData[2].showFields = ['nameLink', 'keywords', 'deadline', 'matched']
     }
-    tableData[2].totalPages = Math.ceil(data.length / rowsPerPage)
-    renderTable(2)
+
+    try {
+        tableData[2].totalPages = Math.ceil(data.length / rowsPerPage)
+        renderTable(2)
+    } catch {
+
+    }
 })
 
 // initialises tthe able and initialises the user dropdowns in the search modals
@@ -1527,19 +1534,32 @@ fetch('/db/users').then(response => response.json()).then(data => {
         tableData[4].showRows.push(row)
         tableData[4].showFields = ['name', 'email', 'role', 'xp']
 
-        // add to the user dropdown
-        // first in the grant search modal
-        document.getElementById('grantUser').innerHTML += `
-        <option value="${row.email}">${row.name}</option>
-        `
+        try {
+            // add to the user dropdown
+            // first in the grant search modal
+            document.getElementById('grantUser').innerHTML += `
+            <option value="${row.email}">${row.name}</option>
+            `
+        } catch {
 
-        // next in the change search modal
-        document.getElementById('changeUser').innerHTML += `
-        <option value="${row.email}">${row.name}</option>
-        `
+        }
+
+        try {
+            // next in the change search modal
+            document.getElementById('changeUser').innerHTML += `
+            <option value="${row.email}">${row.name}</option>
+            `
+        } catch {
+            
+        }
     }
-    tableData[4].totalPages = Math.ceil(data.length / rowsPerPage)
-    renderTable(4)
+
+    try {
+        tableData[4].totalPages = Math.ceil(data.length / rowsPerPage)
+        renderTable(4)
+    } catch {
+
+    }
 
     // THIS FETCH IS INSIDE HERE because it needs the user data
     // to find the username based on email
@@ -1564,7 +1584,12 @@ fetch('/db/users').then(response => response.json()).then(data => {
             tableData[5].showRows.push(row)
             tableData[5].showFields = ['date', 'type', 'username']
         }
-        tableData[5].totalPages = Math.ceil(dataChange.length / rowsPerPage)
-        renderTable(5)
+
+        try {
+            tableData[5].totalPages = Math.ceil(dataChange.length / rowsPerPage)
+            renderTable(5)
+        } catch {
+
+        }
     })
 })

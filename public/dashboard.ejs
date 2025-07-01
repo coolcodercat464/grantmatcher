@@ -203,7 +203,13 @@
             </div>
             <br>
 
-            <label><b>KEYWORDS</b></label>
+            <div class="together">
+                <label><b>KEYWORDS</b></label>
+                <button type="button" class="btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter a keyword and add it to the list by pressing the arrow button. You can also remove keywords from the list by hitting the trash icon.">
+                    <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                </button>
+            </div>
+
             <div class="together" style="align-items: flex-start;">
                 <div style="width: 100%;">
                     <div class="listbox" style="overflow:auto; ">
@@ -567,6 +573,20 @@
                     <button class="buttonStyle pink" style="width: 100%;" onclick="searchChange(5)">Search</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Error modal -->
+    <div id="modal7" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Welcome!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close7">&times;</span>
+            </div>
+            <hr/>
+            
+            <p>Welcome to GrantMatcher - the world's leading figure in... well, matching grants! We hope you enjoy your stay! Before you get started, check out the <a href="/tutorial">tutorial</a> page to learn how to use this site.</p>
         </div>
     </div>
 
@@ -941,6 +961,12 @@
         $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
+    </script>
+    <script>
+        // show welcome message
+        if ("<%= showAlert %>" != "no") {
+            openModal(7);
+        }
     </script>
 </body>
 </html>

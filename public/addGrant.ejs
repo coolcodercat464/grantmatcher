@@ -67,6 +67,20 @@
         </div>
     </div>
 
+    <!-- Error modal -->
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Error!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close2">&times;</span>
+            </div>
+            <hr/>
+            
+            <p><%= showAlert %></p>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section>
@@ -241,14 +255,19 @@
                 "keywords": getKeywords(1)
             }
 
-            document.getElementById("clustersList").textContent = "HELLO"
-            document.getElementById("keywordsList").value = "WORLD"
             fetch('/addgrant', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             }).then(response => response.json()).then(data => {
+                window.location.href = '<%= urlinit %>'
             });
+        }
+    </script>
+    <script>
+        // show alerts
+        if ("<%= showAlert %>" != "no") {
+            openModal(2);
         }
     </script>
 </body>

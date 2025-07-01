@@ -54,46 +54,65 @@
         </div>
     </div>
 
+    <!-- The modal that shows up when the password and confirm passwords fields dont match -->
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Woops!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close2">&times;</span>
+            </div>
+            <hr/>
+            
+            <p>It looks like your password confirmation doesn't match your original password. Please try again.</p>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section class="d-flex justify-content-center flex-grow-1">
             <div style="margin: 0 auto; display:inline-block; max-width: fit-content; width: 250px; overflow: hidden; padding-bottom: 10px;">
                 <h1 style="text-align: center;">Signup</h1>
                 <p>Already have an account? <a href="/login">Login</a> instead!</p>
-                <form method="post" action="/signup">
-                    <label><b>NAME</b></label><br>
-                    <input type="text" id="name" name="name" placeholder="Enter Your Name" required><br><br>
+                <label><b>NAME</b></label><br>
+                <input type="text" id="name" name="name" placeholder="Enter Your Name" required><br><br>
 
-                    <label><b>EMAIL</b></label><br>
-                    <input type="text" id="email" name="email" placeholder="Enter Your Email" required><br><br>
+                <label><b>EMAIL</b></label><br>
+                <input type="text" id="email" name="email" placeholder="Enter Your Email" required><br><br>
 
-                    <label>
-                        <b>AUTHENTICATION CODE</b>
-                    </label>
-                    <!-- Explanation for authentication code -->
-                    <button type="button" class="btn" data-bs-toggle="tooltip" data-bs-placement="top" 
-                    title="For security reasons, only select USYD staff are allowed to use this site. An 8-character code should have been provided to you from your manager or from me. If you didn't receive it or aren't part of my client's team at USYD, please contact me at flyingbutter213@gmail.com.">
-                        <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
-                    </button>
+                <label>
+                    <b>AUTHENTICATION CODE</b>
+                </label>
+                <!-- Explanation for authentication code -->
+                <button type="button" class="btn" data-bs-toggle="tooltip" data-bs-placement="top" 
+                title="For security reasons, only select USYD staff are allowed to use this site. An 8-character code should have been provided to you from your manager or from me. If you didn't receive it or aren't part of my client's team at USYD, please contact me at flyingbutter213@gmail.com.">
+                    <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                </button>
 
-                    <br>
-                    <input type="text" id="authcode" name="authcode" placeholder="Enter Your Authentication Code" required><br><br>
+                <br>
+                <input type="text" id="authcode" name="authcode" placeholder="Enter Your Authentication Code" required><br><br>
 
-                    <!-- TODO: Add toggle visibility -->
-                    <label><b>PASSWORD</b></label><br>
-                    <input type="password" id="password" name="password" placeholder="Enter Your Password" required><br><br>
+                <label><b>PASSWORD</b></label><br>
+                <div class="together">
+                    <input type="password" id="password" name="password" placeholder="Enter Your Password" required>
+                    <button onclick="togglePassword()" id="passwordToggle"><i class="fa fa-eye"></i></button>
+                </div>
+                <br>
 
-                    <!-- TODO: Add confirm password check (ensure they match) -->
-                    <label><b>CONFIRM PASSPORT</b></label><br>
-                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Your Password" required><br><br>
+                <label><b>CONFIRM PASSPORT</b></label><br>
+                
+                <div class="together">
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Your Password" required>
+                    <button onclick="toggleConfirm()" id="confirmToggle"><i class="fa fa-eye"></i></button>
+                </div>
+                <br>
 
-                    <div style="float: right;">
-                        <input type="checkbox" id="rememberme" name="rememberme" value="rememberme">
-                        <label for="rememberme"> Remember Me</label><br>
-                    </div><br><br>
+                <div style="float: right;">
+                    <input type="checkbox" id="rememberme" name="rememberme" value="rememberme">
+                    <label for="rememberme"> Remember Me</label><br>
+                </div><br><br>
 
-                    <input type="submit" value="Login!" class="buttonStyle">
-                </form>
+                <button onclick="submitForm()" class="buttonStyle">Signup!</button>
             </div>
         </section>
     </main>
@@ -102,22 +121,79 @@
     <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
     <script src="script.js"></script>
     <script>
+        if ("<%= showAlert %>" != "no") {
+            openModal(1);
+        }
+    </script>
+    <script>
         // tooltip stuff
         $(function () {
             $('[data-toggle="tooltip"]').tooltip()
         })
     </script>
     <script>
-        // show alerts
-        if ("<%= showAlert %>" != "no") {
-            openModal(1);
-        }
-    </script>
-    <script>
         // widen the tooltip
         new bootstrap.Tooltip(document.querySelector('.btn'), {
             customClass: 'wide-tooltip'
         });
+    </script>
+    <script>
+        // toggle the password field
+        function togglePassword() {
+            password = document.getElementById('password') // get the password element
+
+            // if its hidden...
+            if (password.type == 'password') {
+                password.type = 'text' // make it visible
+                // change the toggle button
+                document.getElementById('passwordToggle').innerHTML = '<i class="fa fa-eye-slash"></i>'
+            // otherwise if its visible...
+            } else {
+                password.type = 'password' // make it hidden
+                // change the toggle button
+                document.getElementById('passwordToggle').innerHTML = '<i class="fa fa-eye"></i>'
+            }
+        }
+
+        // toggle the confirm password field
+        function toggleConfirm() {
+            password = document.getElementById('confirmPassword') // get the password element
+
+            // if its hidden...
+            if (password.type == 'password') {
+                password.type = 'text' // make it visible
+                // change the toggle button
+                document.getElementById('confirmToggle').innerHTML = '<i class="fa fa-eye-slash"></i>'
+            // otherwise if its visible...
+            } else {
+                password.type = 'password' // make it hidden
+                // change the toggle button
+                document.getElementById('confirmToggle').innerHTML = '<i class="fa fa-eye"></i>'
+            }
+        }
+    </script>
+    <script>
+        function submitForm() {
+            if (document.getElementById("password").value == document.getElementById("confirmPassword").value) {
+                data = {
+                    "name": document.getElementById("name").value,
+                    "email": document.getElementById("email").value,
+                    "authcode": document.getElementById("authcode").value,
+                    "password": document.getElementById("password").value,
+                    "rememberme": document.getElementById("rememberme").value
+                }
+
+                fetch('/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                }).then(response => response.json()).then(data => {
+                    window.location.href = '/'
+                });
+            } else {
+                openModal(2);
+            }
+        }
     </script>
 </body>
 </html>

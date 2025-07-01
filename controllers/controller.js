@@ -1,5 +1,5 @@
 const path = require('path');                                // install path
-const options = {root: path.join(__dirname, '../public')};   // set options root
+const options = {root: path.join(__dirname, '../public')};   // set options (root)
 
 // allow the backend to access the database
 const db = require(path.join(__dirname, '../databases/postgres.js'))
@@ -13,16 +13,24 @@ const LocalStrategy = require('passport-local').Strategy;
 
 // get a list of dictionaries of users
 async function users_list() {
-    // res is a list of dictionaries
-
     // JUSTIFICATION: this data structure is used as it is how
     // db.query() returns things as default, reducing processing
     // time. Additionally, it is easy to loop through the contents
     // of all the users.
-    res = await db.query('SELECT name, email, password FROM users');
-    res = res.rows
-    
-    return res
+
+    try {
+        // get all user credentials
+        res = await db.query('SELECT name, email, password FROM users');
+
+        // res is a list of dictionaries
+        res = res.rows
+        
+        return res
+    } catch (err) {
+        // if some error occurs, return an empty list and print out an error message
+        console.error(err);
+        return []
+    }
 }
 
 // add the new user to the user list
@@ -34,10 +42,10 @@ async function save_user(newUser, role) {
     // hash the password
     password = MD5(newUser.password.trim() + process.env.PASSWORD_SALT).toString();
 
-    // get the date
+    // get the current date
     now = new Date();
 
-    // get the parts of the date in 2 digits
+    // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
     year = now.getFullYear()
     month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
     day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
@@ -48,12 +56,13 @@ async function save_user(newUser, role) {
     // catch any errors
     try {
         // insert the user's data into the database
-        const mq1 = 'INSERT INTO users (name, email, password, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)'
-        const result1 = await db.query(mq1, [userName, email, password, role, 0, 0, date, "light", false]);
+        const mq1 = 'INSERT INTO users (name, email, password, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences", "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)'
+        const result1 = await db.query(mq1, [userName, email, password, role, 0, 0, date, "light", false, [[]]]);
         
         // get all changes
         const mq2 = 'SELECT "changeID" FROM changelog'
         const result2 = await db.query(mq2);
+
         // calculate the maximum changeID
         maxChangeID = 0
         for (x in result2.rows) {
@@ -62,6 +71,7 @@ async function save_user(newUser, role) {
                 maxChangeID = rowID
             }
         }
+
         // calculate the next change ID
         nextChangeID = maxChangeID + 1
 
@@ -76,21 +86,29 @@ async function save_user(newUser, role) {
 
 // get a list of dictionaries of users
 async function get_codes() {
-    // res is a list of dictionaries
-
     // JUSTIFICATION: this data structure is used as it is how
     // db.query() returns things as default, reducing processing
     // time. Additionally, it is easy to loop through the contents
     // of all the codes.
-    res = await db.query('SELECT "userEmail", code, role FROM codes');
-    res = res.rows
-    
-    return res
+
+    try {
+        // get all codes
+        res = await db.query('SELECT "userEmail", code, role FROM codes');
+
+        // res is a list of dictionaries
+        res = res.rows
+        
+        return res
+    } catch (err) {
+        // if some error occurs, return an empty list and print out an error message
+        console.error(err);
+        return []
+    }
 }
 
 // find a user by their email
 async function get_user_by_email(useremail) {
-    // the user object
+    // the user object (initially undefined)
     theuser = undefined
 
     // get a list of users
@@ -104,33 +122,56 @@ async function get_user_by_email(useremail) {
         }
     }
 
-    console.log(theuser)
-
     return theuser
 }
 
 // save initial url so after login it doesnt get lost
 var urlinit = '/';
 
+// save this variable for if the user is new
+var showAlertDashboard = "no"
+
 // TEMPLATES
 
-// the html for footer (for code reuse)
-const partialfooter = `
+// the html for footer (for code reuse) when logged out
+const partialfooterLoggedOut = `
 <footer style="margin: 0; padding: 1em; background-color: #272727; color: white; position: relative; bottom: 0; width: 100%;">
     <section>
         <div class="together">
-            <h2>GrantMatcher</h2>
+            <h2><a href="/">GrantMatcher</a></h2>
             <div class="spacer"></div>
             <p>"If we knew what we were doing, it would not be called research, would it?" - Albert Einstein</p>
         </div>
         <div class="together" style="justify-content: center;">
-            <div><a>Login</a></div> 
+            <div><a href="/login">Login</a></div> 
             <div class="spacer"></div>
-            <div><a>Signup</a></div> 
+            <div><a href="/signup">Signup</a></div> 
             <div class="spacer"></div>
-            <div><a>Tutorial</a></div> 
+            <div><a href="/tutorial">Tutorial</a></div> 
             <div class="spacer"></div>
-            <div><a>Contact</a></div> 
+            <div><a onclick="window.location.href = 'mailto:flyingbutter213@gmail.com?subject=Hello&body=Message'">Contact</a></div> 
+        </div>
+    </section>
+</footer>
+`
+
+// the html for footer (for code reuse) when logged in
+const partialfooterLoggedIn = `
+<footer style="margin: 0; padding: 1em; background-color: #272727; color: white; position: relative; bottom: 0; width: 100%;">
+    <section>
+        <div class="together">
+            <h2><a href="/">GrantMatcher</a></h2>
+            <div class="spacer"></div>
+            <p>"If we knew what we were doing, it would not be called research, would it?" - Albert Einstein</p>
+        </div>
+        <div class="together" style="justify-content: center;">
+            <div><a href="/tickets">Tickets</a></div> 
+            <div class="spacer"></div>
+            <div><a href="/profile">Profile</a></div> 
+            <div class="spacer"></div>
+            <div><a href="/tutorial">Tutorial</a></div> 
+            <div class="spacer"></div>
+            <div><a onclick="window.location.href = 'mailto:flyingbutter213@gmail.com?subject=Hello&body=Message'">Contact</a></div> 
         </div>
     </section>
 </footer>
@@ -233,10 +274,17 @@ const indexget = async (req, res)=>{
     if (req.isAuthenticated()) {
         // find the user
         theuser = await get_user_by_email(req.session.useremail)
-        // TODO: check if user exists
-        res.render('dashboard.ejs', {root: path.join(__dirname, '../public'), head: headpartial, user: theuser.name, footer: partialfooter});
+
+        if (theuser != undefined) {
+            tempShow = showAlertDashboard // temporarily store the showAlertDashboard (as we need to set it to no)
+            showAlertDashboard = "no"
+            res.render('dashboard.ejs', {root: path.join(__dirname, '../public'), head: headpartial, user: theuser.name, footer: partialfooterLoggedIn, showAlert: tempShow});
+        } else {
+            req.session.destroy()
+            res.redirect('/')
+        }
     } else {
-        res.render('landing.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter});
+        res.render('landing.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut});
     }
 } 
 
@@ -248,7 +296,7 @@ const loginget = async (req, res)=>{
     if (req.isAuthenticated()) {
         res.redirect('/')
     } else {
-        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'no'});
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
     }
 } 
 
@@ -260,26 +308,16 @@ const signupget = async (req, res)=>{
     if (req.isAuthenticated()) {
         res.redirect('/')
     } else {
-        res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'no'});
-    }
-} 
-
-// present the add grant page
-const addgrantget = async (req, res)=>{
-    console.log("ADD GRANT GET")
-
-    // only allow them to signup if they havent been authenticated yet
-    if (req.isAuthenticated()) {
-        res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'no'});
-    } else {
-        res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'no'});
+        res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no'});
     }
 } 
 
 // get route with input
 const grantpageget = async (req, res)=>{
-  const id = req.params.id
   console.log("GRANT PAGE GET")
+
+  // get the id (from the route name itself)
+  id = req.params.id
   console.log(id);
   
   // only allow them to access this page if they have been authenticated
@@ -289,10 +327,17 @@ const grantpageget = async (req, res)=>{
         // get the grants data
         const mq = 'SELECT * FROM grants WHERE "grantID" = $1'
         const result = await db.query(mq, [id]);
-        grant = result.rows[0]
+        grant = result.rows
     } catch (err) {
         console.error(err);
-        res.send(500)
+        res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
+    }
+
+    if (grant.length == 0) {
+        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'This grant does not exist yet. Maybe you can help make it by adding a grant!'});
+        return
+    } else {
+        grant = grant[0]
     }
     
     // get the relevant fields
@@ -307,22 +352,39 @@ const grantpageget = async (req, res)=>{
     // get the users name from their email
     userEmail = grant.userEmail
     user = await get_user_by_email(userEmail)
+
     // if the user doesnt exist, then they have been deleted
     if (user == undefined) { user = "deleted user"}
     else { user = user.name }
 
-    res.render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, title: grant.grantName, user: user, url: url, deadline: deadline, duration: duration, clusters: clusters, id: id, keywords: keywords, description: description, researchers: researchers, showAlert: 'no'});
+    res.render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: grant.grantName, user: user, url: url, deadline: deadline, duration: duration, clusters: clusters, id: id, keywords: keywords, description: description, researchers: researchers, showAlert: 'no'});
   } else {
-    res.render('landing.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter});
+    urlinit = '/grant/' + id // redirect them to the current url after they logged in
+    res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
   }
 };
+
+// present the add grant page
+const addgrantget = async (req, res)=>{
+    console.log("ADD GRANT GET")
+
+    // only allow them to signup if they havent been authenticated yet
+    if (req.isAuthenticated()) {
+        res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no'});
+    } else {
+        urlinit = '/addgrant' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
+    }
+} 
 
 // POST
 // when user logs out
 const indexpost = (req, res, next) => {
     console.log("INDEX POST")
+    // destroy the session
     req.session.destroy()
-    return res.redirect('/login')
+    // send them page to the login page
+    res.redirect('/login')
 }
 
 // when the user sumbits the login form, either redirect them to the dashboard if their
@@ -339,7 +401,7 @@ const loginpost = async (req, res, next) => {
             console.log("FAILURE")
 
             // showAlert is 'yes' to show an error alert
-            return res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'yes'});
+            return res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'yes', urlinit: urlinit});
         }
 
         // otherwise log them in
@@ -365,15 +427,18 @@ const loginpost = async (req, res, next) => {
             // the user is)
             req.session.useremail = user.email;
 
-            return res.redirect(urlinit)
+            res.send({"success":"success"})
         })
     })(req, res, next);
 }
 
 const signuppost = async (req, res, next) => {
     console.log('SIGNUP POST')
+
+    // get the user inputs
     x = req.body;
 
+    // get all the users
     users = await users_list();
 
     // check if the user is already in the database
@@ -381,13 +446,13 @@ const signuppost = async (req, res, next) => {
         user = users[u];
         if(req.body.email === user.email) {
             // give them an error pop-up if they are already in the database
-            res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'A user with this email already exists. Please try again or login instead.'});
+            res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'A user with this email already exists. Please try again or login instead.'});
             return
         }
     }
 
     if(!req.body.email || !req.body.authcode || !req.body.password || !req.body.name){
-        res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'Please ensure all fields are filled.'});
+        res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'Please ensure all fields are filled.'});
     } else {
         // get all the auth codes
         codes = await get_codes()
@@ -397,6 +462,7 @@ const signuppost = async (req, res, next) => {
         role = undefined
         for (x in codes) {
             code = codes[x]
+            // check if the code matches the inputted email
             if (code.code == req.body.authcode && code.userEmail == req.body.email) {
                 success = true;
                 role = code.role;
@@ -406,7 +472,7 @@ const signuppost = async (req, res, next) => {
 
         // if it failed (no code exists), give an error pop-up to the user
         if (!success) {
-            res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, showAlert: 'Your authentication code seems to be incorrect. If you haven\'t been provided with one, please contact me at flyingbutter213@gmail.com.'});
+            res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'Your authentication code seems to be incorrect. If you haven\'t been provided with one, please contact me at flyingbutter213@gmail.com. Please ensure your email has been spelt correctly.'});
             return
         }
 
@@ -438,8 +504,9 @@ const signuppost = async (req, res, next) => {
             // store the user in the cookie
             req.session.useremail = newUser.email;
 
-            // User is now authenticated
-            res.redirect('/');
+            // User is now authenticated. render dashboard with welcome message
+            showAlertDashboard = "yes"
+            res.send({"success":"success"})
         });
     }
 }
@@ -447,22 +514,30 @@ const signuppost = async (req, res, next) => {
 // add a new grant
 const addgrantpost = async (req, res)=>{
     console.log("ADD GRANT POST")
+
+    // get the user inputs
     x = req.body
 
+    // isolate each field
     grantName = x.name
     url = x.url
+    description = x.description
+    keywords = x.keywords
+
+    // parse the dates
     dateSplit = x.deadline.split('-')
     reformattedDeadline = dateSplit[2] + '-' + dateSplit[1] + '-' + dateSplit[0]
     duration = parseFloat(x.duration)
-    description = x.description
+    
+    // the clusters list will contain two lists - one is a list of names and the
+    // other is a list of element IDs (from the DOM)
     clustersElementId = x.clusters[1]
     clustersId = []
 
+    // isolate the cluster IDs from the element ID list
     for (i in clustersElementId) {
         clustersId.push(parseInt(clustersElementId[i].split('S')[1]))
     }
-
-    keywords = x.keywords
 
     try {
         // get all grant IDs
@@ -480,16 +555,17 @@ const addgrantpost = async (req, res)=>{
         // calculate the next change ID
         nextGrantID = maxGrantID + 1
 
-        console.log(nextGrantID, maxGrantID)
-        console.log( [nextGrantID, req.session.useremail, grantName, url, reformattedDeadline, duration, description, clustersId, keywords, false, [[]]])
-
         // add the grant to grants table
         const mq3 = 'INSERT INTO grants ("grantID", "userEmail", "grantName", url, deadline, duration, description, clusters, keywords, researchers, matched, "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)'
         const result3 = await db.query(mq3, [nextGrantID, req.session.useremail, grantName, url, reformattedDeadline, duration, description, clustersId, keywords, [], false, [[]]]);
         
+        // redirect to the grant page
         res.redirect("/grant/" + nextGrantID)
     } catch (err) {
         console.error(err);
+
+        // if an error occurs, tell the user
+        res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong. Please ensure all of the inputs are valid. THis might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
     }
 } 
 
