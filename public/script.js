@@ -1348,6 +1348,7 @@ function resetChangeSearch(tableNumber) {
 }
 
 // SERVER DATABASE CALLS
+// TODO: Add more try-catch stuff
 /*
 DATA STRUCTURE JUSTIFICATION - List of Dictionaries:
 Allows the program to loop through it and sort it easily. This
@@ -1359,7 +1360,7 @@ clustersData = [] // list of dictionaries
 
 // does many things at once - initialises the tables AND  initialises the cluster
 // selectors. ALSO, it initialises the researcher dropdown in the search modal for
-// grants. ithis improves efficiency
+// grants. this improves efficiency
 fetch('/db/researchers').then(response => response.json()).then(data => {
     for (var i = 0; i < data.length; i++) {
         row = data[i]
@@ -1381,13 +1382,25 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
         tableData[1].showFields = ['nameLink', 'keywords', 'activity']
 
         // add to the grant search modal data list
-        document.getElementById("grantResearcherOptions").innerHTML += `
-        <option data-value="${row.email}" value="${row.name}">
-        `
-    }
-    tableData[1].totalPages = Math.ceil(data.length / rowsPerPage)
-    renderTable(1)
+        // try catch in case the grantResearcherOptions doesnt exist in that specific page
+        try {
+            document.getElementById("grantResearcherOptions").innerHTML += `
+            <option data-value="${row.email}" value="${row.name}">
+            `
+        } catch {
 
+        }
+        
+    }
+
+    // try catch in case the table doesn't exist in that page
+    try {
+        tableData[1].totalPages = Math.ceil(data.length / rowsPerPage)
+        renderTable(1)
+    } catch {
+
+    }
+    
     // THIS FETCH IS INSIDE HERE because it needs the researchers data
     // to calculate how many researchers each cluster has
     fetch('/db/clusters').then(response => response.json()).then(clusterData => {
@@ -1419,9 +1432,14 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
             tableData[3].showFields = ['clusterID', 'name', 'numberResearchers']
         }
 
-        // initialise cluster table
-        tableData[3].totalPages = Math.ceil(clusterData.length / rowsPerPage)
-        renderTable(3)
+        try {
+            // initialise cluster table
+            tableData[3].totalPages = Math.ceil(clusterData.length / rowsPerPage)
+            renderTable(3)
+        } catch {
+
+        }
+
 
         // INITIALISE CLUSTER SELECTORS
         // get all the lists of unselected clusters
@@ -1442,6 +1460,18 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
             }
             unselectedClustersDivs[i].innerHTML += clusterHTML;
         }
+
+        // if there are a bunch of cluster IDs (not )
+        clusterIds = document.getElementById("clusterText").textContent.split(", ")
+        clusterNames = []
+        for (x in clustersData) {
+            if (clusterIds.includes(clustersData[x].id.toString())) {
+                clusterNames.push(clustersData[x].name)
+            }
+        }
+
+        document.getElementById("clusterText").textContent = clusterNames.join(", ")
+
     })
 })
 

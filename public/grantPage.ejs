@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>GrantMatcher</title>
+    <%- head %>
+</head>
+<body>
+    <!-- Navigation (sticky header). Links and dropdown collapse into a hamburger menu when the screen size is small. -->
+    <nav class="navbar navbar-expand-lg navbar-dark px-3" id="navbar">
+        <!-- Brand on the left -->
+        <a class="navbar-brand bigBrand" href="/" id="navbar-brand">Grant Matcher</a>
+
+        <!-- Toggler (for mobile view) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" id="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links on the right -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Links here -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tickets">Tickets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tutorial">Tutorial</a>
+                </li>
+
+                <!-- Dropdown (user menu) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <!-- Logout button (opens a modal) -->
+                        <li><button class="dropdown-item" id="modalBtn1" onclick="openModal(1)">Logout</button></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- The modal the logout button in the navigation bar opens -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Log out</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close1">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to log out?</p>
+            <div class="together">
+                <form method="post" action="/">
+                    <input type="submit" value="Logout!" class="buttonStyle">
+                </form>
+                <button id='cancel1' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The main content -->
+    <main>
+        <section>
+            <h1>Grant Page</h1>
+        </section>
+        <hr/>
+
+        <section>
+            <div style="display: flex; align-items: flex-end; justify-content: space-between; ">
+                <div>
+                    <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                        <h1><%= title %></h1>
+                        <div class="dropdown">
+                            <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa fa-download"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">XML</a></li>
+                                <li><a class="dropdown-item" href="#">CSV</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Edit the Grant">
+                        <i onclick="window.location.href = '/edit/<%= id %>'" class=" fa fa-pencil-square-o"></i>
+                    </button>
+                    <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Match this Grant">
+                        <i onclick="window.location.href = '/match/<%= id %>'" class=" fa fa-graduation-cap "></i>
+                    </button>
+                    <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Delete this Grant">
+                        <i id="modalBtn2" class=" fa fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <p>Added by <%= user %></p><br>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <p><b>URL:</b> <%= url %></p>
+                    <p><b>Deadline:</b> <%= deadline %></p>
+                    <p><b>Duration:</b> <%= duration %> years</p>
+                    <p><b>Clusters:</b> <span id="clusterText"><%= clusters %></span></p>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
+                        <label><b>Description</b></label>
+                        <i class="fa fa-clone" id="descriptionCopy"></i>
+                    </div>
+                    
+                    <!-- TODO: Make this the same height as the other div -->
+                    <textarea rows="5" style="width: 100%;" id="descriptionArea" disabled><%= description %></textarea>
+                </div>
+            </div>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
+                        <label><b>Keywords</b></label>
+                        <i class="fa fa-clone" id="keywordsCopy"></i>
+                    </div>
+                    <textarea rows="4" style="width: 100%;" id="keywordsArea" disabled><%= keywords %></textarea>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
+                        <label><b>Researchers</b></label>
+                        <i class="fa fa-clone" id="researchersCopy"></i>
+                    </div>
+                    <textarea rows="4" style="width: 100%;" id="researchersArea" disabled><%= researchers %></textarea>
+                </div>
+            </div>
+        </section>
+        <hr/>
+
+        <section>
+            <h2>VERSION INFORMATION</h2>
+            <!-- TODO: After making the edit page -->
+        </section>
+    </main>
+    
+    <!-- EJS partial (for code reuse and efficiency) -->
+    <%- footer %>
+
+    <!-- Bootstrap for JS -->
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <!-- This file allows for the user to interact with the elements on the site and for the site to give feedback to the user -->
+    <script src="/script.js"></script>
+    <!-- JQuery for the tooltip -->
+    <script>
+        $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+    </script>
+    <script>
+        document.getElementById("descriptionCopy").onclick = function(){
+            document.getElementById("descriptionArea").removeAttribute("disabled");
+            document.getElementById("descriptionArea").select();
+            document.execCommand('copy');
+            document.getElementById("descriptionArea").setAttribute("disabled", "");
+        }
+
+        document.getElementById("researchersCopy").onclick = function(){
+            document.getElementById("researchersArea").removeAttribute("disabled");
+            document.getElementById("researchersArea").select();
+            document.execCommand('copy');
+            document.getElementById("researchersArea").setAttribute("disabled", "");
+        }
+
+        document.getElementById("keywordsCopy").onclick = function(){
+            document.getElementById("keywordsArea").removeAttribute("disabled");
+            document.getElementById("keywordsArea").select();
+            document.execCommand('copy');
+            document.getElementById("keywordsArea").setAttribute("disabled", "");
+        }
+    </script>
+</body>
+</html>

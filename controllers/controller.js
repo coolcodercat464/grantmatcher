@@ -104,6 +104,8 @@ async function get_user_by_email(useremail) {
         }
     }
 
+    console.log(theuser)
+
     return theuser
 }
 
@@ -274,6 +276,42 @@ const addgrantget = async (req, res)=>{
     }
 } 
 
+// get route with input
+const grantpageget = async (req, res)=>{
+  const id = req.params.id
+  console.log("GRANT PAGE GET")
+  console.log(id);
+  
+  // only allow them to signup if they havent been authenticated yet
+  if (req.isAuthenticated()) {
+    // get the grant data
+    try {
+        // insert the user's data into the database
+        const mq = 'SELECT * FROM grants WHERE "grantID" = $1'
+        const result = await db.query(mq, [id]);
+        grant = result.rows[0]
+    } catch (err) {
+        console.error(err);
+        res.send(500)
+    }
+    url = grant.url
+    userEmail = grant.userEmail
+    user = await get_user_by_email(userEmail)
+    if (user == undefined) { user = "deleted user"}
+    else { user = user.name }
+    console.log(userEmail, user)
+    deadline = grant.deadline
+    duration = grant.duration
+    clusters = grant.clusters.join(", ")
+    description = grant.description
+    keywords = grant.keywords.join("\n")
+    researchers = grant.researchers.join("\n")
+    res.render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, title: grant.grantName, user: user, url: url, deadline: deadline, duration: duration, clusters: clusters, id: id, keywords: keywords, description: description, researchers: researchers, showAlert: 'no'});
+  } else {
+    res.render('landing.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter});
+  }
+};
+
 // POST
 // when user logs out
 const indexpost = (req, res, next) => {
@@ -412,6 +450,7 @@ module.exports = {
     loginget,
     signupget,
     addgrantget,
+    grantpageget,
 
     indexpost,
     loginpost,

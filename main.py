@@ -64,7 +64,8 @@ with suppress_output():
     from sentence_transformers import SentenceTransformer, util
 
     # Initialise the sentence transformer model
-    model = SentenceTransformer("all-MiniLM-L6-v2")
+    # slightly less accurate but faster
+    model = SentenceTransformer("./paraphrase-MiniLM-L3-v2")
 
 clusters = sys.argv[1].split(",")
 matchTo = "biology"
