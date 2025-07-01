@@ -3,3 +3,6 @@
 
 # ignore the black hole that is node modules
 node_modules/
+
+# ignore the model folder for lm
+paraphrase-MiniLM-L3-v2/

@@ -72,8 +72,152 @@
         <section>
             <h1>Add a Grant</h1>
         </section>
-
         <hr/>
+
+        <section>
+            <form method="post" action="/addgrant">
+                <div class="together">
+                    <div style="width: 100%;">
+                        <label><b>NAME</b></label>
+                        <input type="text" id="grantName" class="form-control" name="grantName" placeholder="Enter the grant's name" required>
+                    </div>
+                    <div class="spacer"></div>
+                    <div style="width: 100%;">
+                        <label><b>URL</b></label>
+                        <input type="text" id="url" class="form-control" name="url" placeholder="Enter the grant's URL" required>
+                    </div>
+                </div>
+                <br>
+
+                <div class="together">
+                    <div style="width: 100%;">
+                        <label><b>DEADLINE</b></label>
+                        <input type="date" id="deadline" class="form-control" name="deadline" required>
+                    </div>
+                    <div class="spacer"></div>
+                    <div style="width: 100%;">
+                        <label><b>DURATION</b></label>
+                        <input type="number" min=0 id="duration" class="form-control" name="duration" required>
+                    </div>
+                </div>
+                <br>
+
+                <label><b>SE:ECT CLUSTERS</b></label>
+                <p>Click clusters in the unselected list to select them, and click clusters in the selected list to deselect them. You can search and sort the two lists separately.</p>
+                <div class="together clusterselector">
+                    <!-- List of the unselected clusters -->
+                    <div class="unselected">
+                        <div class="listboxinput">
+                            <div class="listboxtextdiv">
+                                <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                                <!-- This is where the user enters some text that is matched to the clusters in the unselectedClusters list -->
+                                <input class="listboxtext" type="text" id="searchUnselectedClusters1" name="searchUnselectedClusters1" placeholder="Enter a cluster">
+                            </div>
+                            <div class="listboxsubmitdiv">
+                                <!-- User can press this button to search from the list -->
+                                <button class="listboxsubmit" onclick="findUnselectedCluster(1)"><i class="fa fa-search"></i></button>
+                            </div>
+                            <div class="listboxsubmitdiv">
+                                <!-- Added a reset button so its easier for the user to reset the form (displaying all clusters in the list) -->
+                                <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
+                            </div>
+                        </div>
+                        <!-- Contains all unselected clusters -->
+                        <div class="listboxdiv unselectedClusters" id="unselectedClusters1">
+                        </div>
+                        <div class="clustersort">
+                            <label for="sortUnselected1">Sort By:</label>
+
+                            <!-- Sort-by dropdown -->
+                            <select name="sortUnselected1" id="sortUnselected1" onchange="sortUnselected(1)">
+                                <option value="id">ID</option>
+                                <option value="name">Name</option>
+                                <option value="number"># of Researchers</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Adds space between the selected and unselected lists -->
+                    <div class="spacer"></div>
+
+                    <!-- Duplicate of the unselected list (for consistency and symmetrical balance) but with different names -->
+                    <div class="selected">
+                        <div class="listboxinput">
+                            <div class="listboxtextdiv">
+                                <input class="listboxtext" type="text" id="searchSelectedClusters1" name="searchSelectedClusters1" placeholder="Enter a cluster">
+                            </div>
+                            <div class="listboxsubmitdiv">
+                                <button class="listboxsubmit" onclick="findSelectedCluster(1)"><i class="fa fa-search"></i></button>
+                            </div>
+                            <div class="listboxsubmitdiv">
+                                <button class="listboxsubmit" onclick="resetSelectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
+                            </div>
+                        </div>
+                        <div class="listboxdiv selectedClusters" id="selectedClusters1">
+                        </div>
+                        <div class="clustersort">
+                            <label for="sortSelected1">Sort By:</label>
+
+                            <select name="sortSelected1" id="sortSelected1" onchange="sortSelected(1)">
+                                <option value="id">ID</option>
+                                <option value="name">Name</option>
+                                <option value="number"># of Researchers</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                <div class="together">
+                    <div style="width: 100%;">
+                        <label><b>DESCRIPTION</b></label><br>
+                        <textarea rows="4" style="width: 100%;" id="description" class="form-control" required></textarea>
+                    </div>
+                    <div class="spacer"></div>
+                    <div style="width: 100%;">
+                        <label><b>KEYWORDS</b></label><br>
+                            <div style="width: 100%;">
+                            <div class="listbox" style="overflow:auto; ">
+                                <div class="listboxdiv" style="height: 70px;">
+                                    <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                                    <!-- All keywords displayed here -->
+                                    <ul class="listboxul" id="list1" style="height: 70px;">
+                                    </ul>
+                                </div>
+
+                                <!-- The two elements in the div are on the same line -->
+                                <div class="listboxinput">
+                                    <!-- User enters keywords here -->
+                                    <div class="listboxtextdiv">
+                                        <input class="listboxtext" type="text" id="keyword1" name="keyword1" placeholder="Enter a keyword">
+                                    </div>
+
+                                    <!-- User presses this button to add the keyword to the list -->
+                                    <div class="listboxsubmitdiv">
+                                        <button class="listboxsubmit" onclick="addKeyword(1)"><i class="fa fa-arrow-right"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                <label><b>REASON</b></label><br>
+                <p>Briefly explain why you added this grant.</p>
+                <div class="together" style="align-items: flex-start;">
+                    <div style="width: 100%;">
+                        <textarea rows="4" style="width: 100%;" id="reasonArea" class="form-control" required></textarea>
+                    </div>
+                    <div class="spacer"></div>
+                    <div style="width: 100%;">
+                        <button class="buttonStyle blue" style="width: 100%;" onclick="clearForm()">Reset Form</button>
+                        <input class="buttonStyle pink" type="submit" style="width: 100%;" value="Add this Grant">
+                    </div>
+                </div>
+                <br>
+            </form>
+        </section>
     </main>
     
     <!-- EJS partial (for code reuse and efficiency) -->

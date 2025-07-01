@@ -282,11 +282,11 @@ const grantpageget = async (req, res)=>{
   console.log("GRANT PAGE GET")
   console.log(id);
   
-  // only allow them to signup if they havent been authenticated yet
+  // only allow them to access this page if they have been authenticated
   if (req.isAuthenticated()) {
     // get the grant data
     try {
-        // insert the user's data into the database
+        // get the grants data
         const mq = 'SELECT * FROM grants WHERE "grantID" = $1'
         const result = await db.query(mq, [id]);
         grant = result.rows[0]
@@ -294,18 +294,23 @@ const grantpageget = async (req, res)=>{
         console.error(err);
         res.send(500)
     }
+    
+    // get the relevant fields
     url = grant.url
-    userEmail = grant.userEmail
-    user = await get_user_by_email(userEmail)
-    if (user == undefined) { user = "deleted user"}
-    else { user = user.name }
-    console.log(userEmail, user)
     deadline = grant.deadline
     duration = grant.duration
     clusters = grant.clusters.join(", ")
     description = grant.description
     keywords = grant.keywords.join("\n")
     researchers = grant.researchers.join("\n")
+
+    // get the users name from their email
+    userEmail = grant.userEmail
+    user = await get_user_by_email(userEmail)
+    // if the user doesnt exist, then they have been deleted
+    if (user == undefined) { user = "deleted user"}
+    else { user = user.name }
+
     res.render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter, title: grant.grantName, user: user, url: url, deadline: deadline, duration: duration, clusters: clusters, id: id, keywords: keywords, description: description, researchers: researchers, showAlert: 'no'});
   } else {
     res.render('landing.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooter});
@@ -442,6 +447,8 @@ const signuppost = async (req, res, next) => {
 // add a new grant
 const addgrantpost = async (req, res)=>{
     console.log("ADD GRANT POST")
+    // TODO: Find a way to get the clusters and keywords data
+    console.log(req.body)
 } 
 
 // Export of all methods as object 
