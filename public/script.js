@@ -293,6 +293,22 @@ function resetSelectedClusterSearch(selectorId) {
 }
 
 // KEYWORD SELECTOR STUFF
+// get all keywords in a keyword selector
+function getKeywords(id) {
+    // get the list based on the ID number
+    ul = document.getElementById('list' + id)
+    keywordList = ul.getElementsByTagName('li') // all the keywords (elements)
+    keywordListText = [] // all the keywords (string)
+
+    // get the string value of each keyword
+    for (var i = 0; i < keywordList.length; i++) {
+        keyword = keywordList[i]
+        keywordListText.push(keyword.textContent.trim())
+    }
+
+    return keywordListText
+}
+
 // add a keyword to a keyword selector
 function addKeyword(id) {
     // get the list and inputs based on the ID number

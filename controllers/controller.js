@@ -447,8 +447,50 @@ const signuppost = async (req, res, next) => {
 // add a new grant
 const addgrantpost = async (req, res)=>{
     console.log("ADD GRANT POST")
-    // TODO: Find a way to get the clusters and keywords data
-    console.log(req.body)
+    x = req.body
+
+    grantName = x.name
+    url = x.url
+    dateSplit = x.deadline.split('-')
+    reformattedDeadline = dateSplit[2] + '-' + dateSplit[1] + '-' + dateSplit[0]
+    duration = parseFloat(x.duration)
+    description = x.description
+    clustersElementId = x.clusters[1]
+    clustersId = []
+
+    for (i in clustersElementId) {
+        clustersId.push(parseInt(clustersElementId[i].split('S')[1]))
+    }
+
+    keywords = x.keywords
+
+    try {
+        // get all grant IDs
+        const mq2 = 'SELECT "grantID" FROM grants'
+        const result2 = await db.query(mq2);
+
+        // calculate the maximum grantID
+        maxGrantID = 0
+        for (x in result2.rows) {
+            rowID = result2.rows[x].grantID
+            if (rowID > maxGrantID) {
+                maxGrantID = rowID
+            }
+        }
+        // calculate the next change ID
+        nextGrantID = maxGrantID + 1
+
+        console.log(nextGrantID, maxGrantID)
+        console.log( [nextGrantID, req.session.useremail, grantName, url, reformattedDeadline, duration, description, clustersId, keywords, false, [[]]])
+
+        // add the grant to grants table
+        const mq3 = 'INSERT INTO grants ("grantID", "userEmail", "grantName", url, deadline, duration, description, clusters, keywords, researchers, matched, "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)'
+        const result3 = await db.query(mq3, [nextGrantID, req.session.useremail, grantName, url, reformattedDeadline, duration, description, clustersId, keywords, [], false, [[]]]);
+        
+        res.redirect("/grant/" + nextGrantID)
+    } catch (err) {
+        console.error(err);
+    }
 } 
 
 // Export of all methods as object 
