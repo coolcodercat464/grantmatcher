@@ -20,6 +20,9 @@ router.post('/addgrant', control.addgrantpost)
 
 router.get('/grant/:id', control.grantpageget)
 
+router.get('/editgrant/:id', control.editgrantget)
+router.post('/editgrant/:id', control.editgrantpost)
+
 router.get('/login', control.loginget)
 router.post('/login', control.loginpost)
 

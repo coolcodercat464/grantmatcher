@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <title>GrantMatcher - Add Grant</title>
+    <title>GrantMatcher - Edit <%= title %></title>
     <%- head %>
 </head>
 <body>
@@ -84,7 +84,7 @@
     <!-- The main content -->
     <main>
         <section>
-            <h1>Add a Grant</h1>
+            <h1>Edit <%= title %></h1>
         </section>
         <hr/>
 
@@ -92,12 +92,12 @@
             <div class="together">
                 <div style="width: 100%;">
                     <label><b>NAME</b></label>
-                    <input type="text" id="grantName" class="form-control" name="grantName" placeholder="Enter the grant's name" required>
+                    <input type="text" id="grantName" class="form-control" name="grantName" value="<%= title %>" required>
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
                     <label><b>URL</b></label>
-                    <input type="url" id="url" class="form-control" name="url" placeholder="Enter the grant's URL" required>
+                    <input type="url" id="url" class="form-control" name="url" value="<%= url %>" required>
                 </div>
             </div>
             <br>
@@ -105,12 +105,12 @@
             <div class="together">
                 <div style="width: 100%;">
                     <label><b>DEADLINE</b></label>
-                    <input type="date" id="deadline" class="form-control" name="deadline" required>
+                    <input type="date" id="deadline" class="form-control" name="deadline" value="<%= deadline %>" required>
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
                     <label><b>DURATION</b></label>
-                    <input type="number" min=0 id="duration" step="0.1" class="form-control" name="duration" required>
+                    <input type="number" min=0 id="duration" step="0.1" class="form-control" value="<%= duration %>" name="duration" required>
                 </div>
             </div>
             <br>
@@ -184,12 +184,12 @@
             <div class="together">
                 <div style="width: 100%;">
                     <label><b>DESCRIPTION</b></label><br>
-                    <textarea rows="4" style="width: 100%;" id="description" class="form-control" name="description" required></textarea>
+                    <textarea rows="4" style="width: 100%;" id="description" class="form-control" name="description" required><%= description %></textarea>
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
                     <label><b>KEYWORDS</b></label><br>
-                    <div style="width: 100%;">
+                        <div style="width: 100%;">
                         <div class="listbox" style="overflow:auto; ">
                             <div class="listboxdiv" style="height: 70px;">
                                 <!-- Numbering the IDs so I can use many selectors (code reuse) -->
@@ -217,11 +217,50 @@
             <br>
 
             <div class="together" style="align-items: flex-start;">
-                <button class="buttonStyle blue" style="width: 100%;" onclick="clearForm()">Reset Form</button>
+                <div style="width: 100%;">
+                    <label><b>RESEARCHERS</b></label>
+                    <div style="width: 100%;">
+                        <div class="listbox" style="overflow:auto; ">
+                            <div class="listboxdiv" style="height: 90px;">
+                                <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                                <!-- All keywords displayed here -->
+                                <ul class="listboxul" id="list2" style="height: 90px;" name="list2">
+                                </ul>
+                            </div>
+
+                            <!-- The two elements in the div are on the same line -->
+                            <div class="listboxinput">
+                                <!-- User enters keywords here -->
+                                <div class="listboxtextdiv">
+                                    <input class="listboxtext" type="text" id="keyword2" name="keyword2" placeholder="Enter a researcher">
+                                </div>
+
+                                <!-- User presses this button to add the keyword to the list -->
+                                <div class="listboxsubmitdiv">
+                                    <button class="listboxsubmit" onclick="addKeyword(2)"><i class="fa fa-arrow-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="spacer"></div>
-                <button class="buttonStyle pink" style="width: 100%;" onclick="submit()">Add this Grant</button>
+                <div style="width: 100%;">
+                    <label><b>REASON</b></label>
+                    <!-- TODO: Add this to a tooltip -->
+                    <!-- TODO: Ensure that this area (and all other areas) are filled -->
+                    <p>Briefly explain why you edited this grant and what changes you made.</p>
+                    <textarea id="reason" class="form-control" name="reason" required></textarea>
+                </div>
             </div>
             <br>
+
+            <div class="together" style="align-items: flex-start;">
+                <button class="buttonStyle blue" style="width: 100%;" onclick="clearForm()">Reset Form</button>
+                <div class="spacer"></div>
+                <button class="buttonStyle pink" style="width: 100%;" onclick="submit()">Confirm Changes</button>
+                <!-- TODO: Add confirmation modal -->
+            </div>
+            <br><br>
         </section>
     </main>
     
@@ -231,7 +270,7 @@
     <!-- Bootstrap for JS -->
     <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
     <!-- This file allows for the user to interact with the elements on the site and for the site to give feedback to the user -->
-    <script src="script.js"></script>
+    <script src="/script.js"></script>
     <!-- JQuery for the tooltip -->
     <script>
         $(function () {
@@ -247,10 +286,12 @@
                 "duration": document.getElementById("duration").value,
                 "description": document.getElementById("description").value,
                 "clusters": getSelectedClusterNames(1),
-                "keywords": getKeywords(1)
+                "keywords": getKeywords(1),
+                "researchers": getKeywords(2),
+                "reason": document.getElementById("reason").value
             }
 
-            fetch('/addgrant', {
+            fetch('/editgrant/<%= id %>', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -264,6 +305,54 @@
         if ("<%= showAlert %>" != "no") {
             openModal(2);
         }
+    </script>
+    <script>
+        function initialise() {
+            clusters = "<%= clusters %>"
+            clusters = clusters.split(", ")
+            for (x in clusters) {
+                clusterId = clusters[x]
+                buttonId = '1U' + clusterId
+                selectCluster(buttonId)
+            }
+
+            keywords = `<%= keywords %>`
+            keywords = keywords.split("\n")
+            for (x in keywords) {
+                keyword = keywords[x]
+                if (keyword.trim() != '') {
+                    addKeywordManual(1, keyword)
+                }
+            }
+
+            researchers = `<%= researchers %>`
+            researchers = researchers.split("\n")
+            for (x in researchers) {
+                researcher = researchers[x]
+                if (researcher.trim() != '') {
+                    addKeywordManual(2, researcher)
+                }
+            }
+        }
+    </script>
+    <script>
+        // wait for a condition to be true
+        const waitFor = (conditionFn, callback, interval = 50) => {
+            const checker = setInterval(() => {
+            if (conditionFn()) {
+                clearInterval(checker);
+                callback();
+            }
+            }, interval);
+        };
+
+        // wait for clusters to be initialised
+        waitFor(
+            () => clustersInitialised === true,
+            () => {
+                initialise()
+            }
+        );
     </script>
 </body>
 </html>

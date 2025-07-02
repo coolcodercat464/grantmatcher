@@ -311,12 +311,20 @@ function getKeywords(id) {
     return keywordListText
 }
 
-// add a keyword to a keyword selector
+// add the keyword in the input field to a keyword selector
 function addKeyword(id) {
-    // get the list and inputs based on the ID number
-    ul = document.getElementById('list' + id)
+    // get the input based on the ID number
     input = document.getElementById('keyword' + id)
     keyword = input.value
+
+    // add the keyword
+    addKeywordManual(id, keyword)
+}
+
+// add a keyword (from the function parameters) to a keyword selector
+function addKeywordManual(id, keyword) {
+    // get the list based on the ID number
+    ul = document.getElementById('list' + id)
 
     // user the number of keywords to determine the background color of the next item in the list
     numKeywords = ul.querySelectorAll('li').length
@@ -1375,6 +1383,7 @@ thus reducing the processing time.
 */
 
 clustersData = [] // list of dictionaries
+var clustersInitialised = false
 
 // does many things at once - initialises the tables AND  initialises the cluster
 // selectors. ALSO, it initialises the researcher dropdown in the search modal for
@@ -1467,6 +1476,8 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
             }
             unselectedClustersDivs[i].innerHTML += clusterHTML;
         }
+
+        clustersInitialised = true;
 
         try {
             // initialise cluster table

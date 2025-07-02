@@ -57,7 +57,7 @@ async function save_user(newUser, role) {
     try {
         // insert the user's data into the database
         const mq1 = 'INSERT INTO users (name, email, password, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences", "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)'
-        const result1 = await db.query(mq1, [userName, email, password, role, 0, 0, date, "light", false, [[]]]);
+        const result1 = await db.query(mq1, [userName, email, password, role, 0, 0, date, "light", false, []]);
         
         // get all changes
         const mq2 = 'SELECT "changeID" FROM changelog'
@@ -319,6 +319,8 @@ const grantpageget = async (req, res)=>{
   // get the id (from the route name itself)
   id = req.params.id
   console.log(id);
+
+  // TODO: add validation (id might be 'script.js' sometimes)
   
   // only allow them to access this page if they have been authenticated
   if (req.isAuthenticated()) {
@@ -341,6 +343,7 @@ const grantpageget = async (req, res)=>{
     }
     
     // get the relevant fields
+    title = grant.grantName
     url = grant.url
     deadline = grant.deadline
     duration = grant.duration
@@ -357,7 +360,7 @@ const grantpageget = async (req, res)=>{
     if (user == undefined) { user = "deleted user"}
     else { user = user.name }
 
-    res.render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: grant.grantName, user: user, url: url, deadline: deadline, duration: duration, clusters: clusters, id: id, keywords: keywords, description: description, researchers: researchers, showAlert: 'no'});
+    res.render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: title, user: user, url: url, deadline: deadline, duration: duration, clusters: clusters, id: id, keywords: keywords, description: description, researchers: researchers, showAlert: 'no'});
   } else {
     urlinit = '/grant/' + id // redirect them to the current url after they logged in
     res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
@@ -373,6 +376,59 @@ const addgrantget = async (req, res)=>{
         res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no'});
     } else {
         urlinit = '/addgrant' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
+    }
+} 
+
+// present the edit grant page
+const editgrantget = async (req, res)=>{
+    // TODO get grant info
+    console.log("EDIT GRANT GET")
+    id = req.params.id
+    console.log(id)
+
+    // TODO: add validation (id might be 'script.js' sometimes)
+
+    // only allow them to signup if they havent been authenticated yet
+    if (req.isAuthenticated()) {
+        id = parseInt(id)
+
+        try {
+            // get the grants data
+            const mq = 'SELECT * FROM grants WHERE "grantID" = $1'
+            const result = await db.query(mq, [id]);
+            grant = result.rows
+        } catch (err) {
+            console.error(err);
+            res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
+        }
+
+        if (grant.length == 0) {
+            res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'This grant does not exist yet. Maybe you can help make it by adding a grant!'});
+            return
+        } else {
+            grant = grant[0]
+        }
+        
+        // get the relevant fields
+        title = grant.grantName
+        url = grant.url
+        duration = grant.duration
+        description = grant.description
+
+        // join the lists
+        clusters = grant.clusters.join(", ")
+        keywords = grant.keywords.join("\n")
+        researchers = grant.researchers.join("\n")
+
+        // reformat deadline
+        deadline = grant.deadline
+        dateSplit = deadline.split('-')
+        deadline = dateSplit[2] + '-' + dateSplit[1] + '-' + dateSplit[0]
+
+        res.render('editGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, title: title, url: url, deadline: deadline, duration: duration, clusters: clusters, description: description, keywords: keywords, researchers: researchers, showAlert: 'no'});
+    } else {
+        urlinit = '/editgrant/' + id // redirect them to the current url after they logged in
         res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
     }
 } 
@@ -432,11 +488,14 @@ const loginpost = async (req, res, next) => {
     })(req, res, next);
 }
 
+// when the user signs up
 const signuppost = async (req, res, next) => {
     console.log('SIGNUP POST')
 
     // get the user inputs
     x = req.body;
+
+    // TODO: Add validation to name
 
     // get all the users
     users = await users_list();
@@ -527,6 +586,8 @@ const addgrantpost = async (req, res)=>{
     // parse the dates
     dateSplit = x.deadline.split('-')
     reformattedDeadline = dateSplit[2] + '-' + dateSplit[1] + '-' + dateSplit[0]
+
+    // parse the duration
     duration = parseFloat(x.duration)
     
     // the clusters list will contain two lists - one is a list of names and the
@@ -539,15 +600,17 @@ const addgrantpost = async (req, res)=>{
         clustersId.push(parseInt(clustersElementId[i].split('S')[1]))
     }
 
+    // TODO: Add validation
+
     try {
         // get all grant IDs
-        const mq2 = 'SELECT "grantID" FROM grants'
-        const result2 = await db.query(mq2);
+        const mq1 = 'SELECT "grantID" FROM grants'
+        const result1 = await db.query(mq1);
 
         // calculate the maximum grantID
         maxGrantID = 0
-        for (x in result2.rows) {
-            rowID = result2.rows[x].grantID
+        for (x in result1.rows) {
+            rowID = result1.rows[x].grantID
             if (rowID > maxGrantID) {
                 maxGrantID = rowID
             }
@@ -556,11 +619,140 @@ const addgrantpost = async (req, res)=>{
         nextGrantID = maxGrantID + 1
 
         // add the grant to grants table
-        const mq3 = 'INSERT INTO grants ("grantID", "userEmail", "grantName", url, deadline, duration, description, clusters, keywords, researchers, matched, "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)'
-        const result3 = await db.query(mq3, [nextGrantID, req.session.useremail, grantName, url, reformattedDeadline, duration, description, clustersId, keywords, [], false, [[]]]);
+        const mq2 = 'INSERT INTO grants ("grantID", "userEmail", "grantName", url, deadline, duration, description, clusters, keywords, researchers, matched, "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)'
+        const result2 = await db.query(mq2, [nextGrantID, req.session.useremail, grantName, url, reformattedDeadline, duration, description, clustersId, keywords, [[]], false, []]);
         
+        // get all changes
+        const mq3 = 'SELECT "changeID" FROM changelog'
+        const result3 = await db.query(mq3);
+
+        // calculate the maximum changeID
+        maxChangeID = 0
+        for (x in result3.rows) {
+            rowID = result3.rows[x].changeID
+            if (rowID > maxChangeID) {
+                maxChangeID = rowID
+            }
+        }
+
+        // calculate the next change ID
+        nextChangeID = maxChangeID + 1
+
+        // get the current date
+        now = new Date();
+
+        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+        year = now.getFullYear()
+        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+        // stringify it
+        date = `${day}-${month}-${year}`
+
+        // add 'grant added' change to changelog
+        const mq4 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
+        const result4 = await db.query(mq4, [nextChangeID, req.session.useremail, 'Grant Added', date, `The grant "${grantName}" has been added. Check it out now!`, '{}']);
+
         // redirect to the grant page
-        res.redirect("/grant/" + nextGrantID)
+        res.send({"id": nextGrantID})
+    } catch (err) {
+        console.error(err);
+
+        // if an error occurs, tell the user
+        res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong. Please ensure all of the inputs are valid. THis might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+    }
+} 
+
+// add a new grant
+const editgrantpost = async (req, res)=>{
+    // TODO change this
+    console.log("EDIT GRANT POST")
+
+    // get the user inputs
+    x = req.body
+
+    // isolate each field
+    grantName = x.name
+    url = x.url
+    description = x.description
+    keywords = x.keywords
+    researchers = x.researchers
+
+    // parse the dates
+    dateSplit = x.deadline.split('-')
+    reformattedDeadline = dateSplit[2] + '-' + dateSplit[1] + '-' + dateSplit[0]
+
+    // parse the duration
+    duration = parseFloat(x.duration)
+    
+    // the clusters list will contain two lists - one is a list of names and the
+    // other is a list of element IDs (from the DOM)
+    clustersElementId = x.clusters[1]
+    clustersId = []
+
+    // isolate the cluster IDs from the element ID list
+    for (i in clustersElementId) {
+        clustersId.push(parseInt(clustersElementId[i].split('S')[1]))
+    }
+
+    // TODO: Add validation
+
+    try {
+        // get the grant information (to make versionInformation)
+        const mq1 = 'SELECT * FROM grants WHERE "grantID" = $1'
+        const result1 = await db.query(mq1, [id]);
+
+        // TODO: ensure that the grant exists
+        grant = result1.rows[0]
+
+        // get the previous version
+        previousVersion = [grant.grantName, grant.url, grant.deadline, grant.duration.toString(), grant.description, grant.clusters.join(", "), grant.keywords.join("\n"), grant.researchers.join("\n"), grant.matched.toString()]
+
+        // get the current date (when this version stopped being the most recent version)
+        now = new Date();
+
+        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+        year = now.getFullYear()
+        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+        // stringify it
+        date = `${day}-${month}-${year}`
+
+        // add it to the list
+        previousVersion.push(date)
+
+        // add it to the version information list
+        versionInformation = grant.versionInformation
+        versionInformation.push(previousVersion)
+        console.log(researchers)
+
+        // add the grant to grants table
+        const mq2 = 'UPDATE grants SET "grantName" = $1, url = $2, deadline = $3, duration = $4, description = $5, clusters = $6, keywords = $7, researchers = $8, "versionInformation" = $9 WHERE "grantID" = $10;'
+        const result2 = await db.query(mq2, [grantName, url, reformattedDeadline, duration, description, clustersId, keywords, researchers, versionInformation, id]);
+        
+        // get all changes
+        const mq3 = 'SELECT "changeID" FROM changelog'
+        const result3 = await db.query(mq3);
+
+        // calculate the maximum changeID
+        maxChangeID = 0
+        for (x in result3.rows) {
+            rowID = result3.rows[x].changeID
+            if (rowID > maxChangeID) {
+                maxChangeID = rowID
+            }
+        }
+
+        // calculate the next change ID
+        nextChangeID = maxChangeID + 1
+
+        // add 'grant edited' change to changelog
+        const mq4 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
+        const result4 = await db.query(mq4, [nextChangeID, req.session.useremail, 'Grant Edited', date, `The grant "${grantName}" has been edited. Check it out now!`, '{}']);
+
+        // redirect to the grant page
+        res.send({"id": id})
     } catch (err) {
         console.error(err);
 
@@ -576,9 +768,11 @@ module.exports = {
     signupget,
     addgrantget,
     grantpageget,
+    editgrantget,
 
     indexpost,
     loginpost,
     signuppost,
     addgrantpost,
+    editgrantpost
 }

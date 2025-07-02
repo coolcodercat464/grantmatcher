@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <title>GrantMatcher</title>
+    <title>GrantMatcher - <%= title %></title>
     <%- head %>
 </head>
 <body>
@@ -106,7 +106,7 @@
                 </div>
                 <div>
                     <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Edit the Grant">
-                        <i onclick="window.location.href = '/edit/<%= id %>'" class=" fa fa-pencil-square-o"></i>
+                        <i onclick="window.location.href = '/editgrant/<%= id %>'" class=" fa fa-pencil-square-o"></i>
                     </button>
                     <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Match this Grant">
                         <i onclick="window.location.href = '/match/<%= id %>'" class=" fa fa-graduation-cap "></i>
