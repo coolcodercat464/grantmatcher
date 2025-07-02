@@ -204,10 +204,13 @@
             <br>
 
             <div class="together">
-                <label><b>KEYWORDS</b></label>
-                <button type="button" class="btn" data-bs-toggle="tooltip" data-bs-placement="top" title="Enter a keyword and add it to the list by pressing the arrow button. You can also remove keywords from the list by hitting the trash icon.">
-                    <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
-                </button>
+                <label><b>KEYWORDS</b>
+                    <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Add keywords by pressing the add button. Remove keywords from the list by pressing the trash icon next to the keyword you want to remove.">
+                        <!-- Makes the tooltip circular -->
+                        <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                    </button>
+                </label>
+                
             </div>
 
             <div class="together" style="align-items: flex-start;">
@@ -260,7 +263,12 @@
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
-                    <label><b>USER</b></label><br>
+                    <label><b>USER</b>
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="The user who added the grant to the database.">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
+                    </label><br>
                     <select name="grantUser" class="form-control" id="grantUser" style="width: 100%">
                         <option value="all">All</option>
                     </select>
@@ -269,7 +277,12 @@
             <br>
             <div class="together">
                 <div style="width: 100%;">
-                    <label><b>RESEARCHER</b></label><br>
+                    <label><b>RESEARCHER</b>
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Enter a researcher that has been matched to the grant.">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
+                    </label><br>
                     <!-- datalist is a bootstrap thing that allows you to search for the thing you're looking for
                      this is especially important since there might be a lot of researchers -->
                     <!-- i didn't include a thing like the cluster selector but for researchers because it might
@@ -301,7 +314,12 @@
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
-                    <label><b>DURATION RANGE</b></label><br>
+                    <label><b>DURATION RANGE</b>
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="How long the funding will last">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
+                    </label><br>
                     <div class="together datetogether">
                         <input type="number" id="durationLower" name="durationLower" class="form-control" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="durationHigher" name="durationHigher" style="width: 100%">
                     </div>
@@ -375,7 +393,12 @@
             </div>
             <br>
 
-            <label><b>KEYWORDS</b></label>
+            <label><b>KEYWORDS</b>
+                <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Add keywords by pressing the add button. Remove keywords from the list by pressing the trash icon next to the keyword you want to remove.">
+                    <!-- Makes the tooltip circular -->
+                    <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                </button>
+            </label>
             <div class="together" style="align-items: flex-start;">
                 <div style="width: 100%;">
                     <div class="listbox" style="overflow:auto; ">
@@ -409,7 +432,7 @@
         </div>
     </div>
 
-    <!-- search clusters modal TODO -->
+    <!-- search clusters modal -->
     <div id="modal4" class="modal">
         <div class="modal-content">
             <div class="together">
@@ -425,7 +448,12 @@
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
-                    <label><b>MATCH TO</b></label><br>
+                    <label><b>MATCH TO</b>
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Enter something relevant to the clusters you want to find.">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
+                    </label><br>
                     <input type="text" id="matchTo" class="form-control" name="matchTo" placeholder="Enter the something relevant to the cluster">
                 </div>
             </div>
@@ -496,7 +524,12 @@
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
-                    <label><b>GRANTS MATCHED</b></label><br>
+                    <label><b>GRANTS MATCHED</b>
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="How many grants this user matched">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
+                    </label><br>
                     <div class="together datetogether">
                         <input type="number" id="grantsLower" name="grantsLower" class="form-control" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="grantsHigher" name="grantsHigher" style="width: 100%">
                     </div>
@@ -516,7 +549,7 @@
         </div>
     </div>
     
-    <!-- search changes modal TODO -->
+    <!-- search changes modal -->
     <div id="modal6" class="modal">
         <div class="modal-content">
             <div class="together">
@@ -576,7 +609,7 @@
         </div>
     </div>
 
-    <!-- Error modal -->
+    <!-- Welcome modal -->
     <div id="modal7" class="modal">
         <div class="modal-content">
             <div class="together">
@@ -587,6 +620,20 @@
             <hr/>
             
             <p>Welcome to GrantMatcher - the world's leading figure in... well, matching grants! We hope you enjoy your stay! Before you get started, check out the <a href="/tutorial">tutorial</a> page to learn how to use this site.</p>
+        </div>
+    </div>
+
+    <!-- The modal when the user tries to filter a table but nothing is found -->
+    <div id="modal8" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Nothing Found</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close8">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Nothing was found in this search :( Reset the form or try different parameters.</p>
         </div>
     </div>
 

@@ -677,6 +677,7 @@ const editgrantpost = async (req, res)=>{
     description = x.description
     keywords = x.keywords
     researchers = x.researchers
+    reason = x.reason
 
     // parse the dates
     dateSplit = x.deadline.split('-')
@@ -706,7 +707,7 @@ const editgrantpost = async (req, res)=>{
         grant = result1.rows[0]
 
         // get the previous version
-        previousVersion = [grant.grantName, grant.url, grant.deadline, grant.duration.toString(), grant.description, grant.clusters.join(", "), grant.keywords.join("\n"), grant.researchers.join("\n"), grant.matched.toString()]
+        previousVersion = [grant.grantName, grant.url, grant.deadline, grant.duration.toString(), grant.description, grant.clusters.join(", "), grant.keywords.join("\n"), grant.researchers.join("\n"), grant.matched.toString(), reason]
 
         // get the current date (when this version stopped being the most recent version)
         now = new Date();

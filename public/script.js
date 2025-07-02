@@ -686,6 +686,7 @@ function sortTable(tableNumber) {
 }
 
 // SEARCHING
+// TODO: error modal when nothing is found (openModal(8))
 // filter through the researchers table
 function searchResearcher(tableNumber) {
     // get the relevant data
