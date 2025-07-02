@@ -351,6 +351,7 @@ const grantpageget = async (req, res)=>{
     description = grant.description
     keywords = grant.keywords.join("\n")
     researchers = grant.researchers.join("\n")
+    dateAdded = grant.dateAdded
 
     // get the users name from their email
     userEmail = grant.userEmail
@@ -360,7 +361,7 @@ const grantpageget = async (req, res)=>{
     if (user == undefined) { user = "deleted user"}
     else { user = user.name }
 
-    res.render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: title, user: user, url: url, deadline: deadline, duration: duration, clusters: clusters, id: id, keywords: keywords, description: description, researchers: researchers, showAlert: 'no'});
+    res.render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, title: title, user: user, date: dateAdded, url: url, deadline: deadline, duration: duration, clusters: clusters, id: id, keywords: keywords, description: description, researchers: researchers, showAlert: 'no'});
   } else {
     urlinit = '/grant/' + id // redirect them to the current url after they logged in
     res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
@@ -618,9 +619,20 @@ const addgrantpost = async (req, res)=>{
         // calculate the next change ID
         nextGrantID = maxGrantID + 1
 
+        // get the current date
+        now = new Date();
+
+        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+        year = now.getFullYear()
+        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+        // stringify it
+        date = `${day}-${month}-${year}`
+
         // add the grant to grants table
-        const mq2 = 'INSERT INTO grants ("grantID", "userEmail", "grantName", url, deadline, duration, description, clusters, keywords, researchers, matched, "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)'
-        const result2 = await db.query(mq2, [nextGrantID, req.session.useremail, grantName, url, reformattedDeadline, duration, description, clustersId, keywords, [[]], false, []]);
+        const mq2 = 'INSERT INTO grants ("grantID", "userEmail", "grantName", url, deadline, duration, description, clusters, keywords, researchers, matched, "dateAdded", "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)'
+        const result2 = await db.query(mq2, [nextGrantID, req.session.useremail, grantName, url, reformattedDeadline, duration, description, clustersId, keywords, [[]], false, date, []]);
         
         // get all changes
         const mq3 = 'SELECT "changeID" FROM changelog'
@@ -637,17 +649,6 @@ const addgrantpost = async (req, res)=>{
 
         // calculate the next change ID
         nextChangeID = maxChangeID + 1
-
-        // get the current date
-        now = new Date();
-
-        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
-        year = now.getFullYear()
-        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
-        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
-
-        // stringify it
-        date = `${day}-${month}-${year}`
 
         // add 'grant added' change to changelog
         const mq4 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'

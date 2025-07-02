@@ -60,10 +60,14 @@ app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id'], routes)
 
 // for code reuse
 async function queryAll(table) {
-  result = await db.query(`SELECT * FROM ${table}`);
-  result = result.rows
-    
-  return result
+  try {
+    result = await db.query(`SELECT * FROM ${table}`);
+    result = result.rows
+
+    return result
+  } catch {
+    return []
+  }
 }
 
 // database routs
@@ -73,6 +77,19 @@ app.get('/db/researchers', async (req, res) => {
 
 app.get('/db/grants', async (req, res) => {
   res.send(await queryAll('grants'))
+})
+
+app.get('/db/grants/version/:id', async (req, res) => {
+  result = [] // what to put in res.send()
+
+  try {
+    result = await db.query(`SELECT "versionInformation" FROM grants WHERE "grantID" = $1`, [id]);
+    result = result.rows
+  } catch {
+
+  }
+
+  res.send(result)
 })
 
 app.get('/db/clusters', async (req, res) => {

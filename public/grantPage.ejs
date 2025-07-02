@@ -148,7 +148,12 @@
                 <div class="spacer"></div>
                 <div style="width: 100%;">
                     <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
-                        <label><b>Researchers</b></label>
+                        <label><b>Researchers</b>
+                            <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Researchers who have been matched to the grant.">
+                                <!-- Makes the tooltip circular -->
+                                <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                            </button>
+                        </label>
                         <i class="fa fa-clone" id="researchersCopy"></i>
                     </div>
                     <textarea rows="4" style="width: 100%;" id="researchersArea" disabled><%= researchers %></textarea>
@@ -160,11 +165,10 @@
 
         <section>
             <h2>VERSION INFORMATION</h2>
-            <b>Current Version:</b>
-            <b>Reason for Edit:</b>
-            <!-- TODO: After making the edit page -->
+            <p id="versionP"><b>Current Version:</b> <span id="versionSpan"></span></p>
+            <p id="reasonP"><b>Reason for Edit:</b> <span id="reasonSpan"></span></p>
             <!-- Accordion items are added here -->
-            <div class="accordion" id="accordion1">
+            <div class="accordion" id="accordion">
             </div>
         </section>
     </main>
@@ -209,6 +213,131 @@
         if ("<%= showAlert %>" != "no") {
             openModal(2);
         }
+    </script>
+    <script>
+        // ACCORDIONS
+        // get the grant's version information data
+        // using fetch because 2D array cant be reliably sent through EJS variable passing
+        fetch('/db/grants/version/<%= id %>', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        }).then(response => response.json()).then(data => {
+            versionInformation = data[0]
+
+            // only process the information if it has a non-empty version information array
+            if (versionInformation.length > 0) {
+                        /* 
+                        {
+                            "title": "Accordion #1",
+                            "html": "<b>Test1</b> <i>yippeee</i>",
+                            "id": 1
+                        },
+                        */
+                
+                // get the accordion on the page
+                accordion = document.getElementsById("accordion")
+                
+                reasonCurrent = "First version." // the reason for the current version
+                dateCurrent = "<%= date %>" // the date of the current version
+
+                // loop through each version
+                for (i in versionInformation) {
+                    version = versionInformation[i]
+
+                    // get the information from the dictionary
+                    id = i+1 // version number
+                    grantName = version[0]
+                    url = version[1]
+                    deadline = version[2]
+                    duration = version[3]
+                    description = version[4]
+                    clusters = version[5].split(', ')
+                    keywords = version[6]
+                    researchers = version[7]
+                    matched = version[8]
+
+                    // process cluster IDs
+                    clusterNames = []
+                    for (x in clustersData) {
+                        if (clusters.includes(clustersData[x].id.toString())) {
+                            clusterNames.push(clustersData[x].name)
+                        }
+                    }
+
+                    clusters = clusterNames.join(", ")
+
+                    // the reason and date for the next version
+                    reasonNext = version[9]
+                    dateNext = version[10]
+
+                    // create the HTML to display the accordion item on the main page
+                    accordionItem = `<div class="accordion-item">
+                        <h2 class="accordion-header" id="heading1-${id}">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1-${id}" aria-expanded="true" aria-controls="collapse1-${id}">
+                            Version ${id} (${dateCurrent})
+                        </button>
+                        </h2>
+                        <div id="collapse1-${id}" class="accordion-collapse collapse" aria-labelledby="heading1-${id}" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class="together">
+                                <div style="width: 100%;">
+                                    <p><b>URL:</b> ${url}</p>
+                                    <p><b>Deadline:</b> ${deadline}</p>
+                                    <p><b>Duration:</b> ${duration} years</p>
+                                    <p><b>Clusters:</b> ${clusters}</span></p>
+                                </div>
+                                <div class="spacer"></div>
+                                <div style="width: 100%;">
+                                    <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
+                                        <label><b>Description</b></label>
+                                        <i class="fa fa-clone" id="descriptionCopy"></i> <!-- TODO: fix this -->
+                                    </div>
+                                    
+                                    <textarea rows="5" style="width: 100%;" id="descriptionArea-${id}" disabled>${description}</textarea>
+                                </div>
+                            </div>
+
+                            <div class="together">
+                                <div style="width: 100%;">
+                                    <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
+                                        <label><b>Keywords</b></label>
+                                        <i class="fa fa-clone" id="keywordsCopy"></i> <!-- TODO: fix this -->
+                                    </div>
+                                    <textarea rows="4" style="width: 100%;" id="keywordsArea-${id}" disabled>${keywords}</textarea>
+                                </div>
+                                <div class="spacer"></div>
+                                <div style="width: 100%;">
+                                    <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
+                                        <label><b>Researchers</b>
+                                            <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Researchers who have been matched to the grant.">
+                                                <!-- Makes the tooltip circular -->
+                                                <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                                            </button>
+                                        </label>
+                                        <i class="fa fa-clone" id="researchersCopy"></i> <!-- TODO: fix this -->
+                                    </div>
+                                    <textarea rows="4" style="width: 100%;" id="researchersArea-${id}" disabled>${researchers}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>`
+
+                    // add the accordion item to the accordion
+                    document.getElementById(accordion.id).innerHTML += accordionItem
+
+                    reasonCurrent = reasonNext
+                    dateCurrent = dateNext
+                }
+
+                document.getElementById("versionSpan").textContent = `Version ${i+1} (${dateCurrent})`
+                document.getElementById("reasonSpan").textContent = reasonCurrent
+            } else {
+                document.getElementById("versionSpan").textContent = `Version 1 (<%= date %>)`
+                document.getElementById("reasonP").style.display = "none"
+            }
+        });
+        
     </script>
 </body>
 </html>
