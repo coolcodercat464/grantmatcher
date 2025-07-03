@@ -50,7 +50,7 @@
             </div>
             <hr/>
             
-            <p><%= showAlert %></p>
+            <p id="showAlert"></p>
         </div>
     </div>
 
@@ -64,7 +64,7 @@
             </div>
             <hr/>
             
-            <p>It looks like your password confirmation doesn't match your original password. Please try again.</p>
+            <p>Please ensure that your passwords match and are at least 5 characters long!</p>
         </div>
     </div>
 
@@ -121,11 +121,6 @@
     <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
     <script src="script.js"></script>
     <script>
-        if ("<%= showAlert %>" != "no") {
-            openModal(1);
-        }
-    </script>
-    <script>
         // tooltip stuff
         $(function () {
             $('[data-toggle="tooltip"]').tooltip()
@@ -173,9 +168,9 @@
         }
     </script>
     <script>
-        // ensure that the two passwords match, the name isnt empty or spaces, the email isnt empty or spaces, the password is at least 5 characters, and the authcode is exactly 8 characters
         function submitForm() {
-            if (document.getElementById("password").value == document.getElementById("confirmPassword").value && document.getElementById("password").value.length >= 5 && !(document.getElementById("name").value.trim() === '') && !(document.getElementById("email").value.trim() === '') && document.getElementById('authcode').value.length == 8) {
+            // ensure that the two passwords match
+            if (document.getElementById("password").value == document.getElementById("confirmPassword").value) {
                 data = {
                     "name": document.getElementById("name").value,
                     "email": document.getElementById("email").value,
@@ -189,7 +184,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 }).then(response => response.json()).then(data => {
-                    window.location.href = '/'
+                    if (data.success == 'success') {
+                        window.location.href = '/'
+                    } else {
+                        document.getElementById("showAlert").textContent = data.alert
+                        openModal(1)
+                    }
                 });
             } else {
                 openModal(2);

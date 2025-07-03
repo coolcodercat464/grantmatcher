@@ -304,7 +304,7 @@ const loginget = async (req, res)=>{
     if (req.isAuthenticated()) {
         res.redirect('/')
     } else {
-        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
     }
 } 
 
@@ -316,7 +316,7 @@ const signupget = async (req, res)=>{
     if (req.isAuthenticated()) {
         res.redirect('/')
     } else {
-        res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no'});
+        res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut});
     }
 } 
 
@@ -330,7 +330,7 @@ const grantpageget = async (req, res)=>{
 
   // add validation - ensure id is an integer (id might be 'script.js' sometimes)
   if (!isStringInteger(id) && id > 0) {
-    res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+    res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
   }
   
   // only allow them to access this page if they have been authenticated
@@ -343,11 +343,11 @@ const grantpageget = async (req, res)=>{
         grant = result.rows
     } catch (err) {
         console.error(err);
-        res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
+        res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
     }
 
     if (grant.length == 0) {
-        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'This grant does not exist yet. Maybe you can help make it by adding a grant!'});
+        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'This grant does not exist yet. Maybe you can help make it by adding a grant!'});
         return
     } else {
         grant = grant[0]
@@ -385,10 +385,10 @@ const addgrantget = async (req, res)=>{
 
     // only allow them to signup if they havent been authenticated yet
     if (req.isAuthenticated()) {
-        res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no'});
+        res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
     } else {
         urlinit = '/addgrant' // redirect them to the current url after they logged in
-        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
     }
 } 
 
@@ -400,7 +400,8 @@ const editgrantget = async (req, res)=>{
 
     // add validation - ensure id is an integer (id might be 'script.js' sometimes)
     if (!isStringInteger(id) && id > 0) {
-        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+        return
     }
 
     // only allow them to signup if they havent been authenticated yet
@@ -414,11 +415,12 @@ const editgrantget = async (req, res)=>{
             grant = result.rows
         } catch (err) {
             console.error(err);
-            res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
+            res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
+            return
         }
 
         if (grant.length == 0) {
-            res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'This grant does not exist yet. Maybe you can help make it by adding a grant!'});
+            res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'This grant does not exist yet. Maybe you can help make it by adding a grant!'});
             return
         } else {
             grant = grant[0]
@@ -443,7 +445,7 @@ const editgrantget = async (req, res)=>{
         res.render('editGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, title: title, url: url, deadline: deadline, duration: duration, clusters: clusters, description: description, keywords: keywords, researchers: researchers, showAlert: 'no'});
     } else {
         urlinit = '/editgrant/' + id // redirect them to the current url after they logged in
-        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
     }
 } 
 
@@ -470,8 +472,8 @@ const loginpost = async (req, res, next) => {
         if (info) {
             console.log("FAILURE")
 
-            // showAlert is 'yes' to show an error alert
-            return res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'yes', urlinit: urlinit});
+            res.send({"success":"failure"})
+            return
         }
 
         // otherwise log them in
@@ -512,21 +514,21 @@ const signuppost = async (req, res, next) => {
     // ensure that all the fields are there
     if (!Object.keys(x).includes('name') || !Object.keys(x).includes('password') || !Object.keys(x).includes('email') || !Object.keys(x).includes('authcode') || !Object.keys(x).includes('rememberme')) {
         // give them an error pop-up
-        res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'Please ensure all fields are filled.'});
+        res.send({alert: 'Please ensure all fields are filled.'});
         return
     }
 
     // add validation to name - name cannot just be spaced
     if (x.name.trim() === '') {
         // give them an error pop-up
-        res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'Please ensure your name isn\'t empty!'});
+        res.send({alert: 'Please ensure your name isn\'t empty!'});
         return
     } 
 
     // add validation to password - password must be at least 5 characters
     if (x.password.length < 5) {
         // give them an error pop-up
-        res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'Your password must be at least 5 characters long. Please try again!'});
+        res.send({alert: 'Your password must be at least 5 characters long. Please try again!'});
         return
     } 
 
@@ -538,13 +540,13 @@ const signuppost = async (req, res, next) => {
         user = users[u];
         if(x.email === user.email) {
             // give them an error pop-up if they are already in the database
-            res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'A user with this email already exists. Please try again or login instead.'});
+            res.send({alert: 'A user with this email already exists. Please try again or login instead.'});
             return
         }
     }
 
     if(!x.email || !x.authcode || !x.password || !x.name){
-        res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'Please ensure all fields are filled.'});
+        res.send({alert: 'Please ensure all fields are filled.'});
     } else {
         // get all the auth codes
         codes = await get_codes()
@@ -552,8 +554,8 @@ const signuppost = async (req, res, next) => {
         // check whether the authentication code is correct
         success = false
         role = undefined
-        for (x in codes) {
-            code = codes[x]
+        for (i in codes) {
+            code = codes[i]
             // check if the code matches the inputted email
             if (code.code == x.authcode && code.userEmail == x.email) {
                 success = true;
@@ -564,7 +566,7 @@ const signuppost = async (req, res, next) => {
 
         // if it failed (no code exists), give an error pop-up to the user
         if (!success) {
-            res.render('signup.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'Your authentication code seems to be incorrect. If you haven\'t been provided with one, please contact me at flyingbutter213@gmail.com. Please ensure your email has been spelt correctly.'});
+            res.send({alert: 'Your authentication code seems to be incorrect. If you haven\'t been provided with one, please contact me at flyingbutter213@gmail.com. Please ensure your email has been spelt correctly.'});
             return
         }
 
@@ -617,13 +619,24 @@ const addgrantpost = async (req, res)=>{
         url = x.url
         description = x.description
         keywords = x.keywords
+        deadline = x.deadline
+
+        if (grantName == undefined || url == undefined || description == undefined || keywords == undefined || deadline == undefined || new Date(deadline) == 'Invalid Date') {
+            res.send({alert: 'Some entries appear to be missing. Please try again.'});
+            return
+        }
 
         // parse the dates
-        dateSplit = x.deadline.split('-')
+        dateSplit = deadline.split('-')
         reformattedDeadline = dateSplit[2] + '-' + dateSplit[1] + '-' + dateSplit[0]
 
         // parse the duration
         duration = parseFloat(x.duration)
+
+        if (duration <= 0) {
+            res.send({alert: 'Duration must be positive. Please try again.'});
+            return
+        }
         
         // the clusters list will contain two lists - one is a list of names and the
         // other is a list of element IDs (from the DOM)
@@ -632,13 +645,19 @@ const addgrantpost = async (req, res)=>{
 
         // isolate the cluster IDs from the element ID list
         for (i in clustersElementId) {
-            clustersId.push(parseInt(clustersElementId[i].split('S')[1]))
+            clusterID = clustersElementId[i].split('S')[1]
+            if (isStringInteger(clusterID) == false || parseInt(clusterID) < 0) {
+                res.send({alert: 'Your clusters are invalid. Please refresh the page and try again.'});
+                return
+            }
+            clustersId.push(parseInt(clusterID))
         }
     } catch (err) {
         console.error(err);
 
         // if an error occurs, tell the user
-        res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong. Please ensure all of the inputs are valid. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+        return
     }
 
     try {
@@ -698,7 +717,7 @@ const addgrantpost = async (req, res)=>{
         console.error(err);
 
         // if an error occurs, tell the user
-        res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
     }
 } 
 
@@ -714,16 +733,27 @@ const editgrantpost = async (req, res)=>{
         grantName = x.name
         url = x.url
         description = x.description
+        deadline = x.deadline
         keywords = x.keywords
         researchers = x.researchers
         reason = x.reason
 
+        if (grantName == undefined || url == undefined || description == undefined || keywords == undefined || deadline == undefined || new Date(deadline) == 'Invalid Date' || reason == undefined || reason.trim() == '') {
+            res.send({alert: 'Some entries appear to be missing. Please try again.'});
+            return
+        }
+
         // parse the dates
-        dateSplit = x.deadline.split('-')
+        dateSplit = deadline.split('-')
         reformattedDeadline = dateSplit[2] + '-' + dateSplit[1] + '-' + dateSplit[0]
 
         // parse the duration
         duration = parseFloat(x.duration)
+
+        if (duration < 0) {
+            res.send({alert: 'Duration must be positive. Please try again.'});
+            return
+        }
         
         // the clusters list will contain two lists - one is a list of names and the
         // other is a list of element IDs (from the DOM)
@@ -732,13 +762,19 @@ const editgrantpost = async (req, res)=>{
 
         // isolate the cluster IDs from the element ID list
         for (i in clustersElementId) {
-            clustersId.push(parseInt(clustersElementId[i].split('S')[1]))
+            clusterID = clustersElementId[i].split('S')[1]
+            if (isStringInteger(clusterID) == false || parseInt(clusterID) < 0) {
+                res.send({alert: 'Your clusters are invalid. Please refresh the page and try again.'});
+                return
+            }
+            clustersId.push(parseInt(clusterID))
         }
     } catch (err) {
         console.error(err);
 
         // if an error occurs, tell the user
-        res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong. Please ensure all of the inputs are valid. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+        return
     }
 
     try {
@@ -748,7 +784,7 @@ const editgrantpost = async (req, res)=>{
 
         // ensure that the grant exists
         if (result1.rows.length == 0) {
-            res.render('editGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong and we couldn\'t find the grant you were trying to edit. Please check that it exists. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+            res.send({alert: 'Something went wrong and we couldn\'t find the grant you were trying to edit. Please check that it exists. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
             return
         }
         grant = result1.rows[0]
@@ -805,7 +841,7 @@ const editgrantpost = async (req, res)=>{
         console.error(err);
 
         // if an error occurs, tell the user
-        res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
     }
 } 
 

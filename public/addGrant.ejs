@@ -77,7 +77,7 @@
             </div>
             <hr/>
             
-            <p><%= showAlert %></p>
+            <p id="showAlert"></p>
         </div>
     </div>
 
@@ -85,7 +85,7 @@
     <div id="modal3" class="modal">
         <div class="modal-content">
             <div class="together">
-                <h2>Error!</h2>
+                <h2>Woops!</h2>
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
                 <span class="close" id="close3">&times;</span>
             </div>
@@ -260,8 +260,8 @@
             duration = document.getElementById("duration").value
             description = document.getElementById("description").value
 
-            // validation for name, url, and length of description
-            if (grantName.trim() == '' || url.trim() == '' || description.trim() == '') {
+            // validation for name, url, deadline, duration, and description
+            if (grantName.trim() == '' || url.trim() == '' || deadline.trim() == '' || duration.trim() == '' || description.trim() == '') {
                 openModal(3)
             } else {
                 data = {
@@ -279,15 +279,14 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 }).then(response => response.json()).then(data => {
-                    window.location.href = `/grant/${data.id}`
+                    if (data.id == undefined) {
+                        document.getElementById('showAlert').textContent = data.alert
+                        openModal(2)
+                    } else {
+                        window.location.href = `/grant/${data.id}`
+                    }
                 });
             }
-        }
-    </script>
-    <script>
-        // show alerts
-        if ("<%= showAlert %>" != "no") {
-            openModal(2);
         }
     </script>
 </body>
