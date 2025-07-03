@@ -673,6 +673,12 @@ const addgrantpost = async (req, res)=>{
     // get the user inputs
     x = req.body
 
+    // ensure that user is authenticated
+    if (req.isAuthenticated() == false) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+
     // validation (will error out if the fields arent in the correct format, thus invalid inputs are handled in the catch part)
     try {
         // isolate each field
@@ -785,6 +791,22 @@ const addgrantpost = async (req, res)=>{
 // edit a grant
 const editgrantpost = async (req, res)=>{
     console.log("EDIT GRANT POST")
+
+    // ensure that user is authenticated
+    if (req.isAuthenticated() == false) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    // get the id (from the route name itself)
+    id = req.params.id
+    console.log(id);
+
+    // add validation - ensure id is an integer (id might be 'script.js' sometimes)
+    if (!isStringInteger(id) || parseInt(id) <= 0) {
+        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+        return
+    }
 
     try {
         // get the user inputs
@@ -909,11 +931,105 @@ const editgrantpost = async (req, res)=>{
 // match a grant
 const matchpost = async (req, res)=>{
     console.log("MATCH POST")
+
+    if (req.isAuthenticated() == false) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    // get the id (from the route name itself)
+    id = req.params.id
+    console.log(id);
+
+    // add validation - ensure id is an integer (id might be 'script.js' sometimes)
+    if (!isStringInteger(id) || parseInt(id) <= 0) {
+        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+        return
+    }
 } 
 
 // delete a grant
 const deletegrantpost = async (req, res)=>{
     console.log("DELETE GRANT POST")
+
+    // ensure that user is authenticated
+    if (req.isAuthenticated() == false) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    // get the id (from the route name itself)
+    id = req.params.id
+    console.log(id);
+
+    // add validation - ensure id is an integer (id might be 'script.js' sometimes)
+    if (!isStringInteger(id) || parseInt(id) <= 0) {
+        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+        return
+    }
+
+    x = req.body
+
+    // ensure that reason is provided
+    if (!x.reason) {
+        res.send({alert: 'It looks like no reason for grant deletion was provided. Please try again.'});
+        return
+    }
+
+    try {
+        // get the grants name
+        const mq1 =  'SELECT "grantName" FROM grants WHERE "grantID" = $1'
+        const result1 = await db.query(mq1, [id]);
+
+        if (result1.rows.length == 0) {
+            res.send({alert: 'Looks like your grant doesn\'t exist in the first place! Please try again.'})
+            return
+        }
+        
+        grantName = result1.rows[0].grantName
+
+        // remove the grant from the database
+        const mq2 = 'DELETE FROM grants WHERE "grantID" = $1'
+        const result2 = await db.query(mq2, [id]);
+
+        // get the current date (when this version stopped being the most recent version)
+        now = new Date();
+
+        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+        year = now.getFullYear()
+        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+        // stringify it
+        date = `${day}-${month}-${year}`
+        
+        // get all changes
+        const mq3 = 'SELECT "changeID" FROM changelog'
+        const result3 = await db.query(mq3);
+
+        // calculate the maximum changeID
+        maxChangeID = 0
+        for (x in result3.rows) {
+            rowID = result3.rows[x].changeID
+            if (rowID > maxChangeID) {
+                maxChangeID = rowID
+            }
+        }
+
+        // calculate the next change ID
+        nextChangeID = maxChangeID + 1
+
+        // add 'grant edited' change to changelog
+        const mq4 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
+        const result4 = await db.query(mq4, [nextChangeID, req.session.useremail, 'Grant Deleted', date, `The grant "${grantName}" has been deleted. The reason provided was "${x.reason}"`, '{}']);
+
+        // redirect to the grant page
+        res.send({success: 'success'})
+    } catch (err) {
+        console.log(err)
+
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+    }
 } 
 
 // Export of all methods as object 
