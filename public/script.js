@@ -601,7 +601,6 @@ function sortTable(tableNumber) {
 }
 
 // SEARCHING
-// TODO: error modal when nothing is found (openModal(8))
 // filter through the researchers table
 function searchResearcher(tableNumber) {
     // get the relevant data
@@ -718,6 +717,11 @@ function searchResearcher(tableNumber) {
             tableData[tableNumber].showRows.push(researcher)
             console.log(researcher)
         }
+    }
+
+    // open error modal (modal 8) if no researchers are found
+    if (tableData[tableNumber].showRows.length == 0) {
+        openModal(8)
     }
 
     // reset the table
@@ -926,6 +930,11 @@ function searchGrant(tableNumber) {
         }
     }
 
+    // open error modal (modal 8) if no researchers are found
+    if (tableData[tableNumber].showRows.length == 0) {
+        openModal(8)
+    }
+
     // reset the table
     renderTable(tableNumber)
 
@@ -1055,6 +1064,11 @@ function searchUser(tableNumber) {
         }
     }
 
+    // open error modal (modal 8) if no researchers are found
+    if (tableData[tableNumber].showRows.length == 0) {
+        openModal(8)
+    }
+
     // reset the table
     renderTable(tableNumber)
 
@@ -1119,22 +1133,26 @@ async function searchCluster(tableNumber) {
     tableData[tableNumber].showRows = []
 
     // if matchTo isn't provided ...
-    if (matchTo == '') {
+    if (matchTo.trim() == '') {
         // loop through each data row
         for (var i = 0; i < clusterTableData.length; i++) {
             cluster = clusterTableData[i]
 
             // check the text input matches
             nameCorrect = (cluster.name.trim().toLowerCase().includes(clusterName))
-            matchCorrect = true // TODO: Call an NLP function
 
             // ensure the numeric values are within the set range
             researchersCorrect = (cluster.numberResearchers >= researchersLower && cluster.numberResearchers <= researchersHigher)
 
             // only make the row visible if it matches for all of the user inputs
-            if (nameCorrect && matchCorrect && researchersCorrect) {
+            if (nameCorrect && researchersCorrect) {
                 tableData[tableNumber].showRows.push(cluster)
             }
+        }
+
+        // open error modal (modal 8) if no researchers are found
+        if (tableData[tableNumber].showRows.length == 0) {
+            openModal(8)
         }
 
         // reset the table
@@ -1163,15 +1181,19 @@ async function searchCluster(tableNumber) {
 
             // check the text input matches
             nameCorrect = (cluster.name.trim().toLowerCase().includes(clusterName))
-            matchCorrect = true // TODO: Call an NLP function
 
             // ensure the numeric values are within the set range
             researchersCorrect = (cluster.numberResearchers >= researchersLower && cluster.numberResearchers <= researchersHigher)
 
             // only make the row visible if it matches for all of the user inputs
-            if (nameCorrect && matchCorrect && researchersCorrect) {
+            if (nameCorrect && researchersCorrect) {
                 tableData[tableNumber].showRows.push(cluster)
             }
+        }
+
+        // open error modal (modal 8) if no researchers are found
+        if (tableData[tableNumber].showRows.length == 0) {
+            openModal(8)
         }
 
         // reset the table
@@ -1256,6 +1278,11 @@ function searchChange(tableNumber) {
         }
     }
 
+    // open error modal (modal 8) if no researchers are found
+    if (tableData[tableNumber].showRows.length == 0) {
+        openModal(8)
+    }
+
     // reset the table
     renderTable(tableNumber)
 
@@ -1290,7 +1317,7 @@ function resetChangeSearch(tableNumber) {
 }
 
 // SERVER DATABASE CALLS
-// TODO: Add more try-catch stuff
+// lots of try-catch stuff since there might be features that are present in some places but not others
 /*
 DATA STRUCTURE JUSTIFICATION - List of Dictionaries:
 Allows the program to loop through it and sort it easily. This
@@ -1373,27 +1400,31 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
             tableData[3].showFields = ['clusterID', 'name', 'numberResearchers']
         }
 
-        // INITIALISE CLUSTER SELECTORS
-        // get all the lists of unselected clusters
-        unselectedClustersDivs = document.getElementsByClassName('unselectedClusters')
+        try {
+            // INITIALISE CLUSTER SELECTORS
+            // get all the lists of unselected clusters
+            unselectedClustersDivs = document.getElementsByClassName('unselectedClusters')
 
-        // initialise the list by adding all the cluster data to the unselected cluster (no clusters selected at the beginning)
-        for (var i = 0; i < unselectedClustersDivs.length; i++) {
-            // get the number of the div (e.g., the number is 5 for a div with an ID called unselectedClusters5)
-            selectorNumber = unselectedClustersDivs[i].id.replace("unselectedClusters", "")
-            // this string holds the HTMl code for the cluster list
-            clusterHTML = ''
-            for (x in clustersData) {
-                // create a single HTML button for each button and add it to the total list
-                c = clustersData[x]
-                clusterName = c.name
-                clusterId = c['id']
-                clusterHTML += `<button class='unselectedClusterButton' id='${selectorNumber}U${clusterId}' onclick="selectCluster('${selectorNumber}U${clusterId}')">${clusterName}</button>`
+            // initialise the list by adding all the cluster data to the unselected cluster (no clusters selected at the beginning)
+            for (var i = 0; i < unselectedClustersDivs.length; i++) {
+                // get the number of the div (e.g., the number is 5 for a div with an ID called unselectedClusters5)
+                selectorNumber = unselectedClustersDivs[i].id.replace("unselectedClusters", "")
+                // this string holds the HTMl code for the cluster list
+                clusterHTML = ''
+                for (x in clustersData) {
+                    // create a single HTML button for each button and add it to the total list
+                    c = clustersData[x]
+                    clusterName = c.name
+                    clusterId = c['id']
+                    clusterHTML += `<button class='unselectedClusterButton' id='${selectorNumber}U${clusterId}' onclick="selectCluster('${selectorNumber}U${clusterId}')">${clusterName}</button>`
+                }
+                unselectedClustersDivs[i].innerHTML += clusterHTML;
             }
-            unselectedClustersDivs[i].innerHTML += clusterHTML;
-        }
 
-        clustersInitialised = true;
+            clustersInitialised = true;
+        } catch {
+            
+        }
 
         try {
             // initialise cluster table
@@ -1511,7 +1542,7 @@ fetch('/db/users').then(response => response.json()).then(data => {
             tableData[5].showRows.push(row)
             tableData[5].showFields = ['date', 'type', 'username']
         }
-
+        
         try {
             tableData[5].totalPages = Math.ceil(dataChange.length / rowsPerPage)
             renderTable(5)

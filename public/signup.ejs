@@ -173,8 +173,9 @@
         }
     </script>
     <script>
+        // ensure that the two passwords match, the name isnt empty or spaces, the email isnt empty or spaces, the password is at least 5 characters, and the authcode is exactly 8 characters
         function submitForm() {
-            if (document.getElementById("password").value == document.getElementById("confirmPassword").value) {
+            if (document.getElementById("password").value == document.getElementById("confirmPassword").value && document.getElementById("password").value.length >= 5 && !(document.getElementById("name").value.trim() === '') && !(document.getElementById("email").value.trim() === '') && document.getElementById('authcode').value.length == 8) {
                 data = {
                     "name": document.getElementById("name").value,
                     "email": document.getElementById("email").value,

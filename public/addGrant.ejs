@@ -81,6 +81,20 @@
         </div>
     </div>
 
+    <!-- Another error modal -->
+    <div id="modal3" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Error!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close3">&times;</span>
+            </div>
+            <hr/>
+            
+            <p>Please ensure all areas have been filled in.</p>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section>
@@ -240,24 +254,34 @@
     </script>
     <script>
         function submit() {
-            // TODO - validation for name, url, and length of description
-            data = {
-                "name": document.getElementById("grantName").value,
-                "url": document.getElementById("url").value,
-                "deadline": document.getElementById("deadline").value,
-                "duration": document.getElementById("duration").value,
-                "description": document.getElementById("description").value,
-                "clusters": getSelectedClusterNames(1),
-                "keywords": getKeywords(1)
-            }
+            grantName = document.getElementById("grantName").value
+            url = document.getElementById("url").value
+            deadline = document.getElementById("deadline").value
+            duration = document.getElementById("duration").value
+            description = document.getElementById("description").value
 
-            fetch('/addgrant', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            }).then(response => response.json()).then(data => {
-                window.location.href = `/grant/${data.id}`
-            });
+            // validation for name, url, and length of description
+            if (grantName.trim() == '' || url.trim() == '' || description.trim() == '') {
+                openModal(3)
+            } else {
+                data = {
+                    "name": grantName,
+                    "url": url,
+                    "deadline": deadline,
+                    "duration": duration,
+                    "description": description,
+                    "clusters": getSelectedClusterNames(1),
+                    "keywords": getKeywords(1),
+                }
+
+                fetch('/addgrant', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                }).then(response => response.json()).then(data => {
+                    window.location.href = `/grant/${data.id}`
+                });
+            }
         }
     </script>
     <script>
