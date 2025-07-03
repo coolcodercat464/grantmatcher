@@ -77,7 +77,26 @@
             </div>
             <hr/>
             
-            <p><%= showAlert %></p>
+            <p id="showAlert"><%= showAlert %></p>
+        </div>
+    </div>
+
+    <!-- Delete grant modal -->
+    <div id="modal3" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Delete Grant</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close3">&times;</span>
+            </div>
+            <hr/>
+            
+            <label><b>REASON FOR DELETION</b></label>
+            <p>Why do you want to delete this grant? This action cannot be undone.
+</p>
+            <textarea style="width: 100%" id="deleteReason" rows="6"></textarea>
+            <button style="width: 100%" class="buttonStyle blue" id="cancel3">Cancel</button>
+            <button style="width: 100%" class="buttonStyle pink" onclick="deleteGrant()">Delete this Grant</button>
         </div>
     </div>
 
@@ -106,13 +125,13 @@
                 </div>
                 <div>
                     <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Edit the Grant">
-                        <i onclick="window.location.href = '/editgrant/<%= id %>'" class=" fa fa-pencil-square-o"></i>
+                        <i onclick="window.location.href = '/editgrant/<%= id %>'" class="fa fa-pencil-square-o"></i>
                     </button>
                     <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Match this Grant">
-                        <i onclick="window.location.href = '/match/<%= id %>'" class=" fa fa-graduation-cap "></i>
+                        <i onclick="window.location.href = '/match/<%= id %>'" class="fa fa-graduation-cap "></i>
                     </button>
                     <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Delete this Grant">
-                        <i id="modalBtn2" class=" fa fa-trash"></i>
+                        <i id="modalBtn2" class="fa fa-trash" onclick="openModal(3)"></i>
                     </button>
                 </div>
             </div>
@@ -215,6 +234,29 @@
         }
     </script>
     <script>
+        function deleteGrant() {
+            reason = document.getElementById('deleteReason').value
+            document.getElementById('modal3').style.display = 'none'
+            
+            if (reason.trim() == '') {
+                document.getElementById('showAlert').textContent = 'Please ensure that you state the reason you are deleting the grant.'
+                openModal(2)
+            } else {
+                fetch('/deletegrant/<%= id %>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+                }).then(response => response.json()).then(data => {
+                    if (data.success == 'success') {
+                        window.location.href = '/'
+                    } else {
+                        document.getElementById('showAlert').textContent = data.alert
+                        openModal(2)
+                    }
+                })
+            }
+        }
+    </script>
+    <script>
         // wait for a condition to be true
         const waitFor = (conditionFn, callback, interval = 50) => {
             const checker = setInterval(() => {
@@ -276,9 +318,7 @@
                             }
                         }
 
-                        console.log(clusters)
                         clusters = clusterNames.join(", ")
-                        console.log(clusters)
 
                         // the reason and date for the next version
                         reasonNext = version[9]

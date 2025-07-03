@@ -320,7 +320,7 @@ const signupget = async (req, res)=>{
     }
 } 
 
-// get route with input
+// present the grant page
 const grantpageget = async (req, res)=>{
   console.log("GRANT PAGE GET")
 
@@ -329,8 +329,9 @@ const grantpageget = async (req, res)=>{
   console.log(id);
 
   // add validation - ensure id is an integer (id might be 'script.js' sometimes)
-  if (!isStringInteger(id) && id > 0) {
+  if (!isStringInteger(id) || parseInt(id) <= 0) {
     res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+    return
   }
   
   // only allow them to access this page if they have been authenticated
@@ -448,6 +449,66 @@ const editgrantget = async (req, res)=>{
         res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
     }
 } 
+
+// present the match grant page
+const matchget = async (req, res)=>{
+    console.log("MATCH GET")
+
+    // get the id (from the route name itself)
+    id = req.params.id
+    console.log(id);
+
+    // add validation - ensure id is an integer (id might be 'script.js' sometimes)
+    if (!isStringInteger(id) || parseInt(id) < 0) {
+        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+        return
+    }
+    
+    // only allow them to access this page if they have been authenticated
+    if (req.isAuthenticated()) {
+        // get the grant data
+        try {
+            // get the grants data
+            const mq = 'SELECT * FROM grants WHERE "grantID" = $1'
+            const result = await db.query(mq, [id]);
+            grant = result.rows
+        } catch (err) {
+            console.error(err);
+            res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
+        }
+
+        if (grant.length == 0) {
+            res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'This grant does not exist yet. Maybe you can help make it by adding a grant!'});
+            return
+        } else {
+            grant = grant[0]
+        }
+        
+        // get the relevant fields
+        title = grant.grantName
+        url = grant.url
+        deadline = grant.deadline
+        duration = grant.duration
+        clusters = grant.clusters.join(", ")
+        description = grant.description
+        keywords = grant.keywords.join("\n")
+        researchers = grant.researchers.join("\n")
+        dateAdded = grant.dateAdded
+
+        // get the users name from their email
+        userEmail = grant.userEmail
+        user = await get_user_by_email(userEmail)
+
+        // if the user doesnt exist, then they have been deleted
+        if (user == undefined) { user = "deleted user"}
+        else { user = user.name }
+
+        res.render('match.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, title: title, user: user, date: dateAdded, url: url, deadline: deadline, duration: duration, clusters: clusters, id: id, keywords: keywords, description: description, researchers: researchers, showAlert: 'no'});
+    } else {
+        urlinit = '/grant/' + id // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
+    }
+};
 
 // POST
 // when user logs out
@@ -721,7 +782,7 @@ const addgrantpost = async (req, res)=>{
     }
 } 
 
-// add a new grant
+// edit a grant
 const editgrantpost = async (req, res)=>{
     console.log("EDIT GRANT POST")
 
@@ -845,6 +906,16 @@ const editgrantpost = async (req, res)=>{
     }
 } 
 
+// match a grant
+const matchpost = async (req, res)=>{
+    console.log("MATCH POST")
+} 
+
+// delete a grant
+const deletegrantpost = async (req, res)=>{
+    console.log("DELETE GRANT POST")
+} 
+
 // Export of all methods as object 
 module.exports = { 
     indexget,
@@ -853,10 +924,13 @@ module.exports = {
     addgrantget,
     grantpageget,
     editgrantget,
+    matchget,
 
     indexpost,
     loginpost,
     signuppost,
     addgrantpost,
-    editgrantpost
+    editgrantpost,
+    matchpost,
+    deletegrantpost
 }

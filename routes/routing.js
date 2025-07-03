@@ -23,6 +23,11 @@ router.get('/grant/:id', control.grantpageget)
 router.get('/editgrant/:id', control.editgrantget)
 router.post('/editgrant/:id', control.editgrantpost)
 
+router.post('/deletegrant/:id', control.deletegrantpost)
+
+router.get('/match/:id', control.matchget)
+router.post('/match/:id', control.matchpost)
+
 router.get('/login', control.loginget)
 router.post('/login', control.loginpost)
 

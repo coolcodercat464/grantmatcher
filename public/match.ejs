@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>GrantMatcher - Match <%= title %></title>
+    <%- head %>
+</head>
+<body>
+    <!-- Navigation (sticky header). Links and dropdown collapse into a hamburger menu when the screen size is small. -->
+    <nav class="navbar navbar-expand-lg navbar-dark px-3" id="navbar">
+        <!-- Brand on the left -->
+        <a class="navbar-brand bigBrand" href="/" id="navbar-brand">Grant Matcher</a>
+
+        <!-- Toggler (for mobile view) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" id="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links on the right -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Links here -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tickets">Tickets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tutorial">Tutorial</a>
+                </li>
+
+                <!-- Dropdown (user menu) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <!-- Logout button (opens a modal) -->
+                        <li><button class="dropdown-item" id="modalBtn1" onclick="openModal(1)">Logout</button></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- The modal the logout button in the navigation bar opens -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Log out</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close1">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to log out?</p>
+            <div class="together">
+                <form method="post" action="/">
+                    <input type="submit" value="Logout!" class="buttonStyle">
+                </form>
+                <button id='cancel1' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error modal -->
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Error!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close2">&times;</span>
+            </div>
+            <hr/>
+            
+            <p id="showAlert"><%= showAlert %></p>
+        </div>
+    </div>
+
+    <!-- Confirmation modal before submitting the form -->
+    <div id="modal3" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Direct Matching</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close3">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to match this grant directly?</p>
+            <div class="together">
+                <button class="buttonStyle" onclick="directMatch()">Match now</button>
+                <button id='cancel3' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Another error modal -->
+    <div id="modal4" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Error!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close4">&times;</span>
+            </div>
+            <hr/>
+            
+            <p>Please ensure that you have filled in all areas.</p>
+        </div>
+    </div>
+
+    <!-- Confirmation modal before submitting the form -->
+    <div id="modal5" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Match Through Clusters</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close5">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to match this grant through clusters?</p>
+            <div class="together">
+                <button class="buttonStyle" onclick="clusterMatch()">Match now</button>
+                <button id='cancel5' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The main content -->
+    <main>
+        <section>
+            <h1>Match a Grant</h1>
+        </section>
+        <hr/>
+
+        <section>
+            <h2>GRANT DETAILS</h2>
+            <p><b>NAME:</b> <%= title %></p>
+            <p><b>CLUSTERS:</b> <span id="grantClusters"></span></p>
+            <p><b>KEYWORDS:</b>
+                <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="A list of the grant's keywords.">
+                    <!-- Makes the tooltip circular -->
+                    <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                </button>
+            </p>
+            <textarea id="grantKeywords" rows="5" disabled></textarea>
+        </section>
+        <hr/>
+
+        <section>
+            <h2>FILTERING SPECIFICATIONS</h2>
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>SCHOOL</b></label><br>
+                    <select name="school" class="form-control" id="school" style="width: 100%">
+                        <option value="all">All</option>
+                        <option value="geoscience">Geosciences</option>
+                        <option value="philosophy">History and Philosophy</option>
+                        <option value="chemistry">Chemistry</option>
+                        <option value="biology">Life and Environmental Sciences</option>
+                        <option value="maths">Mathematics and Statistics</option>
+                        <option value="physics">Physics</option>
+                        <option value="psychology">Psychology</option>
+                        <option value="veterinary">Veterinary Science</option>
+                    </select>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>CAREER STAGE</b></label><br>
+                    <select name="career" class="form-control" id="career" style="width: 100%">
+                        <option value="all">All</option>
+                        <option value=1>Post-Doctorate</option>
+                        <option value=2>Early Career Researcher</option>
+                        <option value=3>Mid-Career Researcher</option>
+                        <option value=4>Senior Researcher</option>
+                    </select>
+                </div>
+            </div>
+            <br>
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>GENDER</b></label><br>
+                    <select name="gender" class="form-control" id="gender" style="width: 100%">
+                        <option value="all">All</option>
+                        <option value="F">Female</option>
+                        <option value="M">Male</option>
+                        <option value="N">Non-Binary</option>
+                        <option value="U">Unknown Gender</option>
+                    </select>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>ACTIVITY RANGE</b></label><br>
+                    <div class="together">
+                        <input type="number" class="form-control" id="lower" class="form-control" name="lower" min="0" max="1" step="0.01" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="higher" name="higher" min="0" max="1" style="width: 100%" step="0.01">
+                    </div>
+                </div>
+            </div>
+            <br>
+
+            <label><b>SE:ECT CLUSTERS</b></label>
+            <p>Click clusters in the unselected list to select them, and click clusters in the selected list to deselect them. You can search and sort the two lists separately.</p>
+            <div class="together clusterselector">
+                <!-- List of the unselected clusters -->
+                <div class="unselected">
+                    <div class="listboxinput">
+                        <div class="listboxtextdiv">
+                            <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                            <!-- This is where the user enters some text that is matched to the clusters in the unselectedClusters list -->
+                            <input class="listboxtext" type="text" id="searchUnselectedClusters1" name="searchUnselectedClusters1" placeholder="Enter a cluster">
+                        </div>
+                        <div class="listboxsubmitdiv">
+                            <!-- User can press this button to search from the list -->
+                            <button class="listboxsubmit" onclick="findUnselectedCluster(1)"><i class="fa fa-search"></i></button>
+                        </div>
+                        <div class="listboxsubmitdiv">
+                            <!-- Added a reset button so its easier for the user to reset the form (displaying all clusters in the list) -->
+                            <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
+                        </div>
+                    </div>
+                    <!-- Contains all unselected clusters -->
+                    <div class="listboxdiv unselectedClusters" id="unselectedClusters1">
+                    </div>
+                    <div class="clustersort">
+                        <label for="sortUnselected1">Sort By:</label>
+
+                        <!-- Sort-by dropdown -->
+                        <select name="sortUnselected1" id="sortUnselected1" onchange="sortUnselected(1)">
+                            <option value="id">ID</option>
+                            <option value="name">Name</option>
+                            <option value="number"># of Researchers</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Adds space between the selected and unselected lists -->
+                <div class="spacer"></div>
+
+                <!-- Duplicate of the unselected list (for consistency and symmetrical balance) but with different names -->
+                <div class="selected">
+                    <div class="listboxinput">
+                        <div class="listboxtextdiv">
+                            <input class="listboxtext" type="text" id="searchSelectedClusters1" name="searchSelectedClusters1" placeholder="Enter a cluster">
+                        </div>
+                        <div class="listboxsubmitdiv">
+                            <button class="listboxsubmit" onclick="findSelectedCluster(1)"><i class="fa fa-search"></i></button>
+                        </div>
+                        <div class="listboxsubmitdiv">
+                            <button class="listboxsubmit" onclick="resetSelectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
+                        </div>
+                    </div>
+                    <div class="listboxdiv selectedClusters" id="selectedClusters1">
+                    </div>
+                    <div class="clustersort">
+                        <label for="sortSelected1">Sort By:</label>
+
+                        <select name="sortSelected1" id="sortSelected1" onchange="sortSelected(1)">
+                            <option value="id">ID</option>
+                            <option value="name">Name</option>
+                            <option value="number"># of Researchers</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <br>
+
+            <div class="together">
+                <div style="width: 100%">
+                    <div class="together">
+                        <label><b>KEYWORDS</b>
+                            <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Add keywords by pressing the add button. Remove keywords from the list by pressing the trash icon next to the keyword you want to remove.">
+                                <!-- Makes the tooltip circular -->
+                                <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                            </button>
+                        </label>
+                    </div>
+
+                    <div>
+                        <div class="listbox" style="overflow:auto; ">
+                            <div class="listboxdiv" style="height: 70px;">
+                                <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                                <!-- All keywords displayed here -->
+                                <ul class="listboxul" id="list1" style="height: 70px;">
+                                </ul>
+                            </div>
+
+                            <!-- The two elements in the div are on the same line -->
+                            <div class="listboxinput">
+                                <!-- User enters keywords here -->
+                                <div class="listboxtextdiv">
+                                    <input class="listboxtext" type="text" id="keyword1" name="keyword1" placeholder="Enter a keyword">
+                                </div>
+
+                                <!-- User presses this button to add the keyword to the list -->
+                                <div class="listboxsubmitdiv">
+                                    <button class="listboxsubmit" onclick="addKeyword(1)"><i class="fa fa-arrow-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%">
+                    <label for="number"><b>NUMBER</b>
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Number of researchers to find. No need for number if you specified strictness!">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
+                    </label>
+                    <input type="number" id="number" style="width: 100%" min="0" step="1"><br><br>
+                    <label for="strictness"><b>STRICTNESS</b>
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="What fraction of researchers to remove from list. The higher the strictness, the less researchers you get. No need for strictness if you specified number!">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
+                    </label>
+                    <input type="number" id="strictness" style="width: 100%" min="0" max="1" step="0.01" disabled>
+                </div>
+            </div>
+            <br>
+
+             <div class="together">
+                <div style="width: 100%">
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(3)">Direct Matching</button>
+                    <p>Match the inputted keywords to the researcher's keywords directly. Tends to be more specific.</p>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%">
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="openModal(5)">Match Through Clusters</button>
+                    <p>Match the inputted keywords to the clusters, then find all researchers with those clusters.</p>
+                </div>
+            </div>
+        </section>
+        <br><br>
+    </main>
+    
+    <!-- EJS partial (for code reuse and efficiency) -->
+    <%- footer %>
+
+    <!-- Bootstrap for JS -->
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <!-- This file allows for the user to interact with the elements on the site and for the site to give feedback to the user -->
+    <script src="/script.js"></script>
+    <!-- JQuery for the tooltip -->
+    <script>
+        $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+    </script>
+    <script>
+        function directMatch() {
+            //TODO
+        }
+
+        function clusterMatch() {
+            //TODO
+        }
+    </script>
+    <script>
+        function initialise() {
+            clusters = "<%= clusters %>"
+            clusters = clusters.split(", ")
+
+            // process cluster IDs
+            clusterNames = []
+            for (x in clustersData) {
+                if (clusters.includes(clustersData[x].id.toString())) {
+                    clusterNames.push(clustersData[x].name)
+                }
+            }
+
+            clusterNames = clusterNames.join(', ')
+            document.getElementById('grantClusters').textContent = clusterNames
+
+            keywords = `<%= keywords %>`
+            keywords = keywords.split("\n")
+            for (x in keywords) {
+                keyword = keywords[x]
+                document.getElementById('grantKeywords').value += '- ' + keyword + '\n'
+            }
+        }
+    </script>
+    <script>
+        // wait for a condition to be true
+        const waitFor = (conditionFn, callback, interval = 50) => {
+            const checker = setInterval(() => {
+            if (conditionFn()) {
+                clearInterval(checker);
+                callback();
+            }
+            }, interval);
+        };
+
+        // wait for clusters to be initialised
+        waitFor(
+            () => clustersInitialised === true,
+            () => {
+                initialise()
+            }
+        );
+    </script>
+</body>
+</html>

@@ -68,7 +68,7 @@
                     <label for="rememberme"> Remember Me</label><br>
                 </div><br><br>
 
-                <button class="buttonStyle" onclick="submitForm()">Login!</button>
+                <button class="buttonStyle" onclick="submitForm()" style="width: 100%">LOGIN</button>
             </div>
         </section>
     </main>
@@ -118,7 +118,7 @@
                     if (data.success == 'failure') {
                         openModal(1)
                     } else { 
-                        window.location.href = '/'
+                        window.location.href = '<%= urlinit %>'
                     }
                 });
             }
