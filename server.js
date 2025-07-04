@@ -144,6 +144,7 @@ app.post('/clusterMatch', async (req, res) => {
 // Match logic layer
 app.post('/match', async (req, res) => {
     console.log(req.session.useremail)
+    // TODO: Is there a better way to do this?
     if (req.session.useremail == null || req.session.useremail == undefined) {
         res.send({status: "error", alert: 'Please login first :)'});
         return
@@ -156,6 +157,18 @@ app.post('/match', async (req, res) => {
       // error out if the inputs are invalid
       if (x == undefined || !x.matchKeywords || x.matchKeywords.length == 0) {
         res.send({status: "error", alert: 'Your input is invalid. Please ensure that you have filled out the keywords entry.'})
+        return
+      }
+
+      // ensure that the method is valid
+      if (!x.matchMethod || ["cluster", "direct"].includes(x.matchMethod) == false) {
+        res.send({status: "error", alert: 'Something went wrong when processing whether you would like to match through clusters or directly. If this issue persists, please let me know.'})
+        return
+      }
+
+      // ensure that the cutoff method is valid
+      if (!x.cutOffMethod || !x.cutOff || ["number", "strictness"].includes(x.cutOffMethod) == false) {
+        res.send({status: "error", alert: 'Something went wrong when processing your cut-off parameters. If this issue persists, please let me know.'})
         return
       }
 
@@ -204,8 +217,8 @@ app.post('/match', async (req, res) => {
 
             // get the name of that cluster and add it to clustersNames
             for (k in allClustersDict) {
-              if (allClustersDict[k].id == cl) {
-                clusterNames.push(allClustersDict[k].name)
+              if (allClustersDict[k].clusterID == cl) {
+                clustersNames.push(allClustersDict[k].name)
               }
             }
 
@@ -242,13 +255,12 @@ app.post('/match', async (req, res) => {
     try {
       // execute the python script
       const scriptExecution = spawn(pythonExecutable, 
-        ["match.py", JSON.stringify(keywords), JSON.stringify(allClusters), JSON.stringify(researcherPool)]);
+        ["match.py", JSON.stringify(keywords), JSON.stringify(allClusters), JSON.stringify(researcherPool), x.cutOffMethod, x.cutOff, x.matchMethod]);
 
       // Handle normal output
       scriptExecution.stdout.on('data', async (data) => {
           try {
               console.log(data.toString())
-              res.setHeader('Content-Type', 'application/json')
               res.send(JSON.parse(data.toString()))
               return
           } catch (err) {

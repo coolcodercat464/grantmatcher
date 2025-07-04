@@ -89,7 +89,7 @@ def directMatching(researcherPool, keywords, cutOffMethod, cutOff):
     researchers = {k: v for k, v in sorted(researchers.items(), key=lambda item: item[1])}
 
     if cutOffMethod == 'number':
-        number = cutOff
+        number = int(cutOff)
     else:
         number = round(len(researcherPool) * (1 - cutOff))
     
@@ -116,7 +116,7 @@ def clusterMatching(researcherPool, allClusters, keywords, cutOffMethod, cutOff)
     researchers = {k: v for k, v in sorted(researchers.items(), key=lambda item: item[1])}
     
     if cutOffMethod == 'number':
-        number = cutOff
+        number = int(cutOff)
     else:
         number = round(len(researcherPool) * (1 - cutOff))
     
@@ -131,7 +131,9 @@ keywords = json.loads(sys.argv[1])
 allClusters = json.loads(sys.argv[2])
 researcherPool = json.loads(sys.argv[3])
 
-researchersDirect = directMatching(researcherPool, keywords, "number", 2)
-researchersCluster = clusterMatching(researcherPool, allClusters, keywords, "number", 2)
-
-sys.stdout.write(json.dumps(researchersDirect))
+if sys.argv[6] == "direct":
+    researchersDirect = directMatching(researcherPool, keywords, sys.argv[4], float(sys.argv[5]))
+    sys.stdout.write(json.dumps(researchersDirect))
+else:
+    researchersCluster = clusterMatching(researcherPool, allClusters, keywords, sys.argv[4], float(sys.argv[5]))
+    sys.stdout.write(json.dumps(researchersCluster))

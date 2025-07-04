@@ -131,6 +131,12 @@
         </div>
     </div>
 
+    <div id="loadingSpinner" class="modal">
+        <div class="spinner-border text-info" role="status" style="position: fixed; top: 50%; left: 50%; z-index: 10;">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section>
@@ -374,9 +380,13 @@
                 "lower": lower,
                 "higher": higher,
                 "clusters": clusters,
-                "number": number,
-                "strictness": strictness
+                "cutOff": number,
+                "cutOffMethod": "number",
+                "matchMethod": "direct"
             }
+
+            document.getElementById('modal3').style.display = 'none'
+            document.getElementById("loadingSpinner").style.display = 'block'
 
             fetch('/match', {
                 method: 'POST',
@@ -384,17 +394,59 @@
                 body: JSON.stringify(data)
             }).then(response => response.json()).then(data => {
                 if (data.status == "error") {
+                    document.getElementById("loadingSpinner").style.display = 'none'
                     document.getElementById('showAlert').textContent = data.alert
-                    document.getElementById('modal3').style.display = 'none'
                     openModal(2)
                 } else {
                     console.log(data)
+                    document.getElementById("loadingSpinner").style.display = 'none'
                 }
             });
         }
 
         function clusterMatch() {
-            //TODO
+            school = document.getElementById("school").value
+            career = document.getElementById("career").value
+            gender = document.getElementById("gender").value
+
+            lower = document.getElementById("lower").value
+            higher = document.getElementById("higher").value
+
+            clusters = getSelectedClusterNames(1)
+
+            number = document.getElementById("number").value
+            strictness = document.getElementById("strictness").value
+
+            data = {
+                "matchKeywords": getKeywords(1),
+                "school": school,
+                "career": career,
+                "gender": gender,
+                "lower": lower,
+                "higher": higher,
+                "clusters": clusters,
+                "cutOff": number,
+                "cutOffMethod": "number",
+                "matchMethod": "cluster"
+            }
+
+            document.getElementById('modal5').style.display = 'none'
+            document.getElementById("loadingSpinner").style.display = 'block'
+
+            fetch('/match', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(response => response.json()).then(data => {
+                if (data.status == "error") {
+                    document.getElementById("loadingSpinner").style.display = 'none'
+                    document.getElementById('showAlert').textContent = data.alert
+                    openModal(2)
+                } else {
+                    console.log(data)
+                    document.getElementById("loadingSpinner").style.display = 'none'
+                }
+            });
         }
     </script>
     <script>
