@@ -273,7 +273,11 @@
                     </div>
                 </div>
             </div>
-            <br>
+        </section>
+        <hr/>
+
+        <section>
+            <h2>MATCHING OPTIONS</h2>
 
             <div class="together">
                 <div style="width: 100%">
@@ -332,17 +336,86 @@
 
              <div class="together">
                 <div style="width: 100%">
-                    <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(3)">Direct Matching</button>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(3)">Direct Matching</button><br><br>
                     <p>Match the inputted keywords to the researcher's keywords directly. Tends to be more specific.</p>
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%">
-                    <button class="buttonStyle blue" style="width: 100%;" onclick="openModal(5)">Match Through Clusters</button>
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="openModal(5)">Match Through Clusters</button><br><br>
                     <p>Match the inputted keywords to the clusters, then find all researchers with those clusters.</p>
                 </div>
             </div>
         </section>
         <br><br>
+
+        <section>
+            <!-- TODO: Using the researcher's email, get the researchers data to fill in this table (in script.JS or in a script tag) -->
+            <div class="tableContainer" id="tableContainer6">
+                <div>
+                    <div class="tableicons">
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Filter Researchers">
+                            <i id="modalBtn6" onclick="openModal(6)" class=" fa fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="tablesort">
+                        <label for="sortTable6">Sort By:</label>
+
+                        <select name="sortTable6" id="sortTable6" onchange="sortTable(6)" style="margin-bottom: 5px;">
+                            <option value="name">Name</option>
+                            <option value="score">Score</option>
+                            <option value="activity">Activity</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="max-width: 100vw;" >
+                    <div class="scrollTableContainer">
+                        <table class="table table-bordered" style="margin-bottom: 0; border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;">
+                            <thead>
+                                <!-- Column names -->
+                                <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Keywords</th>
+                                <th>Score</th>
+                                <th>Select</th>
+                                </tr>
+                            </thead>
+                            <!-- Table items -->
+                            <tbody id="tableBody6"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Table footer (with pagination controls and download button) -->
+                <div class="pagination-controls" style="border: 1px solid black; margin-top: 0;">
+                    <!-- The download button should be left-aligned while the rest is right-aligned -->
+                    <!-- align-items-center ensures that the text and icons are aligned properly (otherwise the text sticks out vertically and its distracting) -->
+                    <div class="d-flex align-items-center gap-2 d-flex w-100 px-3 py-2">
+                        <div>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-download"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#">XML</a></li>
+                                    <li><a class="dropdown-item" href="#">CSV</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="ms-auto">
+                            <!-- Numbering the IDs so I can use many tables (code reuse) -->
+                            <button class="btn" id="firstNav6" onclick="goToFirst(6)"><i class="fa fa-angle-double-left"></i></button>
+                            <button class="btn" id="prevNav6" onclick="goToPrev(6)"><i class="fa fa-angle-left"></i></button>
+                            <!-- Tells the user what page they are on -->
+                            <span id="pageStats6"></span>
+                            <button class="btn" id="nextNav6" onclick="goToNext(6)"><i class="fa fa-angle-right"></i></button>
+                            <button class="btn" id="lastNav6" onclick="goToLast(6)"><i class="fa fa-angle-double-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
     
     <!-- EJS partial (for code reuse and efficiency) -->
