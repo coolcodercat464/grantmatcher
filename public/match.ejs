@@ -312,14 +312,14 @@
                             <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
                         </button>
                     </label>
-                    <input type="number" id="number" style="width: 100%" min="0" step="1"><br><br>
+                    <input type="number" name="number" id="number" style="width: 100%" min="0" step="1"><br><br>
                     <label for="strictness"><b>STRICTNESS</b>
                         <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="What fraction of researchers to remove from list. The higher the strictness, the less researchers you get. No need for strictness if you specified number!">
                             <!-- Makes the tooltip circular -->
                             <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
                         </button>
                     </label>
-                    <input type="number" id="strictness" style="width: 100%" min="0" max="1" step="0.01" disabled>
+                    <input type="number" id="strictness" name="strictness" style="width: 100%" min="0" max="1" step="0.01" disabled>
                 </div>
             </div>
             <br>
@@ -354,7 +354,43 @@
     </script>
     <script>
         function directMatch() {
-            //TODO
+            school = document.getElementById("school").value
+            career = document.getElementById("career").value
+            gender = document.getElementById("gender").value
+
+            lower = document.getElementById("lower").value
+            higher = document.getElementById("higher").value
+
+            clusters = getSelectedClusterNames(1)
+
+            number = document.getElementById("number").value
+            strictness = document.getElementById("strictness").value
+
+            data = {
+                "matchKeywords": getKeywords(1),
+                "school": school,
+                "career": career,
+                "gender": gender,
+                "lower": lower,
+                "higher": higher,
+                "clusters": clusters,
+                "number": number,
+                "strictness": strictness
+            }
+
+            fetch('/match', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(response => response.json()).then(data => {
+                if (data.status == "error") {
+                    document.getElementById('showAlert').textContent = data.alert
+                    document.getElementById('modal3').style.display = 'none'
+                    openModal(2)
+                } else {
+                    console.log(data)
+                }
+            });
         }
 
         function clusterMatch() {

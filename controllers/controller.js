@@ -569,46 +569,44 @@ const loginpost = async (req, res, next) => {
 const signuppost = async (req, res, next) => {
     console.log('SIGNUP POST')
 
-    // get the user inputs
-    x = req.body;
+    try {
+        // get the user inputs
+        x = req.body;
 
-    // ensure that all the fields are there
-    if (!Object.keys(x).includes('name') || !Object.keys(x).includes('password') || !Object.keys(x).includes('email') || !Object.keys(x).includes('authcode') || !Object.keys(x).includes('rememberme')) {
-        // give them an error pop-up
-        res.send({alert: 'Please ensure all fields are filled.'});
-        return
-    }
-
-    // add validation to name - name cannot just be spaced
-    if (x.name.trim() === '') {
-        // give them an error pop-up
-        res.send({alert: 'Please ensure your name isn\'t empty!'});
-        return
-    } 
-
-    // add validation to password - password must be at least 5 characters
-    if (x.password.length < 5) {
-        // give them an error pop-up
-        res.send({alert: 'Your password must be at least 5 characters long. Please try again!'});
-        return
-    } 
-
-    // get all the users
-    users = await users_list();
-
-    // check if the user is already in the database
-    for (u in users) {
-        user = users[u];
-        if(x.email === user.email) {
-            // give them an error pop-up if they are already in the database
-            res.send({alert: 'A user with this email already exists. Please try again or login instead.'});
+        // ensure that all the fields are there
+        if (!x.name || !x.password || !x.email || !x.authcode || !x.rememberme) {
+            // give them an error pop-up
+            res.send({alert: 'Please ensure all fields are filled.'});
             return
         }
-    }
 
-    if(!x.email || !x.authcode || !x.password || !x.name){
-        res.send({alert: 'Please ensure all fields are filled.'});
-    } else {
+        // add validation to name - name cannot just be spaced
+        if (x.name.trim() === '') {
+            // give them an error pop-up
+            res.send({alert: 'Please ensure your name isn\'t empty!'});
+            return
+        } 
+
+        // add validation to password - password must be at least 5 characters
+        if (x.password.length < 5) {
+            // give them an error pop-up
+            res.send({alert: 'Your password must be at least 5 characters long. Please try again!'});
+            return
+        } 
+
+        // get all the users
+        users = await users_list();
+
+        // check if the user is already in the database
+        for (u in users) {
+            user = users[u];
+            if(x.email === user.email) {
+                // give them an error pop-up if they are already in the database
+                res.send({alert: 'A user with this email already exists. Please try again or login instead.'});
+                return
+            }
+        }
+
         // get all the auth codes
         codes = await get_codes()
 
@@ -663,6 +661,9 @@ const signuppost = async (req, res, next) => {
             showAlertDashboard = "yes"
             res.send({"success":"success"})
         });
+    } catch (err) {
+        console.log(err)
+        res.send({alert: "Something went wrong when signing you up. If this issue persists, please let me know."})
     }
 }
 
@@ -926,27 +927,7 @@ const editgrantpost = async (req, res)=>{
         // if an error occurs, tell the user
         res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
     }
-} 
-
-// match a grant
-const matchpost = async (req, res)=>{
-    console.log("MATCH POST")
-
-    if (req.isAuthenticated() == false) {
-        res.send({alert: 'Please login first :)'});
-        return
-    }
-
-    // get the id (from the route name itself)
-    id = req.params.id
-    console.log(id);
-
-    // add validation - ensure id is an integer (id might be 'script.js' sometimes)
-    if (!isStringInteger(id) || parseInt(id) <= 0) {
-        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
-        return
-    }
-} 
+}
 
 // delete a grant
 const deletegrantpost = async (req, res)=>{
@@ -1047,6 +1028,5 @@ module.exports = {
     signuppost,
     addgrantpost,
     editgrantpost,
-    matchpost,
     deletegrantpost
 }

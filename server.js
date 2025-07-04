@@ -54,7 +54,7 @@ const db = require('./databases/postgres.js')             // database stuff
 
 // get and post routing
 app.get(['/', '/login', '/signup', '/addgrant', '/grant/:id', '/editgrant/:id', '/match/:id'], routes)
-app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id', '/match/:id', '/deletegrant/:id'], routes)
+app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id', '/deletegrant/:id'], routes)
 
 // database routes
 
@@ -110,89 +110,163 @@ app.get('/db/changelog', async (req, res) => {
 app.post('/clusterMatch', async (req, res) => {
   const receivedData = req.body;
 
-  // get the clusters and the matchTo
-  clusters = receivedData.clusters
-  matchTo = receivedData.matchTo
+  try {
+    // get the clusters and the matchTo
+    clusters = receivedData.clusters
+    matchTo = receivedData.matchTo
 
-  // store the result
-  relevant = []
-  
-  for (x in clusters) {
-    // get the name
-    cluster = clusters[x].name
+    // store the result
+    relevant = []
+    
+    for (x in clusters) {
+      // get the name
+      cluster = clusters[x].name
 
-    // get the similarity
-    distance = natural.JaroWinklerDistance(cluster, matchTo);
+      // get the similarity
+      distance = natural.JaroWinklerDistance(cluster, matchTo);
 
-    // only add it to the relevant list if its above the threshold
-    if (distance >= 0.5) {
-      relevant.push(clusters[x])
+      // only add it to the relevant list if its above the threshold
+      if (distance >= 0.5) {
+        relevant.push(clusters[x])
+      }
+      
     }
-  }
 
-  res.send({'relevant':relevant})
+    res.send({'relevant':relevant})
+  } catch (err) {
+    console.log(err)
+    res.send({"error": "Something went wrong.", "relevant": []})
+  }
 })
 
 // python nlp routes
 
-// TEST ROUTE (TODO)
-app.post('/python', async (req, res) => {
-    const receivedData = req.body;
-    console.log(receivedData)
-    
-    const scriptExecution = spawn(pythonExecutable, 
-      [myPythonScript, ["Quantum Mechanics", "cells", "Botany"], receivedData.word2]);
+// Match logic layer
+app.post('/match', async (req, res) => {
+    console.log(req.session.useremail)
+    if (req.session.useremail == null || req.session.useremail == undefined) {
+        res.send({status: "error", alert: 'Please login first :)'});
+        return
+    }
 
-    // Handle normal output
-    scriptExecution.stdout.on('data', async (data) => {
-        try {
-            console.log(data.toString())
-            const result = JSON.parse(data.toString());
-            res.send(result)
-        } catch (err) {
-            console.error("Error parsing JSON:", err);
+    // STEP 1 - preliminary filtering (get researcherPool)
+    try {
+      x = req.body
+      
+      // error out if the inputs are invalid
+      if (x == undefined || !x.matchKeywords || x.matchKeywords.length == 0) {
+        res.send({status: "error", alert: 'Your input is invalid. Please ensure that you have filled out the keywords entry.'})
+        return
+      }
+
+      // if lower or higher activity range isnt provided, use the maximum/minimum values
+      if (x.lower == '') { x.lower = 0 }
+      if (x.higher == '') { x.higher = 1 }
+
+      // get the match keywords
+      keywords = x.matchKeywords
+
+      // get all the clusters
+      allClustersDict = await queryAll('clusters')
+      allClusters = []
+
+      // get all cluster names
+      for (i in allClustersDict) {
+        cluster = allClustersDict[i]
+        clusterName = cluster.name
+        allClusters.push(clusterName)
+      }
+
+      // get all the researchers
+      allResearchers = await queryAll('researchers')
+
+      // list of all researchers
+      researcherPool = []
+
+      for (i in allResearchers) {
+        researcher = allResearchers[i]
+
+        // ensure that these fields match the researcher's data
+        schoolCorrect = (x.school == "all" || researcher.school == x.school)
+        genderCorrect = (x.gender == "all" || researcher.gender == x.gender)
+        careerCorrect = (x.career == "all" || researcher.careerStage == x.career) 
+        activityCorrect = (researcher.activity >= x.lower && researcher.activity <= x.higher)
+
+        // if the cluster list is empty, then set this to true
+        clusterCorrect = (x.clusters[0].length == 0)
+
+        // the names of the researcher's clusters
+        clustersNames = []
+
+        // loop through each of the researcher's clusters
+        for (j in researcher.clusters) {
+            cl = researcher.clusters[j] // this isn't a string, but an id
+
+            // get the name of that cluster and add it to clustersNames
+            for (k in allClustersDict) {
+              if (allClustersDict[k].id == cl) {
+                clusterNames.push(allClustersDict[k].name)
+              }
+            }
+
+            // check if the cluster is in the selected clusters list
+            if (x.clusters[0].includes(cl)) {
+                // once such a pair found, it matches and no further searching is necessary
+                clusterCorrect = true
+                break
+            }
         }
-    });
 
-    // Handle error output
-    scriptExecution.stderr.on('data', (data) => {
-      console.log(data.toString())
-        res.send({'status': 'error'})
-    });
-})
+        // add this property to the researchers
+        researcher.clustersNames = clustersNames
 
-// TEST ROUTE (TODO)
-app.post('/match', (req, res) => {
-    x = req.body
-    
-    if (!x.keywords || !x.clusters || !x.researcherPool) {
-      res.send({alert: 'Your input is invalid. Please ensure that you have filled out all entries.'})
+        // only add the researchers to the list if they match all criteria
+        if (schoolCorrect && genderCorrect && careerCorrect && activityCorrect && clusterCorrect) {
+          researcherPool.push(researcher)
+        }
+      }
+
+      // error out if no researchers found in preliminary filtering
+      if (researcherPool.length == 0) {
+        res.send({status: "error", alert: "No researchers were found given your filtration specifications. Try again with different parameters!"})
+        return
+      }
+
+    } catch (err) {
+      console.log(err)
+      res.send({status: "error", alert: "Something wrong happened while processing your inputs and doing preliminary filtering. Please try again. If this problem persists, please open a ticket to let me know."})
       return
     }
 
-    keywords = x.keywords
-    allClusters = x.clusters
-    researcherPool = x.researcherPool
+    // STEP 2 - use the python NLP program
+    try {
+      // execute the python script
+      const scriptExecution = spawn(pythonExecutable, 
+        ["match.py", JSON.stringify(keywords), JSON.stringify(allClusters), JSON.stringify(researcherPool)]);
 
-    const scriptExecution = spawn(pythonExecutable, 
-      ["match.py", JSON.stringify(keywords), JSON.stringify(allClusters), JSON.stringify(researcherPool)]);
+      // Handle normal output
+      scriptExecution.stdout.on('data', async (data) => {
+          try {
+              console.log(data.toString())
+              res.setHeader('Content-Type', 'application/json')
+              res.send(JSON.parse(data.toString()))
+              return
+          } catch (err) {
+              console.error("Error parsing JSON:", err);
+          }
+      });
 
-    // Handle normal output
-    scriptExecution.stdout.on('data', async (data) => {
-        try {
-            console.log(data.toString())
-            res.setHeader('Content-Type', 'application/json')
-            res.send(JSON.parse(data.toString()))
-        } catch (err) {
-            console.error("Error parsing JSON:", err);
-        }
-    });
-
-    // Handle error output
-    scriptExecution.stderr.on('data', (data) => {
-      console.log(data.toString())
-        res.send({'status': 'error'})
-    });
+      // Handle error output
+      scriptExecution.stderr.on('data', (data) => {
+        console.log(data.toString())
+          res.send({'status': 'error', alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
+          return
+      });
+    } catch (err) {
+      console.log(err)
+      res.send({status: "error", alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
+      return
+    }
 })
 
 // listen to port

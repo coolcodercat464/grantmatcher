@@ -514,6 +514,7 @@ function dbclickRow(tableNumber, id, idField, dbclick) {
         return
     }
 
+    // open the details in the modal
     document.getElementById("doubleclickdetails").textContent = row[dbclick]
     openModal(9)
 }

@@ -106,14 +106,15 @@ def clusterMatching(researcherPool, allClusters, keywords, cutOffMethod, cutOff)
     similarities = clusterSimilarity(model, keywords, allClusters)
     for researcher in researcherPool:
         researcherEmail = researcher['email']
-        researcherClusters = researcher['clusters']
+        researcherClusters = researcher['clustersNames']
         researcherScore = 0
         for cl in researcherClusters:
             researcherScore += similarities[cl]
-        researchers[researcherEmail] = researcherScore / len(researcherClusters)
+        if len(researcherClusters) > 0:
+            researchers[researcherEmail] = researcherScore / len(researcherClusters)
     
     researchers = {k: v for k, v in sorted(researchers.items(), key=lambda item: item[1])}
-
+    
     if cutOffMethod == 'number':
         number = cutOff
     else:
