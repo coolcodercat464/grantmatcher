@@ -493,6 +493,13 @@ tableData = {
         "showFields": [],
         "showRows": []
     },
+    6 : {
+        "dataSet": [],
+        "currentPage": 1,
+        "totalPages": 1,
+        "showFields": [],
+        "showRows": []
+    },
 }
 
 function dbclickRow(tableNumber, id, idField, dbclick) {
@@ -562,6 +569,13 @@ function renderTable(tableNumber, dbclick=null, idField=null) {
 
         for (c in columns) {
             col = columns[c]
+
+            // if this should be a checkbox, not an actual value...
+            if (col == 'SELECT') {
+                row += `<td>TODO: add a checkbox here</td>`
+                continue
+            }
+
             // get the value of item for that column
             value = item[col]
             row += `<td>${value}</td>`
