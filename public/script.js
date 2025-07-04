@@ -495,8 +495,31 @@ tableData = {
     },
 }
 
+function dbclickRow(tableNumber, id, idField, dbclick) {
+    dataSet = tableData[tableNumber].dataSet
+    correctRow = [] // this will store the row that has been clicked
+
+    // find the correct row based on the id
+    for (x in dataSet) {
+        row = dataSet[x]
+        if (row[idField] == id) {
+            correctRow = row;
+            break
+        }
+    }
+
+    // if no row has been found (correctRow is still empty list)
+    if (correctRow == []) {
+        console.log("ERROR - No row found.")
+        return
+    }
+
+    document.getElementById("doubleclickdetails").textContent = row[dbclick]
+    openModal(9)
+}
+
 // present the table
-function renderTable(tableNumber) {
+function renderTable(tableNumber, dbclick=null, idField=null) {
     // get all relevant elements based on the table number
     tableBody = document.getElementById('tableBody' + tableNumber);
     firstBtn = document.getElementById('firstNav' + tableNumber);
@@ -514,9 +537,25 @@ function renderTable(tableNumber) {
     // present the data
     document.getElementById('pageStats' + tableNumber).textContent = `Page ${tableData[tableNumber]["currentPage"]} / ${tableData[tableNumber]["totalPages"]}`
 
-    pageItems.forEach(item => {
-        // make the HTML for the row
-        row = '<tr>'
+    for (var i = 0; i < pageItems.length; i++) {
+        // get the row information
+        item = pageItems[i]
+
+        if (idField == null) {
+            // make the HTML for the row (without id)
+            row = `<tr>`
+
+            if (dbclick != null) {
+                console.log("ERROR - if dbclick isn't null, an idField must be provided!")
+                dbclick = null
+            }
+        } else {
+            // make the HTML for the row (with id)
+            id = item[idField]
+            console.log(id)
+            row = `<tr ondblclick="dbclickRow(${tableNumber}, ${id}, '${idField}', '${dbclick}')">`
+        }
+
         // get the column names (only show some columns)
         columns = tableData[tableNumber].showFields
 
@@ -529,7 +568,7 @@ function renderTable(tableNumber) {
         row += '</tr>'
 
         tableBody.insertAdjacentHTML('beforeend', row);
-    });
+    };
 
     // find which buttons are disabled
     updateButtons(tableNumber);
@@ -557,36 +596,37 @@ function updateButtons(tableNumber) {
 }
 
 // go to the first page
-function goToFirst(tableNumber) {
+function goToFirst(tableNumber, dbclick=null, idField=null) {
     // change the current page
     tableData[tableNumber]["currentPage"] = 1;
-    // render the table
-    renderTable(tableNumber);
+    // render the table (the parameters ensure that you can still double-click
+    // on the all pages)
+    renderTable(tableNumber, dbclick=dbclick, idField=idField);
 }
 
 // same as the previous function, but
 // going to be previous page
-function goToPrev(tableNumber) {
+function goToPrev(tableNumber, dbclick=null, idField=null) {
     tableData[tableNumber]["currentPage"]--;
-    renderTable(tableNumber);
+    renderTable(tableNumber, dbclick=dbclick, idField=idField);
 }
 
 // same as the previous function, but
 // going to be next page
-function goToNext(tableNumber) {
+function goToNext(tableNumber, dbclick=null, idField=null) {
     tableData[tableNumber]["currentPage"]++;
-    renderTable(tableNumber);
+    renderTable(tableNumber, dbclick=dbclick, idField=idField);
 }
 
 // same as the previous function, but
 // going to be last page
-function goToLast(tableNumber) {
+function goToLast(tableNumber, dbclick=null, idField=null) {
     tableData[tableNumber]["currentPage"] = tableData[tableNumber]["totalPages"];
-    renderTable(tableNumber);
+    renderTable(tableNumber, dbclick=dbclick, idField=idField);
 }
 
 // sort the contents of a table based on the table number
-function sortTable(tableNumber) {
+function sortTable(tableNumber, dbclick=null, idField=null) {
     // get the new sort value
     const selectedValue = document.getElementById("sortTable" + tableNumber).value
 
@@ -597,7 +637,7 @@ function sortTable(tableNumber) {
     values = sortDictionaryList(values, selectedValue)
 
     // refresh the table
-    renderTable(tableNumber)
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
 }
 
 // SEARCHING
@@ -1284,7 +1324,7 @@ function searchChange(tableNumber) {
     }
 
     // reset the table
-    renderTable(tableNumber)
+    renderTable(tableNumber, dbclick="description", idField="changeID")
 
     // close the modal
     var modal = document.getElementById("modal6");
@@ -1545,7 +1585,7 @@ fetch('/db/users').then(response => response.json()).then(data => {
         
         try {
             tableData[5].totalPages = Math.ceil(dataChange.length / rowsPerPage)
-            renderTable(5)
+            renderTable(5, dbclick="description", idField="changeID")
         } catch {
 
         }

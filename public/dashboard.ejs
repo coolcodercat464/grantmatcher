@@ -635,6 +635,19 @@
         </div>
     </div>
 
+    <!-- The modal when the user double clicks an entry (the text is changed in script.js) -->
+    <div id="modal9" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>More details...</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close9">&times;</span>
+            </div>
+            
+            <p id="doubleclickdetails"></p>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section>
@@ -929,6 +942,7 @@
 
         <section>
             <h2>Change Log</h2>
+            <p>Double-click a row to see the description.</p>
             <div class="tableContainer" id="tableContainer5">
                 <div>
                     <div class="tableicons">
@@ -939,7 +953,7 @@
                     <div class="tablesort">
                         <label for="sortTable5">Sort By:</label>
 
-                        <select name="sortTable5" id="sortTable5" onchange="sortTable(5)" style="margin-bottom: 5px;">
+                        <select name="sortTable5" id="sortTable5" onchange="sortTable(5, dbclick='description', idField='changeID')" style="margin-bottom: 5px;">
                             <option value="dateReformatted">Date</option>
                             <option value="type">Type</option>
                             <option value="username">User</option>
@@ -980,12 +994,12 @@
                         </div>
                         <div class="ms-auto">
                             <!-- Numbering the IDs so I can use many tables (code reuse) -->
-                            <button class="btn" id="firstNav5" onclick="goToFirst(5)"><i class="fa fa-angle-double-left"></i></button>
-                            <button class="btn" id="prevNav5" onclick="goToPrev(5)"><i class="fa fa-angle-left"></i></button>
+                            <button class="btn" id="firstNav5" onclick="goToFirst(5, dbclick='description', idField='changeID')"><i class="fa fa-angle-double-left"></i></button>
+                            <button class="btn" id="prevNav5" onclick="goToPrev(5, dbclick='description', idField='changeID')"><i class="fa fa-angle-left"></i></button>
                             <!-- Tells the user what page they are on -->
                             <span id="pageStats5"></span>
-                            <button class="btn" id="nextNav5" onclick="goToNext(5)"><i class="fa fa-angle-right"></i></button>
-                            <button class="btn" id="lastNav5" onclick="goToLast(5)"><i class="fa fa-angle-double-right"></i></button>
+                            <button class="btn" id="nextNav5" onclick="goToNext(5, dbclick='description', idField='changeID')"><i class="fa fa-angle-right"></i></button>
+                            <button class="btn" id="lastNav5" onclick="goToLast(5, dbclick='description', idField='changeID')"><i class="fa fa-angle-double-right"></i></button>
                         </div>
                     </div>
                 </div>
