@@ -545,7 +545,7 @@
 
         <section style="display: none" id="matchTable">
             <h2>Select Researchers</h2>
-            <p>Your list of researchers is ready! Go through them and select the researchers you want to notify. Then click the "Email Them" button to open an email in Outlook!</p>
+            <p>Your list of researchers is ready! Go through them and select the researchers you want to notify. Then click the "Email Them" button to open an email in Outlook! The emails will be copied to your clipboard, so all you have to do is paste the emails in the recipients field and you're all set!</p>
             <div class="tableContainer" id="tableContainer6">
                 <div>
                     <div class="tableicons">
@@ -613,7 +613,8 @@
                 </div>
             </div><br>
 
-            <p><b>Selected Researchers:</b> <span id="selectedResearchers">Click the checkbox on the researcher's row to select the researcher. You might have to use the horizontal scroll-bar to find it.</span></p>
+            <p><b>Selected Researchers:</b> <span id="selectedResearchers">Click the checkbox on the researcher's row to select the researcher. You might have to use the horizontal scroll-bar to find it.</span></p><br>
+            <button onclick='emailResearchers()' class="buttonStyle">Email link</button>
         </section>
         <br><br>
     </main>
@@ -833,6 +834,11 @@
         selectedNames = [] // stores the names of the selected researchers
         selectedIds = [] // stores the uniqueID of the selected researchers
         selectedEmails = [] // stores the emails of the selected researchers
+
+        function emailResearchers() {
+            navigator.clipboard.writeText(selectedEmails.join(", "));
+            window.open("https://outlook.office.com/mail/")
+        }
 
         function refreshSelectedResearchers() {
             output = []
