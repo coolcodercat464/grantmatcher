@@ -580,9 +580,9 @@ function renderTable(tableNumber, dbclick=null, idField=null) {
                 // check if the checkbox should already be selected or not
                 if (item.selected) {
                     // select it by default
-                    row += `<td><input type="checkbox" id="select-${id}" onclick="selected('${id}')" checked></td>`
+                    row += `<td><input type="checkbox" id="select-${id}" onclick="handleSelection('${id}')" checked></td>`
                 } else {
-                    row += `<td><input type="checkbox" id="select-${id}" onclick="selected('${id}')"></td>`
+                    row += `<td><input type="checkbox" id="select-${id}" onclick="handleSelection('${id}')"></td>`
                 }
                 
                 break
@@ -669,7 +669,7 @@ function sortTable(tableNumber, dbclick=null, idField=null) {
 
 // SEARCHING
 // filter through the researchers table
-function searchResearcher(tableNumber) {
+function searchResearcher(tableNumber, dbclick=null, idField=null) {
     // get the relevant data
     researcherTable = tableData[tableNumber]
     researcherData = researcherTable.dataSet
@@ -802,7 +802,7 @@ function searchResearcher(tableNumber) {
     }
 
     // reset the table
-    renderTable(tableNumber)
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
     var modal = document.getElementById("modal2");
@@ -810,7 +810,7 @@ function searchResearcher(tableNumber) {
 }
 
 // clear the researcher form and reset the table
-function resetResearcherSearch(tableNumber) {
+function resetResearcherSearch(tableNumber, dbclick=null, idField=null) {
     // get the relevant data
     researcherTable = tableData[tableNumber]
     researcherData = researcherTable.dataSet
@@ -847,7 +847,7 @@ function resetResearcherSearch(tableNumber) {
     tableData[tableNumber].showRows = researcherData
 
     // reset the table
-    renderTable(tableNumber)
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
     var modal = document.getElementById("modal2");

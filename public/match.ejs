@@ -226,7 +226,7 @@
                         <div class="listboxdiv" style="height: 70px;">
                             <!-- Numbering the IDs so I can use many selectors (code reuse) -->
                             <!-- All keywords displayed here -->
-                            <ul class="listboxul" id="list2" style="height: 70px;">
+                            <ul class="listboxul" id="list1" style="height: 70px;">
                             </ul>
                         </div>
 
@@ -234,12 +234,12 @@
                         <div class="listboxinput">
                             <!-- User enters keywords here -->
                             <div class="listboxtextdiv">
-                                <input class="listboxtext" type="text" id="keyword2" name="keyword2" placeholder="Enter a keyword">
+                                <input class="listboxtext" type="text" id="keyword1" name="keyword1" placeholder="Enter a keyword">
                             </div>
 
                             <!-- User presses this button to add the keyword to the list -->
                             <div class="listboxsubmitdiv">
-                                <button class="listboxsubmit" onclick="addKeyword(2)"><i class="fa fa-arrow-right"></i></button>
+                                <button class="listboxsubmit" onclick="addKeyword(1)"><i class="fa fa-arrow-right"></i></button>
                             </div>
                         </div>
                     </div>
@@ -256,25 +256,25 @@
                         <div class="listboxtextdiv">
                             <!-- Numbering the IDs so I can use many selectors (code reuse) -->
                             <!-- This is where the user enters some text that is matched to the clusters in the unselectedClusters list -->
-                            <input class="listboxtext" type="text" id="searchUnselectedClusters2" name="searchUnselectedClusters2" placeholder="Enter a cluster">
+                            <input class="listboxtext" type="text" id="searchUnselectedClusters1" name="searchUnselectedClusters1" placeholder="Enter a cluster">
                         </div>
                         <div class="listboxsubmitdiv">
                             <!-- User can press this button to search from the list -->
-                            <button class="listboxsubmit" onclick="findUnselectedCluster(2)"><i class="fa fa-search"></i></button>
+                            <button class="listboxsubmit" onclick="findUnselectedCluster(1)"><i class="fa fa-search"></i></button>
                         </div>
                         <div class="listboxsubmitdiv">
                             <!-- Added a reset button so its easier for the user to reset the form (displaying all clusters in the list) -->
-                            <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(2)"><i class="fa fa-refresh"></i></button>
+                            <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
                         </div>
                     </div>
                     <!-- Contains all unselected clusters -->
-                    <div class="listboxdiv unselectedClusters" id="unselectedClusters2">
+                    <div class="listboxdiv unselectedClusters" id="unselectedClusters1">
                     </div>
                     <div class="clustersort">
-                        <label for="sortUnselected2">Sort By:</label>
+                        <label for="sortUnselected1">Sort By:</label>
 
                         <!-- Sort-by dropdown -->
-                        <select name="sortUnselected2" id="sortUnselected2" onchange="sortUnselected(2)">
+                        <select name="sortUnselected1" id="sortUnselected1" onchange="sortUnselected(1)">
                             <option value="id">ID</option>
                             <option value="name">Name</option>
                             <option value="number"># of Researchers</option>
@@ -289,21 +289,21 @@
                 <div class="selected">
                     <div class="listboxinput">
                         <div class="listboxtextdiv">
-                            <input class="listboxtext" type="text" id="searchSelectedClusters2" name="searchSelectedClusters2" placeholder="Enter a cluster">
+                            <input class="listboxtext" type="text" id="searchSelectedClusters1" name="searchSelectedClusters1" placeholder="Enter a cluster">
                         </div>
                         <div class="listboxsubmitdiv">
-                            <button class="listboxsubmit" onclick="findSelectedCluster(2)"><i class="fa fa-search"></i></button>
+                            <button class="listboxsubmit" onclick="findSelectedCluster(1)"><i class="fa fa-search"></i></button>
                         </div>
                         <div class="listboxsubmitdiv">
-                            <button class="listboxsubmit" onclick="resetSelectedClusterSearch(2)"><i class="fa fa-refresh"></i></button>
+                            <button class="listboxsubmit" onclick="resetSelectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
                         </div>
                     </div>
-                    <div class="listboxdiv selectedClusters" id="selectedClusters2">
+                    <div class="listboxdiv selectedClusters" id="selectedClusters1">
                     </div>
                     <div class="clustersort">
-                        <label for="sortSelected2">Sort By:</label>
+                        <label for="sortSelected1">Sort By:</label>
 
-                        <select name="sortSelected2" id="sortSelected2" onchange="sortSelected(2)">
+                        <select name="sortSelected1" id="sortSelected1" onchange="sortSelected(1)">
                             <option value="id">ID</option>
                             <option value="name">Name</option>
                             <option value="number"># of Researchers</option>
@@ -315,14 +315,27 @@
 
             <div class="together" style="align-items: flex-start;">
                 <div style="width: 100%;">
-                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetResearcherSearch(6); document.getElementById('modal6').style.display = 'none';">Reset Form</button>
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetResearcherSearch(6, dbclick=null, idField='uniqueId'); document.getElementById('modal6').style.display = 'none';">Reset Form</button>
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
-                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchResearcher(6); document.getElementById('modal6').style.display = 'none';">Search</button>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchResearcher(6, dbclick=null, idField='uniqueId'); document.getElementById('modal6').style.display = 'none';">Search</button>
                 </div>
             </div>
             <br>
+        </div>
+    </div>
+
+    <!-- The modal when the user tries to filter a table but nothing is found -->
+    <div id="modal8" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Nothing Found</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close8">&times;</span>
+            </div>
+            
+            <p>Nothing was found in this search :( Reset the form or try different parameters.</p>
         </div>
     </div>
 
@@ -413,25 +426,25 @@
                         <div class="listboxtextdiv">
                             <!-- Numbering the IDs so I can use many selectors (code reuse) -->
                             <!-- This is where the user enters some text that is matched to the clusters in the unselectedClusters list -->
-                            <input class="listboxtext" type="text" id="searchUnselectedClusters1" name="searchUnselectedClusters1" placeholder="Enter a cluster">
+                            <input class="listboxtext" type="text" id="searchUnselectedClusters2" name="searchUnselectedClusters2" placeholder="Enter a cluster">
                         </div>
                         <div class="listboxsubmitdiv">
                             <!-- User can press this button to search from the list -->
-                            <button class="listboxsubmit" onclick="findUnselectedCluster(1)"><i class="fa fa-search"></i></button>
+                            <button class="listboxsubmit" onclick="findUnselectedCluster(2)"><i class="fa fa-search"></i></button>
                         </div>
                         <div class="listboxsubmitdiv">
                             <!-- Added a reset button so its easier for the user to reset the form (displaying all clusters in the list) -->
-                            <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
+                            <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(2)"><i class="fa fa-refresh"></i></button>
                         </div>
                     </div>
                     <!-- Contains all unselected clusters -->
-                    <div class="listboxdiv unselectedClusters" id="unselectedClusters1">
+                    <div class="listboxdiv unselectedClusters" id="unselectedClusters2">
                     </div>
                     <div class="clustersort">
-                        <label for="sortUnselected1">Sort By:</label>
+                        <label for="sortUnselected2">Sort By:</label>
 
                         <!-- Sort-by dropdown -->
-                        <select name="sortUnselected1" id="sortUnselected1" onchange="sortUnselected(1)">
+                        <select name="sortUnselected2" id="sortUnselected2" onchange="sortUnselected(2)">
                             <option value="id">ID</option>
                             <option value="name">Name</option>
                             <option value="number"># of Researchers</option>
@@ -446,21 +459,21 @@
                 <div class="selected">
                     <div class="listboxinput">
                         <div class="listboxtextdiv">
-                            <input class="listboxtext" type="text" id="searchSelectedClusters1" name="searchSelectedClusters1" placeholder="Enter a cluster">
+                            <input class="listboxtext" type="text" id="searchSelectedClusters2" name="searchSelectedClusters2" placeholder="Enter a cluster">
                         </div>
                         <div class="listboxsubmitdiv">
-                            <button class="listboxsubmit" onclick="findSelectedCluster(1)"><i class="fa fa-search"></i></button>
+                            <button class="listboxsubmit" onclick="findSelectedCluster(2)"><i class="fa fa-search"></i></button>
                         </div>
                         <div class="listboxsubmitdiv">
-                            <button class="listboxsubmit" onclick="resetSelectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
+                            <button class="listboxsubmit" onclick="resetSelectedClusterSearch(2)"><i class="fa fa-refresh"></i></button>
                         </div>
                     </div>
-                    <div class="listboxdiv selectedClusters" id="selectedClusters1">
+                    <div class="listboxdiv selectedClusters" id="selectedClusters2">
                     </div>
                     <div class="clustersort">
-                        <label for="sortSelected1">Sort By:</label>
+                        <label for="sortSelected2">Sort By:</label>
 
-                        <select name="sortSelected1" id="sortSelected1" onchange="sortSelected(1)">
+                        <select name="sortSelected2" id="sortSelected2" onchange="sortSelected(2)">
                             <option value="id">ID</option>
                             <option value="name">Name</option>
                             <option value="number"># of Researchers</option>
@@ -490,7 +503,7 @@
                             <div class="listboxdiv" style="height: 70px;">
                                 <!-- Numbering the IDs so I can use many selectors (code reuse) -->
                                 <!-- All keywords displayed here -->
-                                <ul class="listboxul" id="list1" style="height: 70px;">
+                                <ul class="listboxul" id="list2" style="height: 70px;">
                                 </ul>
                             </div>
 
@@ -498,12 +511,12 @@
                             <div class="listboxinput">
                                 <!-- User enters keywords here -->
                                 <div class="listboxtextdiv">
-                                    <input class="listboxtext" type="text" id="keyword1" name="keyword1" placeholder="Enter a keyword">
+                                    <input class="listboxtext" type="text" id="keyword2" name="keyword2" placeholder="Enter a keyword">
                                 </div>
 
                                 <!-- User presses this button to add the keyword to the list -->
                                 <div class="listboxsubmitdiv">
-                                    <button class="listboxsubmit" onclick="addKeyword(1)"><i class="fa fa-arrow-right"></i></button>
+                                    <button class="listboxsubmit" onclick="addKeyword(2)"><i class="fa fa-arrow-right"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -646,13 +659,13 @@
             strictness = document.getElementById("strictness").value
 
             data = {
-                "matchKeywords": getKeywords(1),
+                "matchKeywords": getKeywords(2),
                 "school": school,
                 "career": career,
                 "gender": gender,
                 "lower": lower,
                 "higher": higher,
-                "clusters": getSelectedClusterNames(1),
+                "clusters": getSelectedClusterNames(2),
                 "cutOff": number,
                 "cutOffMethod": "number",
                 "matchMethod": "direct"
@@ -688,14 +701,14 @@
                             uniqueId = row.email.split("@")[0].replace(".", "")
                             row.nameLink = `<a href='/researcher/${uniqueId}'>${row.name}</a>`
                             row.score = matchResults[row.email]
-                            row.keywords = row.keywords.join(", ")
+                            row.keywordsString = row.keywords.join(", ")
                             row.uniqueId = uniqueId
                             row.selected = false
 
                             // add to the table data
                             tableData[6].dataSet.push(row)
                             tableData[6].showRows.push(row)
-                            tableData[6].showFields = ['nameLink', 'email', 'keywords', 'activity', 'score', 'SELECT']
+                            tableData[6].showFields = ['nameLink', 'email', 'keywordsString', 'activity', 'score', 'SELECT']
                         }
 
                         // try catch in case the table doesn't exist in that page
@@ -723,13 +736,13 @@
             strictness = document.getElementById("strictness").value
 
             data = {
-                "matchKeywords": getKeywords(1),
+                "matchKeywords": getKeywords(2),
                 "school": school,
                 "career": career,
                 "gender": gender,
                 "lower": lower,
                 "higher": higher,
-                "clusters": getSelectedClusterNames(1),
+                "clusters": getSelectedClusterNames(2),
                 "cutOff": number,
                 "cutOffMethod": "number",
                 "matchMethod": "direct"
@@ -765,14 +778,14 @@
                             uniqueId = row.email.split("@")[0].replace(".", "")
                             row.nameLink = `<a href='/researcher/${uniqueId}'>${row.name}</a>`
                             row.score = matchResults[row.email]
-                            row.keywords = row.keywords.join(", ")
+                            row.keywordsString = row.keywords.join(", ")
                             row.uniqueId = uniqueId
                             row.selected = false
 
                             // add to the table data
                             tableData[6].dataSet.push(row)
                             tableData[6].showRows.push(row)
-                            tableData[6].showFields = ['nameLink', 'email', 'keywords', 'activity', 'score', 'SELECT']
+                            tableData[6].showFields = ['nameLink', 'email', 'keywordsString', 'activity', 'score', 'SELECT']
                         }
 
                         // try catch in case the table doesn't exist in that page
@@ -855,7 +868,7 @@
             document.getElementById("selectedResearchers").innerHTML = output.join(', ')
         }
 
-        function selected(id) {
+        function handleSelection(id) {
             // try to find the row to change
             tableIndex = -1 // this will store the row that has the same id
             for (r in tableData[6].dataSet) {
