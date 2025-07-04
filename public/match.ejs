@@ -200,6 +200,53 @@
             </div>
             <br>
 
+            <div class="together" style="align-items: flex-start;">
+                <div style="width: 100%;">
+                    <label><b>SELECTED</b>
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Whether you have selected the researcher or not.">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
+                    </label><br>
+                    <select name="selected" class="form-control" id="selected" style="width: 100%">
+                        <option value="all">All</option>
+                        <option value="yes">Selected</option>
+                        <option value="no">Unselected</option>
+                    </select>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>KEYWORDS</b>
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Add keywords by pressing the add button. Remove keywords from the list by pressing the trash icon next to the keyword you want to remove.">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
+                    </label>
+                    <div class="listbox" style="overflow:auto; ">
+                        <div class="listboxdiv" style="height: 70px;">
+                            <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                            <!-- All keywords displayed here -->
+                            <ul class="listboxul" id="list2" style="height: 70px;">
+                            </ul>
+                        </div>
+
+                        <!-- The two elements in the div are on the same line -->
+                        <div class="listboxinput">
+                            <!-- User enters keywords here -->
+                            <div class="listboxtextdiv">
+                                <input class="listboxtext" type="text" id="keyword2" name="keyword2" placeholder="Enter a keyword">
+                            </div>
+
+                            <!-- User presses this button to add the keyword to the list -->
+                            <div class="listboxsubmitdiv">
+                                <button class="listboxsubmit" onclick="addKeyword(2)"><i class="fa fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+
             <label><b>SE:ECT CLUSTERS</b></label>
             <p>Click clusters in the unselected list to select them, and click clusters in the selected list to deselect them. You can search and sort the two lists separately.</p>
             <div class="together clusterselector">
@@ -245,10 +292,10 @@
                             <input class="listboxtext" type="text" id="searchSelectedClusters2" name="searchSelectedClusters2" placeholder="Enter a cluster">
                         </div>
                         <div class="listboxsubmitdiv">
-                            <button class="listboxsubmit" onclick="findSelectedCluster(2); document.getElementById('modal6').style.display = 'none';"><i class="fa fa-search"></i></button>
+                            <button class="listboxsubmit" onclick="findSelectedCluster(2)"><i class="fa fa-search"></i></button>
                         </div>
                         <div class="listboxsubmitdiv">
-                            <button class="listboxsubmit" onclick="resetSelectedClusterSearch(2); document.getElementById('modal6').style.display = 'none';"><i class="fa fa-refresh"></i></button>
+                            <button class="listboxsubmit" onclick="resetSelectedClusterSearch(2)"><i class="fa fa-refresh"></i></button>
                         </div>
                     </div>
                     <div class="listboxdiv selectedClusters" id="selectedClusters2">
@@ -266,43 +313,13 @@
             </div>
             <br>
 
-            <div class="together">
-                <label><b>KEYWORDS</b>
-                    <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Add keywords by pressing the add button. Remove keywords from the list by pressing the trash icon next to the keyword you want to remove.">
-                        <!-- Makes the tooltip circular -->
-                        <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
-                    </button>
-                </label>
-            </div>
-
             <div class="together" style="align-items: flex-start;">
                 <div style="width: 100%;">
-                    <div class="listbox" style="overflow:auto; ">
-                        <div class="listboxdiv" style="height: 70px;">
-                            <!-- Numbering the IDs so I can use many selectors (code reuse) -->
-                            <!-- All keywords displayed here -->
-                            <ul class="listboxul" id="list2" style="height: 70px;">
-                            </ul>
-                        </div>
-
-                        <!-- The two elements in the div are on the same line -->
-                        <div class="listboxinput">
-                            <!-- User enters keywords here -->
-                            <div class="listboxtextdiv">
-                                <input class="listboxtext" type="text" id="keyword2" name="keyword2" placeholder="Enter a keyword">
-                            </div>
-
-                            <!-- User presses this button to add the keyword to the list -->
-                            <div class="listboxsubmitdiv">
-                                <button class="listboxsubmit" onclick="addKeyword(2)"><i class="fa fa-arrow-right"></i></button>
-                            </div>
-                        </div>
-                    </div>
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetResearcherSearch(6); document.getElementById('modal6').style.display = 'none';">Reset Form</button>
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
-                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchResearcher(6)">Search</button>
-                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetResearcherSearch(6)">Reset Form</button>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchResearcher(6); document.getElementById('modal6').style.display = 'none';">Search</button>
                 </div>
             </div>
             <br>
@@ -672,6 +689,7 @@
                             row.score = matchResults[row.email]
                             row.keywords = row.keywords.join(", ")
                             row.uniqueId = uniqueId
+                            row.selected = false
 
                             // add to the table data
                             tableData[6].dataSet.push(row)
@@ -748,6 +766,7 @@
                             row.score = matchResults[row.email]
                             row.keywords = row.keywords.join(", ")
                             row.uniqueId = uniqueId
+                            row.selected = false
 
                             // add to the table data
                             tableData[6].dataSet.push(row)
@@ -831,6 +850,23 @@
         }
 
         function selected(id) {
+            // try to find the row to change
+            tableIndex = -1 // this will store the row that has the same id
+            for (r in tableData[6].dataSet) {
+                row = tableData[6].dataSet[r]
+                if (row.uniqueId == id) {
+                    tableIndex = r;
+                    break
+                }
+            }
+
+            if (tableIndex == -1) {
+                console.log("ERROR - No ID exists")
+                return
+            }
+
+            console.log(tableIndex, tableData[6].dataSet[tableIndex])
+
             fetch('/db/researchers').then(response => response.json()).then(data => {
                 // iterate over the researchers
                 for (var i = 0; i < data.length; i++) {
@@ -847,13 +883,13 @@
                     // get the checkbox
                     checkbox = document.getElementById(`select-${id}`);
 
-                    info = {name: row.name, email: row.email, uniqueId: uniqueId}
-
                     // If the checkbox is checked, add it to the displayed list
                     if (checkbox.checked == true){
                         selectedEmails.push(row.email)
                         selectedIds.push(row.uniqueId)
                         selectedNames.push(row.name)
+
+                        tableData[6].dataSet[tableIndex].selected = true // change the table data
                     } else {
                         // remove from emails list
                         index = selectedEmails.indexOf(row.email);
@@ -881,6 +917,8 @@
                         } else {
                             console.log("ERROR - ID does not exist in the list of emails")
                         }
+
+                        tableData[6].dataSet[tableIndex].selected = false // change the table data
                     }
 
                     refreshSelectedResearchers() // refresh the text

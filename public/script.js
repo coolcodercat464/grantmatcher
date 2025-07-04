@@ -576,7 +576,15 @@ function renderTable(tableNumber, dbclick=null, idField=null) {
             if (col == 'SELECT') {
                 id = item[idField]
                 // create a checkbox using the id
-                row += `<td><input type="checkbox" id="select-${id}" onclick="selected('${id}')"></td>`
+
+                // check if the checkbox should already be selected or not
+                if (item.selected) {
+                    // select it by default
+                    row += `<td><input type="checkbox" id="select-${id}" onclick="selected('${id}')" checked></td>`
+                } else {
+                    row += `<td><input type="checkbox" id="select-${id}" onclick="selected('${id}')"></td>`
+                }
+                
                 break
             }
 
@@ -771,8 +779,18 @@ function searchResearcher(tableNumber) {
             }
         }
 
+        // table number 6 is only for the match grants table to select researchers
+        // here, we have to include the selectedCorrect
+        if (tableNumber == 6) {
+            selected = document.getElementById('selected').value
+            // it is true if selected is any, and if it isnt any, the selected must match researcher.selected
+            selectedCorrect = (selected == "all" || (researcher.selected == true && selected == 'yes') || (researcher.selected == false && selected == 'no'))
+        } else {
+            selectedCorrect = true
+        }
+
         // only make the row visible if it matches for all of the user inputs
-        if (nameCorrect && emailCorrect && schoolCorrect && genderCorrect && careerCorrect && activityCorrect && clusterCorrect && keywordCorrect) {
+        if (nameCorrect && emailCorrect && schoolCorrect && genderCorrect && careerCorrect && activityCorrect && clusterCorrect && keywordCorrect && selectedCorrect) {
             tableData[tableNumber].showRows.push(researcher)
             console.log(researcher)
         }
