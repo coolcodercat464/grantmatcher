@@ -549,19 +549,21 @@ function renderTable(tableNumber, dbclick=null, idField=null) {
         // get the row information
         item = pageItems[i]
 
-        if (idField == null) {
-            // make the HTML for the row (without id)
-            row = `<tr>`
-
-            if (dbclick != null) {
-                console.log("ERROR - if dbclick isn't null, an idField must be provided!")
-                dbclick = null
-            }
-        } else {
+         if (dbclick != null) {
             // make the HTML for the row (with id)
             id = item[idField]
-            console.log(id)
-            row = `<tr ondblclick="dbclickRow(${tableNumber}, ${id}, '${idField}', '${dbclick}')">`
+
+            // check if the idField is provided. reset dbclick if it isnt provided
+            if (idField != null) {
+                console.log("ERROR - if dbclick isn't null, an idField must be provided!")
+                dbclick = null
+                row = '<tr>'
+            } else {
+                row = `<tr ondblclick="dbclickRow(${tableNumber}, ${id}, '${idField}', '${dbclick}')">`
+            }
+        } else {
+            // make the HTML for the row (without id)
+            row = `<tr>`
         }
 
         // get the column names (only show some columns)
@@ -572,8 +574,10 @@ function renderTable(tableNumber, dbclick=null, idField=null) {
 
             // if this should be a checkbox, not an actual value...
             if (col == 'SELECT') {
-                row += `<td>TODO: add a checkbox here</td>`
-                continue
+                id = item[idField]
+                // create a checkbox using the id
+                row += `<td><input type="checkbox" id="select-${id}" onclick="selected('${id}')"></td>`
+                break
             }
 
             // get the value of item for that column
