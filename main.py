@@ -9,9 +9,8 @@ result = { 'result': cluster_match(clusters, matchTo) }
 
 sys.stdout.write(json.dumps(result))
 
-
-
 '''
+
 import os
 import sys
 import json

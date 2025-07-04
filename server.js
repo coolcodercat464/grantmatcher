@@ -162,16 +162,27 @@ app.post('/python', async (req, res) => {
 })
 
 // TEST ROUTE (TODO)
-app.get('/test', (req, res) => {
+app.post('/match', (req, res) => {
+    x = req.body
+    
+    if (!x.keywords || !x.clusters || !x.researcherPool) {
+      res.send({alert: 'Your input is invalid. Please ensure that you have filled out all entries.'})
+      return
+    }
+
+    keywords = x.keywords
+    allClusters = x.clusters
+    researcherPool = x.researcherPool
+
     const scriptExecution = spawn(pythonExecutable, 
-      [myPythonScript, ["Quantum Mechanics", "cells", "Botany"]]);
+      ["match.py", JSON.stringify(keywords), JSON.stringify(allClusters), JSON.stringify(researcherPool)]);
 
     // Handle normal output
     scriptExecution.stdout.on('data', async (data) => {
         try {
             console.log(data.toString())
-            const result = JSON.parse(data.toString());
-            res.send(result)
+            res.setHeader('Content-Type', 'application/json')
+            res.send(JSON.parse(data.toString()))
         } catch (err) {
             console.error("Error parsing JSON:", err);
         }
