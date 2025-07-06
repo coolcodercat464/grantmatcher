@@ -554,7 +554,7 @@ function renderTable(tableNumber, dbclick=null, idField=null) {
             id = item[idField]
 
             // check if the idField is provided. reset dbclick if it isnt provided
-            if (idField != null) {
+            if (idField == null) {
                 console.log("ERROR - if dbclick isn't null, an idField must be provided!")
                 dbclick = null
                 row = '<tr>'

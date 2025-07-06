@@ -658,6 +658,12 @@
             number = document.getElementById("number").value
             strictness = document.getElementById("strictness").value
 
+            clusters = getSelectedClusterNames(2)
+
+            for (x in clusters[1]) {
+                clusters[1][x] = parseInt(clusters[1][x].split('S')[1])
+            }
+
             data = {
                 "matchKeywords": getKeywords(2),
                 "school": school,
@@ -665,7 +671,7 @@
                 "gender": gender,
                 "lower": lower,
                 "higher": higher,
-                "clusters": getSelectedClusterNames(2),
+                "clusters": clusters,
                 "cutOff": number,
                 "cutOffMethod": "number",
                 "matchMethod": "direct"
@@ -734,6 +740,12 @@
             
             number = document.getElementById("number").value
             strictness = document.getElementById("strictness").value
+            
+            clusters = getSelectedClusterNames(2)
+
+            for (x in clusters[1]) {
+                clusters[1][x] = parseInt(clusters[1][x].split('S')[1])
+            }
 
             data = {
                 "matchKeywords": getKeywords(2),
@@ -742,7 +754,7 @@
                 "gender": gender,
                 "lower": lower,
                 "higher": higher,
-                "clusters": getSelectedClusterNames(2),
+                "clusters": clusters,
                 "cutOff": number,
                 "cutOffMethod": "number",
                 "matchMethod": "direct"

@@ -223,7 +223,7 @@ app.post('/match', async (req, res) => {
             }
 
             // check if the cluster is in the selected clusters list
-            if (x.clusters[0].includes(cl)) {
+            if (x.clusters[1].includes(cl)) {
                 // once such a pair found, it matches and no further searching is necessary
                 clusterCorrect = true
                 break

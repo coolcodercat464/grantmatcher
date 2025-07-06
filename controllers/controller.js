@@ -1098,10 +1098,10 @@ const confirmmatchpost = async (req, res)=>{
 
         // add 'grant edited' change to changelog
         const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result5 = await db.query(mq5, [nextChangeID, req.session.useremail, 'Grant Matched', date, `The grant "${grantName}" has been matched. The researchers notified were ${researchers}"`, '{}']);
+        const result5 = await db.query(mq5, [nextChangeID, req.session.useremail, 'Grant Matched', date, `The grant "${grantName}" has been matched. The researchers notified were ${researchers}.`, '{}']);
 
         // update the grants' researcher column
-        const mq6 =  'UPDATE grants SET researchers = array_append(researchers, $1) WHERE "grantID" = $2;'
+        const mq6 =  'UPDATE grants SET matched = true, researchers = $1 WHERE "grantID" = $2;'
         const result6 = await db.query(mq6, [x.researchersEmails, id]);
 
         res.send({success: 'success'})
