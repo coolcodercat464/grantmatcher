@@ -246,6 +246,37 @@
         </div>
     </div>
 
+    <!-- The confirmation modal when the user wants to recalculate -->
+    <div id="modal3" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Recalculate Researcher Data</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close3">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to recalculate the researchers' data now? This might take some time.</p>
+            <div class="together">
+                <button class="buttonStyle" onclick="recalculate()">Recalculate now</button>
+                <button id='cancel3' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The error modal -->
+    <div id="modal4" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Error!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close4">&times;</span>
+            </div>
+            
+            <p id="showAlert"></p>
+        </div>
+    </div>
+
     <!-- The modal when the user tries to filter a table but nothing is found -->
     <div id="modal8" class="modal">
         <div class="modal-content">
@@ -349,14 +380,6 @@
             <p>Which fields do you want to recalculate? You can select more than one. Selecting "clusters" or "keywords" would require a few more parameters.</p>
             <div class="row">
                 <div class="col-xl">
-                    <input type="checkbox" id="nameField" name="nameField" value="name">
-                    <label for="nameField"> Names</label>
-                </div>
-                <div class="col-xl">
-                    <input type="checkbox" id="emailField" name="emailField" value="email">
-                    <label for="emailField"> Email</label>
-                </div>
-                <div class="col-xl">
                     <input type="checkbox" id="genderField" name="genderField" value="gender">
                     <label for="genderField"> Gender</label>
                 </div>
@@ -367,6 +390,10 @@
                 <div class="col-xl">
                     <input type="checkbox" id="schoolField" name="schoolField" value="school">
                     <label for="schoolField"> School</label>
+                </div>
+                <div class="col-xl">
+                    <input type="checkbox" id="profileField" name="profileField" value="profile">
+                    <label for="profileField"> Profile</label>
                 </div>
             </div>
             <div class="row">
@@ -379,20 +406,16 @@
                     <label for="publicationsField"> Publications</label>
                 </div>
                 <div class="col-xl">
-                    <input type="checkbox" id="profileField" name="profileField" value="profile">
-                    <label for="profileField"> Profile</label>
-                </div>
-                <div class="col-xl">
-                    <input type="checkbox" id="keywordsField" name="keywordsField" value="keywords">
+                    <input type="checkbox" id="keywordsField" name="keywordsField" value="keywords" onclick="toggleKeywords()">
                     <label for="keywordsField"> Keywords</label>
                 </div>
                 <div class="col-xl">
-                    <input type="checkbox" id="clustersField" name="clustersField" value="clusters">
+                    <input type="checkbox" id="clustersField" name="clustersField" value="clusters" onclick="toggleClusters()">
                     <label for="clustersField"> Clusters</label>
                 </div>
             </div>
             <br>
-            <div style="padding: 15px; border: 2px solid black; border-radius: 15px; display: none">
+            <div style="padding: 15px; border: 2px solid black; border-radius: 15px; display: none; margin-bottom: 15px;" id="clusterParameters">
                 <h3>Cluster Parameters</h3>
                 <p>To recalculate the researchers' clusters, we need a few more parameters.</p>
                 <div class="together" style="width: 100%;">
@@ -427,8 +450,7 @@
                     </div>
                 </div>
             </div>
-            <!-- TODO: add the google scholars parameters popup -->
-            <div style="padding: 15px; border: 2px solid black; border-radius: 15px; display: none">
+            <div style="padding: 15px; border: 2px solid black; border-radius: 15px; display: none; margin-bottom: 15px;" id="keywordParameters">
                 <h3>Google Scholar Parameters</h3>
                 <p>To recalculate the researchers' keywords, we need to know whether we should use Google Scholar for scraping in case a researcher's keywords isn't available.
                     However, if you choose to use Google Scholar, the process might take slightly longer than usual. Would you like to use Google Scholar?
@@ -446,7 +468,7 @@
                 </div>
             </div>
             <!-- TODO: Add confirmation modal for this -->
-            <button class="buttonStyle pink">Recalculate</button>
+            <button class="buttonStyle pink" onclick="openModal(3)">Recalculate</button>
         </section>
         <hr/>
         <!-- TODO: add logic layer for this -->
@@ -567,6 +589,107 @@
                     break; // exit the loop
                 }
             })
+        }
+    </script>
+    <script>
+        function toggleClusters() {
+            // get the checkbox element
+            checkbox = document.getElementById("clustersField")
+
+            // check whether it has been checked
+            if (checkbox.checked == true) {
+                // show the clusters parameter div
+                document.getElementById('clusterParameters').style.display = 'block'
+            } else {
+                // hide the clusters parameter div
+                document.getElementById('clusterParameters').style.display = 'none'
+            }
+        }
+
+        function toggleKeywords() {
+            // get the checkbox element
+            checkbox = document.getElementById("keywordsField")
+
+            // check whether it has been checked
+            if (checkbox.checked == true) {
+                // show the keyword parameter div
+                document.getElementById('keywordParameters').style.display = 'block'
+            } else {
+                // hide the keyword parameter div
+                document.getElementById('keywordParameters').style.display = 'none'
+            }
+        }
+    </script>
+    <script>
+        fieldsToCalculate = []
+
+        function checkField(field) {
+            if (document.getElementById(field + "Field").checked) {
+                fieldsToCalculate.push(field)
+            }
+        }
+
+        function recalculate() {
+            fieldsToCalculate = []
+            checkField("school")
+            checkField("gender")
+            checkField("career")
+            checkField("publications")
+            checkField("grants")
+            checkField("profile")
+            checkField("keywords")
+            checkField("clusters")
+
+            // if there are no researchers
+            if (selectedEmails.length == 0) {
+                // open error modal
+                document.getElementById("showAlert").textContent = 'Make sure you select your researchers.'
+                openModal(4)
+            }
+
+            if (fieldsToCalculate.length == 0) {
+                // open error modal
+                document.getElementById("showAlert").textContent = 'Make sure you select your fields.'
+                openModal(4)
+            } else {
+                data = {}
+                data['fields'] = fieldsToCalculate
+            }
+
+            // if clusters is selected
+            if (fieldsToCalculate.includes('clusters')) {
+                number = document.getElementById("numberCluster")
+                strictness = document.getElementById("strictnessCluster")
+                range = document.getElementById("rangeCluster")
+
+                // if one of those fields isnt provided
+                if (number.value == '' || strictness.value == '' || range.value == '') {
+                    // open error modal
+                    document.getElementById("showAlert").textContent = 'Make sure you specified the Cluster Parameters section.'
+                    openModal(4)
+                } else {
+                    fields['number'] = number.value
+                    fields['strictness'] = strictness.value
+                    fields['range'] = range.value
+                }
+            }
+
+            // if keywords is selected
+            if (fieldsToCalculate.includes('keywords')) {
+                googleScholar = document.querySelector('input[name="googleScholar"]:checked');
+
+                // if the radio button is pressed
+                if (googleScholar) {
+                    value = googleScholar.value;
+                    fields['googleScholar'] = value
+                } else {
+                    // open error modal
+                    document.getElementById("showAlert").textContent = 'Make sure you specified the Keywords Parameters section.'
+                    openModal(4)
+                }
+            }
+
+            document.getElementById("modal3").style.display = 'none'
         }
     </script>
 </body>
