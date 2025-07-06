@@ -850,7 +850,19 @@
 
         function emailResearchers() {
             navigator.clipboard.writeText(selectedEmails.join(", "));
-            window.open("https://outlook.office.com/mail/")
+
+            fetch('/confirmmatch/<%= id %>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({researchersNames: selectedNames, researchersEmails: selectedEmails})
+            }).then(response => response.json()).then(data => {
+                if (!data.success) {
+                    document.getElementById('showAlert').textContent = data.alert
+                    openModal(2)
+                } else {
+                    window.open("https://outlook.office.com/mail/")
+                }
+            })
         }
 
         function refreshSelectedResearchers() {

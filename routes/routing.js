@@ -25,6 +25,8 @@ router.post('/editgrant/:id', control.editgrantpost)
 
 router.post('/deletegrant/:id', control.deletegrantpost)
 
+router.post('/confirmmatch/:id', control.confirmmatchpost)
+
 router.get('/match/:id', control.matchget)
 
 router.get('/login', control.loginget)

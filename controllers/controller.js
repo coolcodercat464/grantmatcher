@@ -1004,7 +1004,106 @@ const deletegrantpost = async (req, res)=>{
         const mq4 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
         const result4 = await db.query(mq4, [nextChangeID, req.session.useremail, 'Grant Deleted', date, `The grant "${grantName}" has been deleted. The reason provided was "${x.reason}"`, '{}']);
 
-        // redirect to the grant page
+        res.send({success: 'success'})
+    } catch (err) {
+        console.log(err)
+
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+    }
+} 
+
+// after a grant has been matched, update the database
+const confirmmatchpost = async (req, res)=>{
+    console.log("CONFIRM MATCH POST")
+
+    // ensure that user is authenticated
+    if (req.isAuthenticated() == false) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    // get the id (from the route name itself)
+    id = req.params.id
+    console.log(id);
+
+    // add validation - ensure id is an integer (id might be 'script.js' sometimes)
+    if (!isStringInteger(id) || parseInt(id) <= 0) {
+        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+        return
+    }
+
+    x = req.body
+
+    // ensure that reason is provided
+    if (!x.researchersNames || !x.researchersEmails) {
+        res.send({alert: 'It looks like no researchers were selected. Please try again.'});
+        return
+    }
+
+    try {
+        // get the researchers
+        researchers = x.researchersNames.join(", ")
+
+        // get the grants name
+        const mq1 =  'SELECT "grantName" FROM grants WHERE "grantID" = $1'
+        const result1 = await db.query(mq1, [id]);
+
+        if (result1.rows.length == 0) {
+            res.send({alert: 'Looks like your grant doesn\'t exist in the first place! Please try again.'})
+            return
+        }
+        
+        grantName = result1.rows[0].grantName
+
+        // get the current xp
+        const mq2 = 'SELECT xp FROM users WHERE email = $1'
+        const result2 = await db.query(mq2, [req.session.useremail]);
+
+        if (result2.rows.length == 0) {
+            res.send({alert: 'Something went wrong when getting your XP and account details. If the issue persists, please let me know.'})
+            return
+        }
+
+        // otherwise, add 5 to the xp
+        currentXp = result2.rows[0].xp
+        const mq3 = 'UPDATE users SET xp = $1 WHERE email = $2'
+        const result3 = await db.query(mq3, [currentXp + 5, req.session.useremail]);
+
+        // get the current date
+        now = new Date();
+
+        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+        year = now.getFullYear()
+        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+        // stringify it
+        date = `${day}-${month}-${year}`
+        
+        // get all changes
+        const mq4 = 'SELECT "changeID" FROM changelog'
+        const result4 = await db.query(mq4);
+
+        // calculate the maximum changeID
+        maxChangeID = 0
+        for (x in result4.rows) {
+            rowID = result4.rows[x].changeID
+            if (rowID > maxChangeID) {
+                maxChangeID = rowID
+            }
+        }
+
+        // calculate the next change ID
+        nextChangeID = maxChangeID + 1
+
+        // add 'grant edited' change to changelog
+        const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
+        const result5 = await db.query(mq5, [nextChangeID, req.session.useremail, 'Grant Matched', date, `The grant "${grantName}" has been matched. The researchers notified were ${researchers}"`, '{}']);
+
+        // update the grants' researcher column
+        const mq6 =  'UPDATE grants SET researchers = array_append(researchers, $1) WHERE "grantID" = $2;'
+        const result6 = await db.query(mq6, [x.researchersEmails, id]);
+
         res.send({success: 'success'})
     } catch (err) {
         console.log(err)
@@ -1028,5 +1127,6 @@ module.exports = {
     signuppost,
     addgrantpost,
     editgrantpost,
-    deletegrantpost
+    deletegrantpost,
+    confirmmatchpost
 }

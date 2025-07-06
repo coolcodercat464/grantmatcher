@@ -54,7 +54,7 @@ const db = require('./databases/postgres.js')             // database stuff
 
 // get and post routing
 app.get(['/', '/login', '/signup', '/addgrant', '/grant/:id', '/editgrant/:id', '/match/:id'], routes)
-app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id', '/deletegrant/:id'], routes)
+app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id', '/deletegrant/:id', '/confirmmatch/:id'], routes)
 
 // database routes
 
