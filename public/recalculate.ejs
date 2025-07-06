@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>GrantMatcher - Recalculate Researcher Data</title>
+    <%- head %>
+</head>
+<body>
+    <!-- Navigation (sticky header). Links and dropdown collapse into a hamburger menu when the screen size is small. -->
+    <nav class="navbar navbar-expand-lg navbar-dark px-3" id="navbar">
+        <!-- Brand on the left -->
+        <a class="navbar-brand bigBrand" href="/" id="navbar-brand">Grant Matcher</a>
+
+        <!-- Toggler (for mobile view) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" id="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links on the right -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Links here -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tickets">Tickets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tutorial">Tutorial</a>
+                </li>
+
+                <!-- Dropdown (user menu) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <!-- Logout button (opens a modal) -->
+                        <li><button class="dropdown-item" id="modalBtn1" onclick="openModal(1)">Logout</button></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- The modal the logout button in the navigation bar opens -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Log out</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close1">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to log out?</p>
+            <div class="together">
+                <form method="post" action="/">
+                    <input type="submit" value="Logout!" class="buttonStyle">
+                </form>
+                <button id='cancel1' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- search researchers modal -->
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Filter Researchers</h2>
+                <span class="close" id="close2">&times;</span>
+            </div>
+            <hr/>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>NAME</b></label><br>
+                    <input type="text" class="form-control" id="researcherName" name="researcherName" placeholder="Enter their name">
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>SCHOOL</b></label><br>
+                    <select name="school" class="form-control" id="school" style="width: 100%">
+                        <option value="all">All</option>
+                        <option value="geoscience">Geosciences</option>
+                        <option value="philosophy">History and Philosophy</option>
+                        <option value="chemistry">Chemistry</option>
+                        <option value="biology">Life and Environmental Sciences</option>
+                        <option value="maths">Mathematics and Statistics</option>
+                        <option value="physics">Physics</option>
+                        <option value="psychology">Psychology</option>
+                        <option value="veterinary">Veterinary Science</option>
+                    </select>
+                </div>
+            </div>
+            <br>
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>EMAIL</b></label><br>
+                    <input type="text" class="form-control" id="researcherEmail" name="researcherEmail" placeholder="Enter their email">
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>GENDER</b></label><br>
+                    <select name="gender" class="form-control" id="gender" style="width: 100%">
+                        <option value="all">All</option>
+                        <option value="F">Female</option>
+                        <option value="M">Male</option>
+                        <option value="N">Non-Binary</option>
+                        <option value="U">Unknown Gender</option>
+                    </select>
+                </div>
+            </div>
+            <br>
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>ACTIVITY RANGE</b></label><br>
+                    <div class="together">
+                        <input type="number" class="form-control" id="lower" class="form-control" name="lower" min="0" max="1" step="0.01" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="higher" name="higher" min="0" max="1" style="width: 100%" step="0.01">
+                    </div>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>CAREER STAGE</b></label><br>
+                    <select name="career" class="form-control" id="career" style="width: 100%">
+                        <option value="all">All</option>
+                        <option value=1>Post-Doctorate</option>
+                        <option value=2>Early Career Researcher</option>
+                        <option value=3>Mid-Career Researcher</option>
+                        <option value=4>Senior Researcher</option>
+                    </select>
+                </div>
+            </div>
+            <br>
+
+            <label><b>SE:ECT CLUSTERS</b></label>
+            <p>Click clusters in the unselected list to select them, and click clusters in the selected list to deselect them. You can search and sort the two lists separately.</p>
+            <div class="together clusterselector">
+                <!-- List of the unselected clusters -->
+                <div class="unselected">
+                    <div class="listboxinput">
+                        <div class="listboxtextdiv">
+                            <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                            <!-- This is where the user enters some text that is matched to the clusters in the unselectedClusters list -->
+                            <input class="listboxtext" type="text" id="searchUnselectedClusters1" name="searchUnselectedClusters1" placeholder="Enter a cluster">
+                        </div>
+                        <div class="listboxsubmitdiv">
+                            <!-- User can press this button to search from the list -->
+                            <button class="listboxsubmit" onclick="findUnselectedCluster(1)"><i class="fa fa-search"></i></button>
+                        </div>
+                        <div class="listboxsubmitdiv">
+                            <!-- Added a reset button so its easier for the user to reset the form (displaying all clusters in the list) -->
+                            <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
+                        </div>
+                    </div>
+                    <!-- Contains all unselected clusters -->
+                    <div class="listboxdiv unselectedClusters" id="unselectedClusters1">
+                    </div>
+                    <div class="clustersort">
+                        <label for="sortUnselected1">Sort By:</label>
+
+                        <!-- Sort-by dropdown -->
+                        <select name="sortUnselected1" id="sortUnselected1" onchange="sortUnselected(1)">
+                            <option value="id">ID</option>
+                            <option value="name">Name</option>
+                            <option value="number"># of Researchers</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Adds space between the selected and unselected lists -->
+                <div class="spacer"></div>
+
+                <!-- Duplicate of the unselected list (for consistency and symmetrical balance) but with different names -->
+                <div class="selected">
+                    <div class="listboxinput">
+                        <div class="listboxtextdiv">
+                            <input class="listboxtext" type="text" id="searchSelectedClusters1" name="searchSelectedClusters1" placeholder="Enter a cluster">
+                        </div>
+                        <div class="listboxsubmitdiv">
+                            <button class="listboxsubmit" onclick="findSelectedCluster(1)"><i class="fa fa-search"></i></button>
+                        </div>
+                        <div class="listboxsubmitdiv">
+                            <button class="listboxsubmit" onclick="resetSelectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
+                        </div>
+                    </div>
+                    <div class="listboxdiv selectedClusters" id="selectedClusters1">
+                    </div>
+                    <div class="clustersort">
+                        <label for="sortSelected1">Sort By:</label>
+
+                        <select name="sortSelected1" id="sortSelected1" onchange="sortSelected(1)">
+                            <option value="id">ID</option>
+                            <option value="name">Name</option>
+                            <option value="number"># of Researchers</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <br>
+
+            <div class="together">
+                <label><b>KEYWORDS</b>
+                    <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Add keywords by pressing the add button. Remove keywords from the list by pressing the trash icon next to the keyword you want to remove.">
+                        <!-- Makes the tooltip circular -->
+                        <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                    </button>
+                </label>
+            </div>
+
+            <div class="together" style="align-items: flex-start;">
+                <div style="width: 100%;">
+                    <div class="listbox" style="overflow:auto; ">
+                        <div class="listboxdiv" style="height: 70px;">
+                            <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                            <!-- All keywords displayed here -->
+                            <ul class="listboxul" id="list1" style="height: 70px;">
+                            </ul>
+                        </div>
+
+                        <!-- The two elements in the div are on the same line -->
+                        <div class="listboxinput">
+                            <!-- User enters keywords here -->
+                            <div class="listboxtextdiv">
+                                <input class="listboxtext" type="text" id="keyword1" name="keyword1" placeholder="Enter a keyword">
+                            </div>
+
+                            <!-- User presses this button to add the keyword to the list -->
+                            <div class="listboxsubmitdiv">
+                                <button class="listboxsubmit" onclick="addKeyword(1)"><i class="fa fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchResearcher(7, dbclick=null, idField='uniqueId');">Search</button>
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetResearcherSearch(7, dbclick=null, idField='uniqueId')">Reset Form</button>
+                </div>
+            </div>
+            <br>
+        </div>
+    </div>
+
+    <!-- The modal when the user tries to filter a table but nothing is found -->
+    <div id="modal8" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Nothing Found</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close8">&times;</span>
+            </div>
+            
+            <p>Nothing was found in this search :( Reset the form or try different parameters.</p>
+        </div>
+    </div>
+
+    <!-- The main content -->
+    <main>
+        <section>
+            <h1>Recalculate the Researchers' Data</h1>
+        </section>
+        <hr/>
+
+        <section>
+            <h2>Select Researchers</h2>
+            <p>Go through the list of researchers and select the researchers whose data you want to recalculate (note that you can use the search button).</p>
+            <div class="tableContainer" id="tableContainer7">
+                <div>
+                    <div class="tableicons">
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Filter Researchers">
+                            <i id="modalBtn2" onclick="openModal(2)" class=" fa fa-search"></i>
+                        </button>
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Add a Researcher">
+                            <i id="modalBtn3" onclick="window.location.href = '/addresearcher'" class=" fa fa-plus-square-o"></i>
+                        </button>
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Recalculate the Researchers' Data">
+                            <i id="modalBtn4" onclick="window.location.href = '/recalculate'" class=" fa fa-refresh"></i>
+                        </button>
+                    </div>
+                    <div class="tablesort">
+                        <label for="sortTable7">Sort By:</label>
+
+                        <select name="sortTable7" id="sortTable7" onchange="sortTable(7, dbclick=null, idField='uniqueId')" style="margin-bottom: 5px;">
+                            <option value="name">Name</option>
+                            <option value="activity">Activity</option>
+                            <option value="careerStage">Career Stage</option>
+                            <option value="editNumber"># of Edits</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="max-width: 100vw;" >
+                    <div class="scrollTableContainer">
+                        <table class="table table-bordered" style="margin-bottom: 0; border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;">
+                            <thead>
+                                <!-- Column names -->
+                                <tr>
+                                <th>Name</th>
+                                <th>School</th>
+                                <th>Keywords</th>
+                                <th>Activity</th>
+                                <th>Select</th>
+                                </tr>
+                            </thead>
+                            <!-- Table items -->
+                            <tbody id="tableBody7"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Table footer (with pagination controls and download button) -->
+                <div class="pagination-controls" style="border: 1px solid black; margin-top: 0;">
+                    <!-- The download button should be left-aligned while the rest is right-aligned -->
+                    <!-- align-items-center ensures that the text and icons are aligned properly (otherwise the text sticks out vertically and its distracting) -->
+                    <div class="d-flex align-items-center gap-2 d-flex w-100 px-3 py-2">
+                        <div>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-download"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#">XML</a></li>
+                                    <li><a class="dropdown-item" href="#">CSV</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="ms-auto">
+                            <!-- Numbering the IDs so I can use many tables (code reuse) -->
+                            <button class="btn" id="firstNav7" onclick="goToFirst(7, dbclick=null, idField='uniqueId')"><i class="fa fa-angle-double-left"></i></button>
+                            <button class="btn" id="prevNav7" onclick="goToPrev(7, dbclick=null, idField='uniqueId')"><i class="fa fa-angle-left"></i></button>
+                            <!-- Tells the user what page they are on -->
+                            <span id="pageStats7"></span>
+                            <button class="btn" id="nextNav7" onclick="goToNext(7, dbclick=null, idField='uniqueId')"><i class="fa fa-angle-right"></i></button>
+                            <button class="btn" id="lastNav7" onclick="goToLast(7, dbclick=null, idField='uniqueId')"><i class="fa fa-angle-double-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div><br>
+            <p><b>Selected Researchers:</b> <span id="selectedResearchers">Click the checkbox on the researcher's row to select the researcher. You might have to use the horizontal scroll-bar to find it.</span></p>
+        </section>
+        <hr/>
+        <section>
+            <h2>Select Fields</h2>
+            <p>Which fields do you want to recalculate? You can select more than one. Selecting "clusters" or "keywords" would require a few more parameters.</p>
+            <div class="row">
+                <div class="col-xl">
+                    <input type="checkbox" id="nameField" name="nameField" value="name">
+                    <label for="nameField"> Names</label>
+                </div>
+                <div class="col-xl">
+                    <input type="checkbox" id="emailField" name="emailField" value="email">
+                    <label for="emailField"> Email</label>
+                </div>
+                <div class="col-xl">
+                    <input type="checkbox" id="genderField" name="genderField" value="gender">
+                    <label for="genderField"> Gender</label>
+                </div>
+                <div class="col-xl">
+                    <input type="checkbox" id="careerField" name="careerField" value="career">
+                    <label for="careerField"> Career Stage</label>
+                </div>
+                <div class="col-xl">
+                    <input type="checkbox" id="schoolField" name="schoolField" value="school">
+                    <label for="schoolField"> School</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl">
+                    <input type="checkbox" id="grantsField" name="grantsField" value="grants">
+                    <label for="grantsField"> Grants</label>
+                </div>
+                <div class="col-xl">
+                    <input type="checkbox" id="publicationsField" name="publicationsField" value="publications">
+                    <label for="publicationsField"> Publications</label>
+                </div>
+                <div class="col-xl">
+                    <input type="checkbox" id="profileField" name="profileField" value="profile">
+                    <label for="profileField"> Profile</label>
+                </div>
+                <div class="col-xl">
+                    <input type="checkbox" id="keywordsField" name="keywordsField" value="keywords">
+                    <label for="keywordsField"> Keywords</label>
+                </div>
+                <div class="col-xl">
+                    <input type="checkbox" id="clustersField" name="clustersField" value="clusters">
+                    <label for="clustersField"> Clusters</label>
+                </div>
+            </div>
+            <br>
+            <div style="padding: 15px; border: 2px solid black; border-radius: 15px; display: none">
+                <h3>Cluster Parameters</h3>
+                <p>To recalculate the researchers' clusters, we need a few more parameters.</p>
+                <div class="together" style="width: 100%;">
+                    <div>
+                        <label><b>NUMBER</b>
+                            <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="The maximum number of clusters generated.">
+                                <!-- Makes the tooltip circular -->
+                                <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                            </button>
+                        </label><br>
+                        <input type="number" class="form-control" style="width: 100%" min="0" max="200" step="1" id="numberCluster">
+                    </div>
+                    <div class="spacer"></div>
+                    <div>
+                        <label><b>STRICTNESS</b>
+                            <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="The minimum score for a cluster to be added to the researcher's list. A higher strictness would result in less but more relevant clusters.">
+                                <!-- Makes the tooltip circular -->
+                                <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                            </button>
+                        </label><br>
+                        <input type="number" class="form-control" style="width: 100%" min="0" max="1" step="0.01" id="strictnessCluster">
+                    </div>
+                    <div class="spacer"></div>
+                    <div>
+                        <label><b>RANGE</b>
+                            <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="How many points below the best-scoring cluster for another cluster to be considered.">
+                                <!-- Makes the tooltip circular -->
+                                <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                            </button>
+                        </label><br>
+                        <input type="number" class="form-control" style="width: 100%" min="0" max="1" step="0.01" id="rangeCluster">
+                    </div>
+                </div>
+            </div>
+            <!-- TODO: add the google scholars parameters popup -->
+            <div style="padding: 15px; border: 2px solid black; border-radius: 15px; display: none">
+                <h3>Google Scholar Parameters</h3>
+                <p>To recalculate the researchers' keywords, we need to know whether we should use Google Scholar for scraping in case a researcher's keywords isn't available.
+                    However, if you choose to use Google Scholar, the process might take slightly longer than usual. Would you like to use Google Scholar?
+                </p>
+                <div class="together">
+                    <div>
+                        <input type="radio" id="yes" name="googleScholar" value="yes">
+                        <label for="yes"> Yes</label>
+                    </div>
+                    <div class="spacer"></div>
+                    <div>
+                        <input type="radio" id="no" name="googleScholar" value="no">
+                        <label for="no"> No</label>
+                    </div>
+                </div>
+            </div>
+            <!-- TODO: Add confirmation modal for this -->
+            <button class="buttonStyle pink">Recalculate</button>
+        </section>
+        <hr/>
+        <!-- TODO: add logic layer for this -->
+        <section>
+            <h2>Confirm Changes</h2>
+            <p>Your recalculated researchers are ready! Go through them and double click the values to edit them.</p>
+            <!-- TODO: finish this -->
+        </section>
+    </main>
+    
+    <!-- EJS partial (for code reuse and efficiency) -->
+    <%- footer %>
+
+    <!-- Bootstrap for JS -->
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <!-- This file allows for the user to interact with the elements on the site and for the site to give feedback to the user -->
+    <script src="script.js"></script>
+    <!-- JQuery for the tooltip -->
+    <script>
+        $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+    </script>
+    <script>
+        selectedNames = [] // stores the names of the selected researchers
+        selectedIds = [] // stores the uniqueID of the selected researchers
+        selectedEmails = [] // stores the emails of the selected researchers
+
+        function refreshSelectedResearchers() {
+            output = []
+
+            // go through each researcher
+            for (r in selectedNames) {
+                researcherName = selectedNames[r]
+                researcherId = selectedIds[r]
+                // add the researcher's link to the list of links
+                output.push(`<a href='/researcher/${researcherId}'>${researcherName}</a>`)
+            }
+
+            // substitute the list of links for the selectedResearchers element
+            document.getElementById("selectedResearchers").innerHTML = output.join(', ')
+        }
+
+        function handleSelection(id) {
+            // try to find the row to change
+            tableIndex = -1 // this will store the row that has the same id
+            for (r in tableData[7].dataSet) {
+                row = tableData[7].dataSet[r]
+                if (row.uniqueId == id) {
+                    tableIndex = r;
+                    break
+                }
+            }
+
+            if (tableIndex == -1) {
+                console.log("ERROR - No ID exists")
+                return
+            }
+
+            console.log(tableIndex, tableData[7].dataSet[tableIndex])
+
+            fetch('/db/researchers').then(response => response.json()).then(data => {
+                // iterate over the researchers
+                for (var i = 0; i < data.length; i++) {
+                    row = data[i]
+
+                    // the name should be a link
+                    uniqueId = row.email.split("@")[0].replace(".", "")
+
+                    // skip the row if its not the right one
+                    if (uniqueId != id) { continue; }
+
+                    // all code here is executed only if the uniqueId is the id
+
+                    // get the checkbox
+                    checkbox = document.getElementById(`select-${id}`);
+
+                    // If the checkbox is checked, add it to the displayed list
+                    if (checkbox.checked == true){
+                        selectedEmails.push(row.email)
+                        selectedIds.push(row.uniqueId)
+                        selectedNames.push(row.name)
+
+                        tableData[7].dataSet[tableIndex].selected = true // change the table data
+                    } else {
+                        // remove from emails list
+                        index = selectedEmails.indexOf(row.email);
+                        // only splice array when item is found
+                        if (index > -1) { 
+                            selectedEmails.splice(index, 1); // remove the researcher from the list
+                        } else {
+                            console.log("ERROR - Email does not exist in the list of emails")
+                        }
+
+                        // remove from names list
+                        index = selectedNames.indexOf(row.name);
+                        // only splice array when item is found
+                        if (index > -1) { 
+                            selectedNames.splice(index, 1); // remove the researcher from the list
+                        } else {
+                            console.log("ERROR - Name does not exist in the list of emails")
+                        }
+
+                        // remove from ids list
+                        index = selectedIds.indexOf(row.uniqueId);
+                        // only splice array when item is found
+                        if (index > -1) { 
+                            selectedIds.splice(index, 1); // remove the researcher from the list
+                        } else {
+                            console.log("ERROR - ID does not exist in the list of emails")
+                        }
+
+                        tableData[7].dataSet[tableIndex].selected = false // change the table data
+                    }
+
+                    refreshSelectedResearchers() // refresh the text
+
+                    break; // exit the loop
+                }
+            })
+        }
+    </script>
+</body>
+</html>

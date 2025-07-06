@@ -379,9 +379,9 @@ input[type=radio] {
   -webkit-appearance: none;
   border-radius: 50%;
   /* TODO: Change the colors */
-  background-color: #e1789d; 
+  background-color: #e2bfcb; 
   border: 3px solid #FFF;
-  box-shadow: 0 0 0 1px #e02063;
+  box-shadow: 0 0 0 1px #d25782;
   transition: border 0.4s, background-color 0.5s;
   grid-template-columns: 1em auto;
   

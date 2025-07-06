@@ -35,5 +35,8 @@ router.post('/login', control.loginpost)
 router.get('/signup', control.signupget)
 router.post('/signup', control.signuppost)
 
+router.get('/recalculate', control.recalculateget)
+router.post('/recalculate', control.recalculatepost)
+
 module.exports = router;
 

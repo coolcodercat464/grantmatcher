@@ -511,6 +511,16 @@ const matchget = async (req, res)=>{
     }
 };
 
+const recalculateget = async (req, res) => {
+    // only allow them to signup if they have already been authenticated
+    if (req.isAuthenticated()) {
+        res.render('recalculate.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
+    } else {
+        urlinit = '/recalculate'
+        res.redirect('/login')
+    }
+}
+
 // POST
 // when user logs out
 const indexpost = (req, res, next) => {
@@ -1140,6 +1150,10 @@ const confirmmatchpost = async (req, res)=>{
     }
 } 
 
+const recalculatepost = async (req, res) => {
+    console.log("RECALCULATE GET")
+}
+
 // Export of all methods as object 
 module.exports = { 
     indexget,
@@ -1149,6 +1163,7 @@ module.exports = {
     grantpageget,
     editgrantget,
     matchget,
+    recalculateget,
 
     indexpost,
     loginpost,
@@ -1156,5 +1171,6 @@ module.exports = {
     addgrantpost,
     editgrantpost,
     deletegrantpost,
-    confirmmatchpost
+    confirmmatchpost,
+    recalculatepost
 }

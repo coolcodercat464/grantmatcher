@@ -458,6 +458,7 @@ presentation layer to include multiple tables which all work.
 
 // actual data calculated later on
 tableData = {
+    // researchers
     1 : {
         "dataSet": [],
         "currentPage": 1,
@@ -465,6 +466,7 @@ tableData = {
         "showFields": [],
         "showRows": []
     },
+    // grants
     2 : {
         "dataSet": [],
         "currentPage": 1,
@@ -472,6 +474,7 @@ tableData = {
         "showFields": [],
         "showRows": []
     },
+    // clusters
     3 : {
         "dataSet": [],
         "currentPage": 1,
@@ -479,6 +482,7 @@ tableData = {
         "showFields": [],
         "showRows": []
     },
+    // users
     4 : {
         "dataSet": [],
         "currentPage": 1,
@@ -486,6 +490,7 @@ tableData = {
         "showFields": [],
         "showRows": []
     },
+    // changelog
     5 : {
         "dataSet": [],
         "currentPage": 1,
@@ -493,7 +498,16 @@ tableData = {
         "showFields": [],
         "showRows": []
     },
+    // researchers (match)
     6 : {
+        "dataSet": [],
+        "currentPage": 1,
+        "totalPages": 1,
+        "showFields": [],
+        "showRows": []
+    },
+    // researchers (recalculate)
+    7 : {
         "dataSet": [],
         "currentPage": 1,
         "totalPages": 1,
@@ -1414,6 +1428,7 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
 
         // the name should be a link
         uniqueId = row.email.split("@")[0].replace(".", "")
+        row.uniqueId = uniqueId
         row.nameLink = `<a href='/researcher/${uniqueId}'>${row.name}</a>`
 
         // get the number of edits (for sorting)
@@ -1427,6 +1442,11 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
         tableData[1].dataSet.push(row)
         tableData[1].showRows.push(row)
         tableData[1].showFields = ['nameLink', 'keywords', 'activity']
+
+        // add to the table data
+        tableData[7].dataSet.push(row)
+        tableData[7].showRows.push(row)
+        tableData[7].showFields = ['nameLink', 'school', 'keywords', 'activity', 'SELECT']
 
         // add to the grant search modal data list
         // if statement in case the grantResearcherOptions doesnt exist in that specific page
@@ -1442,6 +1462,14 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
     try {
         tableData[1].totalPages = Math.ceil(data.length / rowsPerPage)
         renderTable(1)
+    } catch {
+
+    }
+
+    // try catch in case the table doesn't exist in that page
+    try {
+        tableData[7].totalPages = Math.ceil(data.length / rowsPerPage)
+        renderTable(7, dbclick=null, idField='uniqueId')
     } catch {
 
     }
