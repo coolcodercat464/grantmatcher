@@ -364,6 +364,7 @@ const grantpageget = async (req, res)=>{
     keywords = grant.keywords.join("\n")
     researchers = grant.researchers.join("\n")
     dateAdded = grant.dateAdded
+    matched = grant.matched
 
     // get the users name from their email
     userEmail = grant.userEmail
@@ -373,7 +374,7 @@ const grantpageget = async (req, res)=>{
     if (user == undefined) { user = "deleted user"}
     else { user = user.name }
 
-    res.render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, title: title, user: user, date: dateAdded, url: url, deadline: deadline, duration: duration, clusters: clusters, id: id, keywords: keywords, description: description, researchers: researchers, showAlert: 'no'});
+    res.render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, title: title, user: user, matched: matched, date: dateAdded, url: url, deadline: deadline, duration: duration, clusters: clusters, id: id, keywords: keywords, description: description, researchers: researchers, showAlert: 'no'});
   } else {
     urlinit = '/grant/' + id // redirect them to the current url after they logged in
     res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
@@ -559,6 +560,7 @@ const loginpost = async (req, res, next) => {
             // in the profile page, the app has to know who
             // the user is)
             req.session.useremail = user.email;
+            req.session.username = user.name;
 
             res.send({"success":"success"})
         })
@@ -656,6 +658,7 @@ const signuppost = async (req, res, next) => {
 
             // store the user in the cookie
             req.session.useremail = newUser.email;
+            req.session.username = newUser.name;
 
             // User is now authenticated. render dashboard with welcome message
             showAlertDashboard = "yes"
@@ -890,6 +893,10 @@ const editgrantpost = async (req, res)=>{
         // add it to the list
         previousVersion.push(date)
 
+        // add the user to the version history list
+        previousVersion.push(req.session.useremail)
+        previousVersion.push(req.session.username)
+
         // add it to the version information list
         versionInformation = grant.versionInformation
         versionInformation.push(previousVersion)
@@ -1033,6 +1040,7 @@ const confirmmatchpost = async (req, res)=>{
     }
 
     x = req.body
+    console.log(x)
 
     // ensure that reason is provided
     if (!x.researchersNames || !x.researchersEmails) {
@@ -1043,17 +1051,23 @@ const confirmmatchpost = async (req, res)=>{
     try {
         // get the researchers
         researchers = x.researchersNames.join(", ")
+        researchersEmails = x.researchersEmails
 
         // get the grants name
-        const mq1 =  'SELECT "grantName" FROM grants WHERE "grantID" = $1'
+        const mq1 =  'SELECT * FROM grants WHERE "grantID" = $1'
         const result1 = await db.query(mq1, [id]);
 
         if (result1.rows.length == 0) {
             res.send({alert: 'Looks like your grant doesn\'t exist in the first place! Please try again.'})
             return
         }
-        
-        grantName = result1.rows[0].grantName
+
+        grant = result1.rows[0]
+
+        // get the previous version
+        previousVersion = [grant.grantName, grant.url, grant.deadline, grant.duration.toString(), grant.description, grant.clusters.join(", "), grant.keywords.join("\n"), grant.researchers.join("\n"), grant.matched.toString(), "This grant has been matched."]
+
+        grantName = grant.grantName
 
         // get the current xp
         const mq2 = 'SELECT xp FROM users WHERE email = $1'
@@ -1100,9 +1114,23 @@ const confirmmatchpost = async (req, res)=>{
         const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
         const result5 = await db.query(mq5, [nextChangeID, req.session.useremail, 'Grant Matched', date, `The grant "${grantName}" has been matched. The researchers notified were ${researchers}.`, '{}']);
 
-        // update the grants' researcher column
-        const mq6 =  'UPDATE grants SET matched = true, researchers = $1 WHERE "grantID" = $2;'
-        const result6 = await db.query(mq6, [x.researchersEmails, id]);
+        // update the grant
+        console.log(researchersEmails)
+
+        // add the date to the verion history list
+        previousVersion.push(date)
+
+        // add the users name to the version history list
+        previousVersion.push(req.session.useremail)
+        previousVersion.push(req.session.username)
+
+        // add it to the version information list
+        versionInformation = grant.versionInformation
+        versionInformation.push(previousVersion)
+        console.log(researchers)
+
+        const mq6 =  'UPDATE grants SET matched = true, researchers = researchers || $1, "versionInformation" = $2 WHERE "grantID" = $3;'
+        const result6 = await db.query(mq6, [researchersEmails, versionInformation, id]);
 
         res.send({success: 'success'})
     } catch (err) {

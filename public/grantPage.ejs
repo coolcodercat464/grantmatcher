@@ -143,6 +143,7 @@
                     <p><b>Deadline:</b> <%= deadline %></p>
                     <p><b>Duration:</b> <%= duration %> years</p>
                     <p><b>Clusters:</b> <span id="clusterText"><%= clusters %></span></p>
+                    <p><b>Matched:</b> <%= matched %></p>
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
@@ -292,8 +293,9 @@
                     // get the accordion on the page
                     accordion = document.getElementById("accordion")
                     
-                    reasonCurrent = "" // the reason for the current version
+                    reasonCurrent = "First version" // the reason for the current version
                     dateCurrent = "<%= date %>" // the date of the current version
+                    userCurrent = "<%= user %>"
 
                     // loop through each version
                     for (i in versionInformation) {
@@ -324,6 +326,7 @@
                         // the reason and date for the next version
                         reasonNext = version[9]
                         dateNext = version[10]
+                        userNext = version[12] // user name, not email
 
                         // create the HTML to display the accordion item on the main page
                         accordionItem = `<div class="accordion-item">
@@ -340,6 +343,8 @@
                                         <p><b>Deadline:</b> ${deadline}</p>
                                         <p><b>Duration:</b> ${duration} years</p>
                                         <p><b>Clusters:</b> ${clusters}</span></p>
+                                        <p><b>Matched:</b> ${matched}</span></p>
+                                        <p><b>User Responsible:</b> ${userCurrent}</span></p>
                                     </div>
                                     <div class="spacer"></div>
                                     <div style="width: 100%;">
@@ -374,7 +379,7 @@
                                         <textarea rows="4" style="width: 100%;" id="researchersArea-${id}" disabled>${researchers}</textarea>
                                     </div>
                                 </div>
-                                <p>${reasonCurrent}</p>
+                                <p><b>Reason for edit:</b> ${reasonCurrent}</p>
                             </div>
                             </div>
                         </div>`
@@ -384,6 +389,7 @@
 
                         reasonCurrent = reasonNext
                         dateCurrent = dateNext
+                        userCurrent = userNext
                     }
 
                     document.getElementById("versionSpan").textContent = `Version ${parseInt(i)+2} (${dateCurrent})`
