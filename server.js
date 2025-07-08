@@ -323,7 +323,7 @@ app.post('/recalculate', async (req, res) => {
         try {
           // only parse the JSON when it finished
           result = JSON.parse(output);
-          res.send(result)
+          res.send({'result': result})
           return
         } catch (err) {
           console.log(output)

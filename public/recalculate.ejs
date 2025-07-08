@@ -668,7 +668,7 @@
                 range = document.getElementById("rangeCluster")
 
                 // if one of those fields isnt provided
-                if (number.value == '' || strictness.value == '' || range.value == '' || parseInt(strictness.value) > 1 || parseInt(range.value) > 1 || parseInt(strictness.value) < 0 || parseInt(range.value) < 0) {
+                if (number.value == '' || strictness.value == '' || range.value == '') {
                     // open error modal
                     document.getElementById('modal3').style.display = 'none'
                     document.getElementById("showAlert").textContent = 'Make sure the Cluster Parameters section is filled and valid.'
@@ -711,8 +711,18 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
-            }).then(data => {
-                console.log(data)
+            }).then(response => response.json()).then(result => {
+                // stop the spinner
+                document.getElementById("loadingSpinner").style.display = 'none'
+                if (result.status == 'error') {
+                    document.getElementById("showAlert").textContent = result.alert
+                    openModal(4)
+                    return
+                } else {
+                    console.log(result)
+                    result = result.result
+                    console.log(result)
+                }
             })
         }
     </script>
