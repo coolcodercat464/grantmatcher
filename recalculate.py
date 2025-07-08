@@ -243,211 +243,206 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
     texts = []         # list of all keywords (for cluster generation)
     researchers = {}   # where all the researcher's information will be stored in
 
-    # Clusters are not calculated from the scraped content, but rather from the keywords. 
-    # Thus, no scraping is required if clusters is the only field being recalculated.
-    if affectedFields == ['clusters']:
-        pass
+    # Set up gender detector
+    d = gender.Detector()
+
+    # Scrape for every researcher
+    response = requests.get(url)
+    allResearchers = response.json()
+
+    if affectedResearchers != 'all':
+        content = []
+        for researcher in allResearchers:
+            if researcher['urlId'] in affectedResearchers:
+                content.append(researcher)
     else:
-        # Set up gender detector
-        d = gender.Detector()
+        content = allResearchers
 
-        # Scrape for every researcher
-        response = requests.get(url)
-        allResearchers = response.json()
+    #print('scraping & processing finished')
 
-        if affectedResearchers != 'all':
-            content = []
-            for researcher in allResearchers:
-                if researcher['urlId'] in affectedResearchers:
-                    content.append(researcher)
-        else:
-            content = allResearchers
+    # Start timer
+    tic = time.perf_counter()
+    #print('start timer')
 
-        #print('scraping & processing finished')
+    # THREAD POOLS
+    
+    # Each thread here goes to the research_interest_keywords function
+    bio_jobs = []
+    bio_pool = ThreadPool(processes=222)
+    
+    # Each thread here goes to the google_scholar function
+    gs_jobs = []
+    gs_pool = ThreadPool(processes=222)
 
-        # Start timer
-        tic = time.perf_counter()
-        #print('start timer')
+    # Each thread here goes to the get_grants function
+    grant_jobs = []
+    grant_pool = ThreadPool(processes=222)
 
-        # THREAD POOLS
+    # Each thread here goes to the get_pubs function
+    pub_jobs = []
+    pub_pool = ThreadPool(processes=222)
+
+    # ITERATE THROUGH SCRAPED CONTENT
+    for researcher in content:
+        # Find career stage through 'salutation'
+        # This can be one of:
+        #   - Dr       - Ms
+        #   - Professor
+        #   - Associate Professor
+        #   - Professor Emeritus
+        #   - Professor Emerita
         
-        # Each thread here goes to the research_interest_keywords function
-        bio_jobs = []
-        bio_pool = ThreadPool(processes=222)
-        
-        # Each thread here goes to the google_scholar function
-        gs_jobs = []
-        gs_pool = ThreadPool(processes=222)
+        salutation = researcher['salutation']
 
-        # Each thread here goes to the get_grants function
-        grant_jobs = []
-        grant_pool = ThreadPool(processes=222)
+        # Exclude from dataset if they are retired (emeritus/emerita)
+        # or if they don't have a phd (ms)
+        if 'Emerit' not in salutation and salutation != 'Ms':
+            # Name information
+            urlId = researcher['urlId']
+            name = researcher['staffName']
+            researchers[urlId] = {}
 
-        # Each thread here goes to the get_pubs function
-        pub_jobs = []
-        pub_pool = ThreadPool(processes=222)
+            if 'name' in affectedFields:
+                researchers[urlId]['nam'] = name
 
-        # ITERATE THROUGH SCRAPED CONTENT
-        for researcher in content:
-            # Find career stage through 'salutation'
-            # This can be one of:
-            #   - Dr       - Ms
-            #   - Professor
-            #   - Associate Professor
-            #   - Professor Emeritus
-            #   - Professor Emerita
+            # Gender
+            if 'gender' in affectedFields:
+                researchers[urlId]['gender'] = d.get_gender(name.split(' ')[0])
+
+            # Find possible career stages based on their salutation
+            if 'cds' in affectedFields:
+                if salutation == 'Dr':
+                    cds = ['PD', 'ECR', 'MCR']
+                elif salutation == 'Associate Professor':
+                    cds = ['MCR']
+                elif salutation == 'Professor':
+                    cds = ['SR']
+
+                researchers[urlId] = {'cds': cds}
+
+            # Get their keywords
+            if 'keywords' in affectedFields:
+                Mediakeywords = researcher['mediaKeyword'].replace('-', ' ')
+                researchers[urlId]['keywords'] = Mediakeywords
+                texts.append(Mediakeywords)
+
+                # If no media keywords are available, get keywords from
+                # google scholar
+                if (Mediakeywords == '' or Mediakeywords.isspace()) and googlescholar:
+                    async_result = gs_pool.apply_async(google_scholar, (urlId,))
+                    gs_jobs.append((urlId, async_result))
+            elif 'clusters' in affectedFields:
+                # Add the keywords to the dictionary
+                keywords = researcher['mediaKeyword'].replace('-', ' ')
+                researchers[urlId]['keywords'] = keywords
+                texts.append(keywords)
+
+            # APPLY POOLS
+            # Rationale - API calls take a while. Increase efficiency by threading.
             
-            salutation = researcher['salutation']
+            # Biography pool
+            if 'profile' in affectedFields:
+                async_result = bio_pool.apply_async(research_interest_keywords, (urlId,))
+                bio_jobs.append((urlId, async_result))
 
-            # Exclude from dataset if they are retired (emeritus/emerita)
-            # or if they don't have a phd (ms)
-            if 'Emerit' not in salutation and salutation != 'Ms':
-                # Name information
-                urlId = researcher['urlId']
-                name = researcher['staffName']
-                researchers[urlId] = {}
+            # Publications/Grants pools
+            if 'grants' in affectedFields:
+                async_result = grant_pool.apply_async(get_grants, (urlId,))
+                grant_jobs.append((urlId, async_result))
 
-                if 'name' in affectedFields:
-                    researchers[urlId]['nam'] = name
+            if 'pubs' in affectedFields:
+                async_result = pub_pool.apply_async(get_pubs, (urlId,))
+                pub_jobs.append((urlId, async_result))
 
-                # Gender
-                if 'gender' in affectedFields:
-                    researchers[urlId]['gender'] = d.get_gender(name.split(' ')[0])
+    # PROCESS POOLS
+    #print('pool time')
 
-                # Find possible career stages based on their salutation
-                if 'cds' in affectedFields:
-                    if salutation == 'Dr':
-                        cds = ['PD', 'ECR', 'MCR']
-                    elif salutation == 'Associate Professor':
-                        cds = ['MCR']
-                    elif salutation == 'Professor':
-                        cds = ['SR']
+    # Check time
+    toc = time.perf_counter()
+    #print(f"Preprocessing finished in {(toc - tic)/60:0.0f} minutes {(toc - tic)%60:0.0f} seconds")
+    #print(f"Preprocessing finished in {toc - tic:0.4f} seconds")
 
-                    researchers[urlId] = {'cds': cds}
+    # Handle biography jobs (won't run if empty)
+    for urlId, job in bio_jobs:
+        # Get output
+        res = job.get()
+        # Split output into raw profile and profile keywords
+        profile, keywords = res[0], res[1]
 
-                # Get their keywords
-                if 'keywords' in affectedFields:
-                    Mediakeywords = researcher['mediaKeyword'].replace('-', ' ')
-                    researchers[urlId]['keywords'] = Mediakeywords
-                    texts.append(Mediakeywords)
+        # Add keywords to data
+        keywords = '; '.join(keywords)
+        researchers[urlId]['keywords'] += '; ' + keywords
+        texts.append(researchers[urlId]['keywords'])
 
-                    # If no media keywords are available, get keywords from
-                    # google scholar
-                    if (Mediakeywords == '' or Mediakeywords.isspace()) and googlescholar:
-                        async_result = gs_pool.apply_async(google_scholar, (urlId,))
-                        gs_jobs.append((urlId, async_result))
-                elif 'clusters' in affectedFields:
-	    	        # Add the keywords to the dictionary
-                    keywords = affectedResearchers[urlId]
-                    researchers[urlId]['keywords'] = keywords
-                    texts.append(keywords)
+        # Add profile to data
+        researchers[urlId]['profile'] = profile
 
-                # APPLY POOLS
-                # Rationale - API calls take a while. Increase efficiency by threading.
-                
-                # Biography pool
-                if 'profile' in affectedFields:
-                    async_result = bio_pool.apply_async(research_interest_keywords, (urlId,))
-                    bio_jobs.append((urlId, async_result))
+    # Close pool to free up resources
+    bio_pool.close()
+    #print('1 - bio done')
 
-                # Publications/Grants pools
-                if 'grants' in affectedFields:
-                    async_result = grant_pool.apply_async(get_grants, (urlId,))
-                    grant_jobs.append((urlId, async_result))
+    # Check time
+    toc = time.perf_counter()
+    #print(f"Biographies finished in {(toc - tic)/60:0.0f} minutes {(toc - tic)%60:0.0f} seconds")
+    #print(f"Biographies finished in {toc - tic:0.4f} seconds")
 
-                if 'pubs' in affectedFields:
-                    async_result = pub_pool.apply_async(get_pubs, (urlId,))
-                    pub_jobs.append((urlId, async_result))
+    # Handle google scholar jobs (won't run if empty)
+    for urlId, job in gs_jobs:
+        # Get output
+        keywords = job.get()
 
-        # PROCESS POOLS
-        #print('pool time')
+        # Add to keywords
+        keywords = keywords + ' ' + '; '.join(researchers[urlId]['keywords'])
 
-        # Check time
-        toc = time.perf_counter()
-        #print(f"Preprocessing finished in {(toc - tic)/60:0.0f} minutes {(toc - tic)%60:0.0f} seconds")
-        #print(f"Preprocessing finished in {toc - tic:0.4f} seconds")
+        # Add keywords to data
+        texts.append(keywords)
+        researchers[urlId]['keywords'] = keywords
 
-        # Handle biography jobs (won't run if empty)
-        for urlId, job in bio_jobs:
-            # Get output
-            res = job.get()
-            # Split output into raw profile and profile keywords
-            profile, keywords = res[0], res[1]
+    # Close pool to free up resources
+    gs_pool.close()
+    #print('2 - google scholar done')
 
-            # Add keywords to data
-            keywords = '; '.join(keywords)
-            researchers[urlId]['keywords'] += '; ' + keywords
-            texts.append(researchers[urlId]['keywords'])
+    # Check time
+    toc = time.perf_counter()
+    #print(f"Google Scholar finished in {(toc - tic)/60:0.0f} minutes {(toc - tic)%60:0.0f} seconds")
+    #print(f"Google Scholar finished in {toc - tic:0.4f} seconds")
 
-            # Add profile to data
-            researchers[urlId]['profile'] = profile
+    # Handle grant jobs (won't run if empty)
+    for urlId, job in grant_jobs:
+        # Get output
+        res = job.get()
 
-        # Close pool to free up resources
-        bio_pool.close()
-        #print('1 - bio done')
+        # Get grants
+        researchers[urlId]['grants'] = res[0]
+        researchers[urlId]['grant_keywords'] = res[1]
 
-        # Check time
-        toc = time.perf_counter()
-        #print(f"Biographies finished in {(toc - tic)/60:0.0f} minutes {(toc - tic)%60:0.0f} seconds")
-        #print(f"Biographies finished in {toc - tic:0.4f} seconds")
+    # close pool to free up resources
+    grant_pool.close()
+    #print('3 - grants done')
 
-        # Handle google scholar jobs (won't run if empty)
-        for urlId, job in gs_jobs:
-            # Get output
-            keywords = job.get()
+    # check time
+    toc = time.perf_counter()
+    #print(f"Grants finished in {(toc - tic)/60:0.0f} minutes {(toc - tic)%60:0.0f} seconds")
+    #print(f"Grants inished in {toc - tic:0.4f} seconds")
 
-            # Add to keywords
-            keywords = keywords + ' ' + '; '.join(researchers[urlId]['keywords'])
+    # Handle pub jobs (won't run if empty)
+    for urlId, job in pub_jobs:
+        # get output
+        res = job.get()
 
-            # Add keywords to data
-            texts.append(keywords)
-            researchers[urlId]['keywords'] = keywords
+        # Get pubs
+        researchers[urlId]['pubs'] = res[0]
+        researchers[urlId]['pubs_keywords'] = res[1]
 
-        # Close pool to free up resources
-        gs_pool.close()
-        #print('2 - google scholar done')
+    # close pool to free up resources
+    pub_pool.close()
 
-        # Check time
-        toc = time.perf_counter()
-        #print(f"Google Scholar finished in {(toc - tic)/60:0.0f} minutes {(toc - tic)%60:0.0f} seconds")
-        #print(f"Google Scholar finished in {toc - tic:0.4f} seconds")
+    #print('4 - pubs done')
 
-        # Handle grant jobs (won't run if empty)
-        for urlId, job in grant_jobs:
-            # Get output
-            res = job.get()
-
-            # Get grants
-            researchers[urlId]['grants'] = res[0]
-            researchers[urlId]['grant_keywords'] = res[1]
-
-        # close pool to free up resources
-        grant_pool.close()
-        #print('3 - grants done')
-
-        # check time
-        toc = time.perf_counter()
-        #print(f"Grants finished in {(toc - tic)/60:0.0f} minutes {(toc - tic)%60:0.0f} seconds")
-        #print(f"Grants inished in {toc - tic:0.4f} seconds")
-
-        # Handle pub jobs (won't run if empty)
-        for urlId, job in pub_jobs:
-            # get output
-            res = job.get()
-
-            # Get pubs
-            researchers[urlId]['pubs'] = res[0]
-            researchers[urlId]['pubs_keywords'] = res[1]
-
-        # close pool to free up resources
-        pub_pool.close()
-
-        #print('4 - pubs done')
-
-        # check time
-        toc = time.perf_counter()
-        #print(f"Pubs finished in {(toc - tic)/60:0.0f} minutes {(toc - tic)%60:0.0f} seconds")
-        #print(f"Pubs finished in {toc - tic:0.4f} seconds")
+    # check time
+    toc = time.perf_counter()
+    #print(f"Pubs finished in {(toc - tic)/60:0.0f} minutes {(toc - tic)%60:0.0f} seconds")
+    #print(f"Pubs finished in {toc - tic:0.4f} seconds")
 
     #print(researchers)
     if 'clusters' in affectedFields:
@@ -481,12 +476,32 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
     
     return researchers, None
 
+# get the information from nodejs
+affectedFields = json.loads(sys.argv[1])
+affectedResearchers = json.loads(sys.argv[2])
+maxNumber = int(sys.argv[3])
+strictness = float(sys.argv[4])
+clusterRangeSetting = float(sys.argv[5])
+googlescholar = sys.argv[6]
+
+# process the information from nodejs
+if googlescholar == 'yes':
+    googlescholar = True
+else:
+    googlescholar = False
+
+if len(affectedResearchers) == 0:
+    affectedResearchers = 'all'
+
+'''
 affectedResearchers = 'all'
 affectedFields = ['name', 'clusters', 'keywords', 'gender', 'cds', 'pubs', 'grants', 'profile']
 clusterRangeSetting = 0.15
 strictness = 0.25
 maxNumber = 50
 googlescholar = True
+'''
+
 url = "https://www.sydney.edu.au/AcademicProfiles/interfaces/rest/performSimpleAttributeSearch/+jobType:1%20+orgUnitCode:5000053020L0000%20+isMediaExpert:true/0/270/byRelevance/false"
 researchers, clusters = main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, maxNumber, googlescholar, url)
 sys.stdout.write(json.dumps(researchers))

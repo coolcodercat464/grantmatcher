@@ -290,6 +290,13 @@
         </div>
     </div>
 
+    <!-- spinner so the user knows that its processing the info -->
+    <div id="loadingSpinner" class="modal">
+        <div class="spinner-border text-info" role="status" style="position: fixed; top: 50%; left: 50%; z-index: 10;">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section>
@@ -299,7 +306,7 @@
 
         <section>
             <h2>Select Researchers</h2>
-            <p>Go through the list of researchers and select the researchers whose data you want to recalculate (note that you can use the search button).</p>
+            <p>Go through the list of researchers and select the researchers whose data you want to recalculate (note that you can use the search button). If you don't select any researchers, we will recalculate all researchers.</p>
             <div class="tableContainer" id="tableContainer7">
                 <div>
                     <div class="tableicons">
@@ -384,8 +391,8 @@
                     <label for="genderField"> Gender</label>
                 </div>
                 <div class="col-xl">
-                    <input type="checkbox" id="careerField" name="careerField" value="career">
-                    <label for="careerField"> Career Stage</label>
+                    <input type="checkbox" id="cdsField" name="cdsField" value="cds">
+                    <label for="cdsField"> Career Stage</label>
                 </div>
                 <div class="col-xl">
                     <input type="checkbox" id="schoolField" name="schoolField" value="school">
@@ -402,8 +409,8 @@
                     <label for="grantsField"> Grants</label>
                 </div>
                 <div class="col-xl">
-                    <input type="checkbox" id="publicationsField" name="publicationsField" value="publications">
-                    <label for="publicationsField"> Publications</label>
+                    <input type="checkbox" id="pubsField" name="pubsField" value="pubs">
+                    <label for="pubsField"> Publications</label>
                 </div>
                 <div class="col-xl">
                     <input type="checkbox" id="keywordsField" name="keywordsField" value="keywords" onclick="toggleKeywords()">
@@ -629,30 +636,28 @@
             }
         }
 
+        // TODO: add a try-catch thingy here
         function recalculate() {
             fieldsToCalculate = []
             checkField("school")
             checkField("gender")
-            checkField("career")
-            checkField("publications")
+            checkField("cds")
+            checkField("pubs")
             checkField("grants")
             checkField("profile")
             checkField("keywords")
             checkField("clusters")
 
-            // if there are no researchers
-            if (selectedEmails.length == 0) {
-                // open error modal
-                document.getElementById("showAlert").textContent = 'Make sure you select your researchers.'
-                openModal(4)
-            }
+            data = {}
+            data['researchers'] = selectedIds
 
             if (fieldsToCalculate.length == 0) {
                 // open error modal
+                document.getElementById('modal3').style.display = 'none'
                 document.getElementById("showAlert").textContent = 'Make sure you select your fields.'
                 openModal(4)
+                return
             } else {
-                data = {}
                 data['fields'] = fieldsToCalculate
             }
 
@@ -663,15 +668,21 @@
                 range = document.getElementById("rangeCluster")
 
                 // if one of those fields isnt provided
-                if (number.value == '' || strictness.value == '' || range.value == '') {
+                if (number.value == '' || strictness.value == '' || range.value == '' || parseInt(strictness.value) > 1 || parseInt(range.value) > 1 || parseInt(strictness.value) < 0 || parseInt(range.value) < 0) {
                     // open error modal
-                    document.getElementById("showAlert").textContent = 'Make sure you specified the Cluster Parameters section.'
+                    document.getElementById('modal3').style.display = 'none'
+                    document.getElementById("showAlert").textContent = 'Make sure the Cluster Parameters section is filled and valid.'
                     openModal(4)
+                    return
                 } else {
-                    fields['number'] = number.value
-                    fields['strictness'] = strictness.value
-                    fields['range'] = range.value
+                    data['number'] = number.value
+                    data['strictness'] = strictness.value
+                    data['range'] = range.value
                 }
+            } else {
+                data['number'] = 0
+                data['strictness'] = 0
+                data['range'] = 0
             }
 
             // if keywords is selected
@@ -681,15 +692,28 @@
                 // if the radio button is pressed
                 if (googleScholar) {
                     value = googleScholar.value;
-                    fields['googleScholar'] = value
+                    data['googleScholar'] = value
                 } else {
                     // open error modal
+                    document.getElementById('modal3').style.display = 'none'
                     document.getElementById("showAlert").textContent = 'Make sure you specified the Keywords Parameters section.'
                     openModal(4)
                 }
+            } else {
+                data['googleScholar'] = 'no'
             }
 
-            document.getElementById("modal3").style.display = 'none'
+            // hide the modal and show the spinner
+            document.getElementById('modal3').style.display = 'none'
+            document.getElementById("loadingSpinner").style.display = 'block'
+
+            fetch('/recalculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(data => {
+                console.log(data)
+            })
         }
     </script>
 </body>

@@ -1150,10 +1150,6 @@ const confirmmatchpost = async (req, res)=>{
     }
 } 
 
-const recalculatepost = async (req, res) => {
-    console.log("RECALCULATE GET")
-}
-
 // Export of all methods as object 
 module.exports = { 
     indexget,
@@ -1171,6 +1167,5 @@ module.exports = {
     addgrantpost,
     editgrantpost,
     deletegrantpost,
-    confirmmatchpost,
-    recalculatepost
+    confirmmatchpost
 }
