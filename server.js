@@ -252,26 +252,42 @@ app.post('/match', async (req, res) => {
 
     // STEP 2 - use the python NLP program
     try {
+      // store the output (its very long so the JSON will get processed over multiple .stdout.on() events)
+      output = '';
+
+      error = false;
+
       // execute the python script
       const scriptExecution = spawn(pythonExecutable, 
         ["match.py", JSON.stringify(keywords), JSON.stringify(allClusters), JSON.stringify(researcherPool), x.cutOffMethod, x.cutOff, x.matchMethod]);
 
       // Handle normal output
       scriptExecution.stdout.on('data', async (data) => {
-          try {
-              console.log(data.toString())
-              res.send(JSON.parse(data.toString()))
-              return
-          } catch (err) {
-              console.error("Error parsing JSON:", err);
-          }
+          output += data.toString(); // Accumulate output
+          console.log(output)
       });
 
       // Handle error output
       scriptExecution.stderr.on('data', (data) => {
-        console.log(data.toString())
-          res.send({'status': 'error', alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
+        // ensure that no errors occured
+        if (!error) {
+          error = true;
+
+          console.log(data.toString())
+          res.send({status: 'error', alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
           return
+        }
+      });
+
+      // when the python script finished executing
+      scriptExecution.on('close', (code) => {
+        // ensure that no errors occured
+        if (!error) {
+          // only parse the JSON when it finished
+          result = JSON.parse(output);
+          res.send({'result': result})
+          return
+        } 
       });
     } catch (err) {
       console.log(err)

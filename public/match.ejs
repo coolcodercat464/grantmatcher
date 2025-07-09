@@ -562,6 +562,7 @@
         <section style="display: none" id="matchTable">
             <h2>Select Researchers</h2>
             <p>Your list of researchers is ready! Go through them and select the researchers you want to notify. Then click the "Email Them" button to open an email in Outlook! The emails will be copied to your clipboard, so all you have to do is paste the emails in the recipients field and you're all set!</p>
+            <p>Nothing appearing? Don't worry! Try a set of different parameters and retry!</p>
             <div class="tableContainer" id="tableContainer6">
                 <div>
                     <div class="tableicons">
@@ -694,7 +695,7 @@
                     document.getElementById('showAlert').textContent = matchResults.alert
                     openModal(2)
                 } else {
-                    console.log(matchResults)
+                    matchResults = matchResults.result
                     document.getElementById("tableBody6").innerHTML = '' // reset the table
                     document.getElementById("matchTable").style.display = 'block' // show the table
                     document.getElementById("loadingSpinner").style.display = 'none' // remove the spinner
