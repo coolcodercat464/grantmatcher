@@ -501,6 +501,7 @@
                     </div>
 
                     <div>
+                        <!-- TODO: make the grant keywords here default -->
                         <div class="listbox" style="overflow:auto; ">
                             <div class="listboxdiv" style="height: 70px;">
                                 <!-- Numbering the IDs so I can use many selectors (code reuse) -->
@@ -557,6 +558,7 @@
                 </div>
             </div>
         </section>
+        <!-- TODO: add an id and hide/show this -->
         <hr/>
 
         <section style="display: none" id="matchTable">
@@ -718,16 +720,13 @@
                             // add to the table data
                             tableData[6].dataSet.push(row)
                             tableData[6].showRows.push(row)
-                            tableData[6].showFields = ['nameLink', 'email', 'keywordsString', 'activity', 'score', 'SELECT']
                         }
 
-                        // try catch in case the table doesn't exist in that page
-                        try {
-                            tableData[6].totalPages = Math.ceil(data.length / rowsPerPage)
-                            renderTable(6, dbclick=null, idField='uniqueId')
-                        } catch {
+                        tableData[6].showFields = ['nameLink', 'email', 'keywordsString', 'activity', 'score', 'SELECT']
 
-                        }
+                        // initialise the table
+                        tableData[6].totalPages = Math.ceil(data.length / rowsPerPage)
+                        renderTable(6, dbclick=null, idField='uniqueId')
                     })
                 }
             });
@@ -801,8 +800,9 @@
                             // add to the table data
                             tableData[6].dataSet.push(row)
                             tableData[6].showRows.push(row)
-                            tableData[6].showFields = ['nameLink', 'email', 'keywordsString', 'activity', 'score', 'SELECT']
                         }
+
+                        tableData[6].showFields = ['nameLink', 'email', 'keywordsString', 'activity', 'score', 'SELECT']
 
                         // try catch in case the table doesn't exist in that page
                         try {
@@ -897,7 +897,10 @@
             document.getElementById("selectedResearchers").innerHTML = output.join(', ')
         }
 
-        function handleSelection(id) {
+        function handleSelection(element) {
+            // get the id based of the element (should be in format [TABLENAME]-[ELEMENT ID])
+            id = element.split('-')[1]
+
             // try to find the row to change
             tableIndex = -1 // this will store the row that has the same id
             for (r in tableData[6].dataSet) {

@@ -506,8 +506,16 @@ tableData = {
         "showFields": [],
         "showRows": []
     },
-    // researchers (recalculate)
+    // researchers (before recalculate)
     7 : {
+        "dataSet": [],
+        "currentPage": 1,
+        "totalPages": 1,
+        "showFields": [],
+        "showRows": []
+    },
+    // researchers (after recalculate)
+    8 : {
         "dataSet": [],
         "currentPage": 1,
         "totalPages": 1,
@@ -594,9 +602,9 @@ function renderTable(tableNumber, dbclick=null, idField=null) {
                 // check if the checkbox should already be selected or not
                 if (item.selected) {
                     // select it by default
-                    row += `<td><input type="checkbox" id="select-${id}" onclick="handleSelection('${id}')" checked></td>`
+                    row += `<td><input type="checkbox" id="select-${tableNumber}-${id}" onclick="handleSelection('${tableNumber}-${id}')" checked></td>`
                 } else {
-                    row += `<td><input type="checkbox" id="select-${id}" onclick="handleSelection('${id}')"></td>`
+                    row += `<td><input type="checkbox" id="select-${tableNumber}-${id}" onclick="handleSelection('${tableNumber}-${id}')"></td>`
                 }
                 
                 break

@@ -303,7 +303,7 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
             researchers[urlId] = {}
 
             if 'name' in affectedFields:
-                researchers[urlId]['nam'] = name
+                researchers[urlId]['name'] = name
 
             # Gender
             if 'gender' in affectedFields:
@@ -319,6 +319,25 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
                     cds = ['SR']
 
                 researchers[urlId] = {'cds': cds}
+            
+            if 'school' in affectedFields:
+                affiliation = researcher['affiliationList'][0].lower()
+                if 'chemistry' in affiliation:
+                    researchers[urlId]['school'] = 'chemistry'
+                elif 'geoscience' in affiliation:
+                    researchers[urlId]['school'] = 'geoscience'
+                elif 'life and environmental' in affiliation:
+                    researchers[urlId]['school'] = 'biology'
+                elif 'veterinary' in affiliation:
+                    researchers[urlId]['school'] = 'veterinary'
+                elif 'mathematics' in affiliation:
+                    researchers[urlId]['school'] = 'mathematics'
+                elif 'physics' in affiliation:
+                    researchers[urlId]['school'] = 'physics'
+                elif 'philosphy' in affiliation:
+                    researchers[urlId]['school'] = 'philosphy'
+                elif 'psychology' in affiliation:
+                    researchers[urlId]['school'] = 'psychology'
 
             # Get their keywords
             if 'keywords' in affectedFields:

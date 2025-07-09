@@ -307,7 +307,9 @@ app.post('/recalculate', async (req, res) => {
     }
 
     x = req.body
+    console.log(x)
 
+    // TRY CATCH DOESNT WORK. FIX THIS TODO
     try {
       // store the output (its very long so the JSON will get processed over multiple .stdout.on() events)
       output = '';
