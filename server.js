@@ -291,11 +291,12 @@ app.post('/recalculate', async (req, res) => {
     }
 
     x = req.body
-    console.log(x)
 
     try {
       // store the output (its very long so the JSON will get processed over multiple .stdout.on() events)
       output = '';
+
+      error = false;
 
       // execute the python script
       const scriptExecution = spawn(pythonExecutable, 
@@ -303,91 +304,35 @@ app.post('/recalculate', async (req, res) => {
 
       // Handle normal output
       scriptExecution.stdout.on('data', async (data) => {
-          try {
-              output += data.toString(); // Accumulate output
-              console.log(output)
-          } catch (err) {
-              console.error("Error parsing JSON:", err);
-          }
+          output += data.toString(); // Accumulate output
+          console.log(output)
       });
 
       // Handle error output
       scriptExecution.stderr.on('data', (data) => {
-        console.log(data.toString())
-        res.send({'status': 'error', alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
-        return
+        // ensure that no errors occured
+        if (!error) {
+          error = true;
+
+          console.log(data.toString())
+          res.send({status: "error", alert: "Something wrong happened while recalculating researchers. Please try again. If this problem persists, please open a ticket to let me know."})
+          return
+        }
       });
 
       // when the python script finished executing
       scriptExecution.on('close', (code) => {
-        try {
+        // ensure that no errors occured
+        if (!error) {
           // only parse the JSON when it finished
           result = JSON.parse(output);
           res.send({'result': result})
           return
-        } catch (err) {
-          console.log(output)
-          console.error('Failed to parse JSON:', err);
-          res.send({'status': 'error', alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
-          return
-        }
+        } 
       });
     } catch (err) {
       console.log(err)
-      res.send({status: "error", alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
-      return
-    }
-})
-
-app.get('/test', async (req, res) => {
-    console.log(req.session.useremail)
-    // TODO: Is there a better way to do this?
-    if (req.session.useremail == null || req.session.useremail == undefined) {
-        res.send({status: "error", alert: 'Please login first :)'});
-        return
-    }
-
-    try {
-      // store the output (its very long so the JSON will get processed over multiple .stdout.on() events)
-      output = '';
-
-      // execute the python script
-      const scriptExecution = spawn(pythonExecutable, 
-        ["recalculate.py"]);
-
-      // Handle normal output
-      scriptExecution.stdout.on('data', async (data) => {
-          try {
-              output += data.toString(); // Accumulate output
-          } catch (err) {
-              console.error("Error parsing JSON:", err);
-          }
-      });
-
-      // Handle error output
-      scriptExecution.stderr.on('data', (data) => {
-        console.log(data.toString())
-          res.send({'status': 'error', alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
-          return
-      });
-
-      // when the python script finished executing
-      scriptExecution.on('close', (code) => {
-        try {
-          // only parse the JSON when it finished
-          result = JSON.parse(output);
-          res.send(result)
-          return
-        } catch (err) {
-          console.log(output.slice(0, 1000))
-          console.error('Failed to parse JSON:', err);
-          res.send({'status': 'error', alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
-          return
-        }
-      });
-    } catch (err) {
-      console.log(err)
-      res.send({status: "error", alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
+      res.send({status: "error", alert: "Something wrong happened while recalculating researchers. Please try again. If this problem persists, please open a ticket to let me know."})
       return
     }
 })
