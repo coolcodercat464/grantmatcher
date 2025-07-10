@@ -236,6 +236,16 @@ function addKeyword(id) {
     addKeywordManual(id, keyword)
 }
 
+// add an editable keyword in the input field to a keyword selector
+function addEditableKeyword(id) {
+    // get the input based on the ID number
+    input = document.getElementById('keyword' + id)
+    keyword = input.value
+
+    // add the keyword
+    addEditableKeywordManual(id, keyword)
+}
+
 // add a keyword (from the function parameters) to a keyword selector
 function addKeywordManual(id, keyword) {
     // get the list based on the ID number
@@ -247,6 +257,23 @@ function addKeywordManual(id, keyword) {
         keywordElement = `<li id='kw${id}-${numKeywords}' class='listboxliwhite'><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteKeyword(${id}, ${numKeywords})"></i> ${keyword}</li>`
     } else {
         keywordElement = `<li id='kw${id}-${numKeywords}' class='listboxligray'><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteKeyword(${id}, ${numKeywords})"></i> ${keyword}</li>`
+    }
+    
+    // add the new keyword to the list
+    ul.innerHTML += keywordElement
+}
+
+// add an editable keyword (from the function parameters) to a keyword selector
+function addEditableKeywordManual(id, keyword) {
+    // get the list based on the ID number
+    ul = document.getElementById('list' + id)
+
+    // user the number of keywords to determine the background color of the next item in the list
+    numKeywords = ul.querySelectorAll('li').length
+    if (numKeywords % 2 == 0) {
+        keywordElement = `<li id='kw${id}-${numKeywords}' contenteditable="true" class='listboxliwhite'>${keyword}</li>`
+    } else {
+        keywordElement = `<li id='kw${id}-${numKeywords}' contenteditable="true" class='listboxligray'>${keyword}</li>`
     }
     
     // add the new keyword to the list
@@ -612,7 +639,7 @@ function renderTable(tableNumber, dbclick=null, idField=null) {
 
             // get the value of item for that column
             value = item[col]
-            row += `<td>${value}</td>`
+            row += `<td><div style="width:100%; max-height:100px; overflow:auto">${value}</div></td>`
         }
         row += '</tr>'
 
@@ -691,34 +718,34 @@ function sortTable(tableNumber, dbclick=null, idField=null) {
 
 // SEARCHING
 // filter through the researchers table
-function searchResearcher(tableNumber, dbclick=null, idField=null) {
+function searchResearcher(tableNumber, dbclick=null, idField=null, searchId='') {
     // get the relevant data
     researcherTable = tableData[tableNumber]
     researcherData = researcherTable.dataSet
 
     // get the text inputs
     // trim and lowercase all user inputs
-    researcherName = document.getElementById('researcherName').value.trim().toLowerCase()
-    researcherEmail = document.getElementById('researcherEmail').value.trim().toLowerCase()
+    researcherName = document.getElementById('researcherName' + searchId).value.trim().toLowerCase()
+    researcherEmail = document.getElementById('researcherEmail' + searchId).value.trim().toLowerCase()
 
     // get the dropdown inputs
-    school = document.getElementById('school').value
-    gender = document.getElementById('gender').value
-    career = document.getElementById('career').value
+    school = document.getElementById('school' + searchId).value
+    gender = document.getElementById('gender' + searchId).value
+    career = document.getElementById('career' + searchId).value
 
     // get the numeric inputs
-    lower = document.getElementById('lower').value
+    lower = document.getElementById('lower' + searchId).value
 
     // if not given, then the lower bound is 0
     if (lower == '') { lower = 0 }
 
-    higher = document.getElementById('higher').value
+    higher = document.getElementById('higher' + searchId).value
 
     // if not given, then the higher bound is 1
     if (higher == '') { higher = 1 }
 
     // get the selected clusters
-    selectedClusters = document.getElementById('selectedClusters1')
+    selectedClusters = document.getElementById('selectedClusters1' + searchId)
     selectedClusters = selectedClusters.getElementsByTagName('button') // list of each cluster (element)
 
     // get a list of all the clusters
@@ -729,7 +756,7 @@ function searchResearcher(tableNumber, dbclick=null, idField=null) {
     }
 
     // get the inputted keywords
-    keywords = document.getElementById('list1')
+    keywords = document.getElementById('list1' + searchId)
     keywords = keywords.getElementsByTagName('li') // list of each keyword (element)
 
     // get a list of all the keywords
@@ -754,17 +781,17 @@ function searchResearcher(tableNumber, dbclick=null, idField=null) {
         emailCorrect = researcher.email.trim().toLowerCase().includes(researcherEmail)
 
         // if the dropdown is set to 'all', then its true. otherwise, the researcher
-        // should match that column
-        schoolCorrect = (school == "all" || researcher.school == school)
-        genderCorrect = (gender == "all" || researcher.gender == gender)
+        // should match that column (unless they actually dont have that column)
+        schoolCorrect = (school == "all" || researcher.school == school || !researcher.school)
+        genderCorrect = (gender == "all" || researcher.gender == gender || !researcher.gender)
 
         // note that career stage is either 1, 2, 3, or 4. 1 is post-doc, 2 is ecr,
         // 3 is mcr, and 4 is senior researcher. this is to make sorting easier. it will
         // be converted between the number and text form throughout the app
-        careerCorrect = (career == "all" || researcher.careerStage == career) 
+        careerCorrect = (career == "all" || researcher.careerStage == career || researcher.cds == career || !researcher.cds) 
 
         // ensure the activity is within the set range
-        activityCorrect = (researcher.activity >= lower && researcher.activity <= higher)
+        activityCorrect = ((researcher.activity >= lower && researcher.activity <= higher) || !researcher.activity)
 
         // if the cluster list is empty, then set this to true
         clusterCorrect = (selectedClustersText.length == 0)
@@ -804,7 +831,13 @@ function searchResearcher(tableNumber, dbclick=null, idField=null) {
         // table number 6 is only for the match grants table to select researchers
         // here, we have to include the selectedCorrect
         if (tableNumber == 6) {
-            selected = document.getElementById('selected').value
+            selected = document.getElementById('selected' + searchId).value
+            // it is true if selected is any, and if it isnt any, the selected must match researcher.selected
+            selectedCorrect = (selected == "all" || (researcher.selected == true && selected == 'yes') || (researcher.selected == false && selected == 'no'))
+        // we also have to consider selectedCorrect if its table number 8 (after
+        // recalculation)
+        } else if (tableNumber == 8) {
+            selected = document.getElementById('selected' + searchId).value
             // it is true if selected is any, and if it isnt any, the selected must match researcher.selected
             selectedCorrect = (selected == "all" || (researcher.selected == true && selected == 'yes') || (researcher.selected == false && selected == 'no'))
         } else {

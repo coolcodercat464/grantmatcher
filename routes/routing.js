@@ -27,6 +27,9 @@ router.post('/deletegrant/:id', control.deletegrantpost)
 
 router.post('/confirmmatch/:id', control.confirmmatchpost)
 
+router.post('/confirmrecalculation', control.confirmrecalculationpost)
+router.post('/addclusters', control.addclusterspost)
+
 router.get('/match/:id', control.matchget)
 
 router.get('/login', control.loginget)

@@ -1150,6 +1150,279 @@ const confirmmatchpost = async (req, res)=>{
     }
 } 
 
+// add some clusters to the database
+const addclusterspost = async (req, res)=>{
+    console.log("ADD CLUSTERS POST")
+
+    // ensure that user is authenticated
+    if (req.isAuthenticated() == false) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    x = req.body
+
+    // ensure that reason is provided
+    if (!x.generatedClusters || x.generatedClusters == []) {
+        res.send({alert: 'It looks like no clusters were selected. Please try again.'});
+        return
+    }
+
+    try {
+        clusterDictionary = {}
+
+        // get all clusters
+        const mq = 'SELECT "clusterID" FROM clusters'
+        const result = await db.query(mq);
+
+        // calculate the maximum clusterID
+        maxClusterID = 0
+        for (i in result.rows) {
+            rowID = result.rows[i].clusterID
+            if (rowID > maxClusterID) {
+                maxClusterID = rowID
+            }
+        }
+
+        // add each cluster to the database
+        for (i in x.generatedClusters) {
+            clusterName = x.generatedClusters[i]
+            await db.query('INSERT INTO clusters ("clusterID", name, description) VALUES ($1, $2, $3)', [maxClusterID+1, clusterName, "No description for this cluster yet."]);
+            clusterDictionary[clusterName] = maxClusterID + 1 // map cluster name to cluster ID
+            maxClusterID += 1
+        }
+
+        res.send({success: 'success'})
+    } catch (err) {
+        console.log(err)
+
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+    }
+} 
+
+// after the researchers have been recalculated, update the database
+const confirmrecalculationpost = async (req, res)=>{
+    console.log("CONFIRM RECALCULATION POST")
+
+    // ensure that user is authenticated
+    if (req.isAuthenticated() == false) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    x = req.body
+
+    // ensure that reason is provided
+    if (!x.researcher || x.researcher == {}) {
+        res.send({alert: 'It looks like no researchers were selected. Please try again.'});
+        return
+    }
+
+    try {
+        // get the current date
+        now = new Date();
+
+        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+        year = now.getFullYear()
+        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+        // stringify it
+        date = `${day}-${month}-${year}`
+
+        // get all researcher data
+        const mq1 =  'SELECT * FROM researchers'
+        const result1 = await db.query(mq1);
+        rows = result1.rows
+        allResearchers = {}
+
+        for (r in rows) {
+            row = rows[r]
+            allResearchers[row['email']] = row
+        }
+
+        clusterDictionary = {}
+
+        // get all clusters
+        const mq = 'SELECT * FROM clusters'
+        const result = await db.query(mq);
+
+        // map the cluster name to ID
+        for (i in result.rows) {
+            clusterDictionary[result.rows[i].name] = result.rows[i].clusterID
+        }
+
+        researcher = x.researcher
+    
+        // get the researcher's details
+        researcherName = researcher.name
+        researcherEmail = researcher.email
+        researcherSchool = researcher.school
+        researcherGender = researcher.gender
+        researcherCds = researcher.cds
+        researcherActivity = researcher.activity
+        researcherGrantKW = researcher.grant_keywords
+        researcherGrant = researcher.grants
+        researcherKW = researcher.keywords
+        researcherProfile = researcher.profile
+        researcherPub = researcher.pubs
+        researcherPubKW = researcher.pubs_keywords
+        researcherCluster = researcher.clusters
+
+        newResearcher = {
+            'name':researcherName,
+            'email':researcherEmail,
+            'school':researcherSchool,
+            'gender':researcherGender,
+            'careerStage':researcherCds,
+            'activity':researcherActivity,
+            'grantKeywords':researcherGrantKW,
+            'grants':researcherGrant,
+            'publicationKeywords':researcherPubKW,
+            'publications':researcherPub,
+            'profile':researcherProfile,
+            'clusters':researcherCluster,
+            'keywords':researcherKW,
+        }
+
+        if (allResearchers[researcherEmail] != undefined) {
+            // researcher is in the database
+            prevResearcher = allResearchers[researcherEmail]
+            // get the previous version
+            previousVersion = [prevResearcher.name, prevResearcher.email, prevResearcher.school, prevResearcher.gender, prevResearcher.careerStage.toString(), prevResearcher.activity.toString(), prevResearcher.clusters.join(", "), prevResearcher.keywords.join("\n"), prevResearcher.publications.join("\n"), prevResearcher.publicationKeywords.join("\n"), prevResearcher.grants.join("\n"), prevResearcher.grantKeywords.join("\n"), prevResearcher.profile, "This researcher's data has been recalculated."]
+            // add the date to the verion history list
+            previousVersion.push(date)
+            // add the users name to the version history list
+            previousVersion.push(req.session.useremail)
+            previousVersion.push(req.session.username)
+            // add it to the version information list
+            versionInformation = prevResearcher.versionInformation
+            versionInformation.push(previousVersion)
+
+            // update each piece of information to the database
+            Object.entries(newResearcher).forEach(async ([column,newValue]) => {
+                if (newValue == undefined || prevResearcher[column] == newValue) {
+                    // that value hasnt been updated
+                } else {
+                    // ensure that its cluster ID, not cluster name
+                    if (column == 'clusters') {
+                        temp = []
+                        for (n in newValue) {
+                            clusterName = newValue[n]
+                            clusterID = clusterDictionary[clusterName]
+                            temp.push(clusterID)
+                        }
+                        newValue = temp
+                    }
+
+                    // ensure that its a number, not a string, for CDS
+                    if (column == 'careerStage') {
+                        if (newValue == 'PD') {
+                            newValue = 1
+                        } else if (newValue == 'ECR') {
+                            newValue = 2
+                        } else if (newValue == 'MCR') {
+                            newValue = 3
+                        } else { // SR
+                            newValue = 4
+                        }
+                    }
+
+                    // turn the string keywords into a list
+                    if (column == 'keywords') {
+                        newValue = newValue.split('; ')
+                    }
+                    
+                    // update that value
+                    await db.query('UPDATE researchers SET ' + column + ' = $1 WHERE email = $2;', [newValue, researcherEmail]);
+                }
+            })
+        } else {
+            // add the researcher
+            await db.query('INSERT INTO researchers (email, name) VALUES ($1, $2)', [researcherEmail, researcherName]);
+
+            // update each piece of information to the database
+            Object.entries(newResearcher).forEach(async ([column,newValue]) => {
+                if (newValue == undefined) {
+                    // that value hasnt been provided
+                } else {
+                    // ensure that its cluster ID, not cluster name
+                    if (column == 'clusters') {
+                        temp = []
+                        for (n in newValue) {
+                            clusterName = newValue[n]
+                            clusterID = clusterDictionary[clusterName]
+                            temp.push(clusterID)
+                        }
+                        newValue = temp
+                    }
+
+                    // ensure that its a number, not a string, for CDS
+                    if (column == 'careerStage') {
+                        if (newValue == 'PD') {
+                            newValue = 1
+                        } else if (newValue == 'ECR') {
+                            newValue = 2
+                        } else if (newValue == 'MCR') {
+                            newValue = 3
+                        } else { // SR
+                            newValue = 4
+                        }
+                    }
+
+                    // turn the string keywords into a list
+                    if (column == 'keywords') {
+                        newValue = newValue.split('; ')
+                    }
+
+                    // update that value
+                    await db.query('UPDATE researchers SET "' + column + '" = $1 WHERE email = $2;', [newValue, researcherEmail]);
+                }
+            })
+        }
+
+        // get the current xp
+        const mq2 = 'SELECT xp FROM users WHERE email = $1'
+        const result2 = await db.query(mq2, [req.session.useremail]);
+
+        if (result2.rows.length == 0) {
+            res.send({alert: 'Something went wrong when getting your XP and account details. If the issue persists, please let me know.'})
+            return
+        }
+
+        // otherwise, add 5 to the xp
+        currentXp = result2.rows[0].xp
+        const mq3 = 'UPDATE users SET xp = $1 WHERE email = $2'
+        const result3 = await db.query(mq3, [currentXp + 5, req.session.useremail]);
+
+        // get all changes
+        const mq4 = 'SELECT "changeID" FROM changelog'
+        const result4 = await db.query(mq4);
+
+        // calculate the maximum changeID
+        maxChangeID = 0
+        for (i in result4.rows) {
+            rowID = result4.rows[i].changeID
+            if (rowID > maxChangeID) {
+                maxChangeID = rowID
+            }
+        }
+
+        // calculate the next change ID
+        nextChangeID = maxChangeID + 1
+
+        // add 'grant edited' change to changelog
+        const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
+        const result5 = await db.query(mq5, [nextChangeID, req.session.useremail, 'Researcher Recalculated', date, `${researcherName}'s data has been recalculated.`, '{}']);
+        
+        res.send({success: 'success'})
+    } catch (err) {
+        console.log(err)
+
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+    }
+} 
+
 // Export of all methods as object 
 module.exports = { 
     indexget,
@@ -1167,5 +1440,7 @@ module.exports = {
     addgrantpost,
     editgrantpost,
     deletegrantpost,
-    confirmmatchpost
+    confirmmatchpost,
+    confirmrecalculationpost,
+    addclusterspost
 }

@@ -53,7 +53,7 @@ const db = require('./databases/postgres.js')             // database stuff
 
 // get and post routing
 app.get(['/', '/login', '/signup', '/addgrant', '/grant/:id', '/editgrant/:id', '/match/:id', '/recalculate'], routes)
-app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id', '/deletegrant/:id', '/confirmmatch/:id'], routes)
+app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id', '/deletegrant/:id', '/confirmmatch/:id', '/confirmrecalculation', '/addclusters'], routes)
 
 // database routes
 
@@ -323,7 +323,6 @@ app.post('/recalculate', async (req, res) => {
       // Handle normal output
       scriptExecution.stdout.on('data', async (data) => {
           output += data.toString(); // Accumulate output
-          console.log(output)
       });
 
       // Handle error output

@@ -289,12 +289,12 @@
             <div class="together">
                 <div style="width: 100%;">
                     <label><b>NAME</b></label><br>
-                    <input type="text" class="form-control" id="researcherName" name="researcherName" placeholder="Enter their name">
+                    <input type="text" class="form-control" id="researcherName2" name="researcherName2" placeholder="Enter their name">
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
                     <label><b>SCHOOL</b></label><br>
-                    <select name="school" class="form-control" id="school" style="width: 100%">
+                    <select name="school2" class="form-control" id="school2" style="width: 100%">
                         <option value="all">All</option>
                         <option value="geoscience">Geosciences</option>
                         <option value="philosophy">History and Philosophy</option>
@@ -311,17 +311,18 @@
             <div class="together">
                 <div style="width: 100%;">
                     <label><b>EMAIL</b></label><br>
-                    <input type="text" class="form-control" id="researcherEmail" name="researcherEmail" placeholder="Enter their email">
+                    <input type="text" class="form-control" id="researcherEmail2" name="researcherEmail2" placeholder="Enter their email">
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
                     <label><b>GENDER</b></label><br>
-                    <select name="gender" class="form-control" id="gender" style="width: 100%">
+                    <select name="gender2" class="form-control" id="gender2" style="width: 100%">
                         <option value="all">All</option>
-                        <option value="F">Female</option>
-                        <option value="M">Male</option>
-                        <option value="N">Non-Binary</option>
-                        <option value="U">Unknown Gender</option>
+                        <option value="female">Female</option>
+                        <option value="male">Male</option>
+                        <option value="mostly_female">Probably Female</option>
+                        <option value="mostly_male">Probably Male</option>
+                        <option value="unknown">Unknown Gender</option>
                     </select>
                 </div>
             </div>
@@ -330,18 +331,18 @@
                 <div style="width: 100%;">
                     <label><b>ACTIVITY RANGE</b></label><br>
                     <div class="together">
-                        <input type="number" class="form-control" id="lower" class="form-control" name="lower" min="0" max="1" step="0.01" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="higher" name="higher" min="0" max="1" style="width: 100%" step="0.01">
+                        <input type="number" class="form-control" id="lower2" class="form-control" name="lower2" min="0" max="1" step="0.01" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="higher2" name="higher2" min="0" max="1" style="width: 100%" step="0.01">
                     </div>
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
                     <label><b>CAREER STAGE</b></label><br>
-                    <select name="career" class="form-control" id="career" style="width: 100%">
+                    <select name="career2" class="form-control" id="career2" style="width: 100%">
                         <option value="all">All</option>
-                        <option value=1>Post-Doctorate</option>
-                        <option value=2>Early Career Researcher</option>
-                        <option value=3>Mid-Career Researcher</option>
-                        <option value=4>Senior Researcher</option>
+                        <option value='PD'>Post-Doctorate</option>
+                        <option value='ECR'>Early Career Researcher</option>
+                        <option value='MCR"'>Mid-Career Researcher</option>
+                        <option value='SR'>Senior Researcher</option>
                     </select>
                 </div>
             </div>
@@ -355,7 +356,7 @@
                             <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
                         </button>
                     </label><br>
-                    <select name="selected" class="form-control" id="selected" style="width: 100%">
+                    <select name="selected2" class="form-control" id="selected2" style="width: 100%">
                         <option value="all">All</option>
                         <option value="yes">Selected</option>
                         <option value="no">Unselected</option>
@@ -373,7 +374,7 @@
                         <div class="listboxdiv" style="height: 70px;">
                             <!-- Numbering the IDs so I can use many selectors (code reuse) -->
                             <!-- All keywords displayed here -->
-                            <ul class="listboxul" id="list1" style="height: 70px;">
+                            <ul class="listboxul" id="list12" style="height: 70px;">
                             </ul>
                         </div>
 
@@ -381,12 +382,12 @@
                         <div class="listboxinput">
                             <!-- User enters keywords here -->
                             <div class="listboxtextdiv">
-                                <input class="listboxtext" type="text" id="keyword1" name="keyword1" placeholder="Enter a keyword">
+                                <input class="listboxtext" type="text" id="keyword12" name="keyword12" placeholder="Enter a keyword">
                             </div>
 
                             <!-- User presses this button to add the keyword to the list -->
                             <div class="listboxsubmitdiv">
-                                <button class="listboxsubmit" onclick="addKeyword(1)"><i class="fa fa-arrow-right"></i></button>
+                                <button class="listboxsubmit" onclick="addKeyword(12)"><i class="fa fa-arrow-right"></i></button>
                             </div>
                         </div>
                     </div>
@@ -403,25 +404,25 @@
                         <div class="listboxtextdiv">
                             <!-- Numbering the IDs so I can use many selectors (code reuse) -->
                             <!-- This is where the user enters some text that is matched to the clusters in the unselectedClusters list -->
-                            <input class="listboxtext" type="text" id="searchUnselectedClusters1" name="searchUnselectedClusters1" placeholder="Enter a cluster">
+                            <input class="listboxtext" type="text" id="searchUnselectedClusters12" name="searchUnselectedClusters12" placeholder="Enter a cluster">
                         </div>
                         <div class="listboxsubmitdiv">
                             <!-- User can press this button to search from the list -->
-                            <button class="listboxsubmit" onclick="findUnselectedCluster(1)"><i class="fa fa-search"></i></button>
+                            <button class="listboxsubmit" onclick="findUnselectedCluster(12)"><i class="fa fa-search"></i></button>
                         </div>
                         <div class="listboxsubmitdiv">
                             <!-- Added a reset button so its easier for the user to reset the form (displaying all clusters in the list) -->
-                            <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
+                            <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(12)"><i class="fa fa-refresh"></i></button>
                         </div>
                     </div>
                     <!-- Contains all unselected clusters -->
-                    <div class="listboxdiv unselectedClusters" id="unselectedClusters1">
+                    <div class="listboxdiv unselectedClusters" id="unselectedClusters12">
                     </div>
                     <div class="clustersort">
-                        <label for="sortUnselected1">Sort By:</label>
+                        <label for="sortUnselected12">Sort By:</label>
 
                         <!-- Sort-by dropdown -->
-                        <select name="sortUnselected1" id="sortUnselected1" onchange="sortUnselected(1)">
+                        <select name="sortUnselected12" id="sortUnselected12" onchange="sortUnselected(12)">
                             <option value="id">ID</option>
                             <option value="name">Name</option>
                             <option value="number"># of Researchers</option>
@@ -436,21 +437,21 @@
                 <div class="selected">
                     <div class="listboxinput">
                         <div class="listboxtextdiv">
-                            <input class="listboxtext" type="text" id="searchSelectedClusters1" name="searchSelectedClusters1" placeholder="Enter a cluster">
+                            <input class="listboxtext" type="text" id="searchSelectedClusters12" name="searchSelectedClusters12" placeholder="Enter a cluster">
                         </div>
                         <div class="listboxsubmitdiv">
-                            <button class="listboxsubmit" onclick="findSelectedCluster(1)"><i class="fa fa-search"></i></button>
+                            <button class="listboxsubmit" onclick="findSelectedCluster(12)"><i class="fa fa-search"></i></button>
                         </div>
                         <div class="listboxsubmitdiv">
-                            <button class="listboxsubmit" onclick="resetSelectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
+                            <button class="listboxsubmit" onclick="resetSelectedClusterSearch(12)"><i class="fa fa-refresh"></i></button>
                         </div>
                     </div>
-                    <div class="listboxdiv selectedClusters" id="selectedClusters1">
+                    <div class="listboxdiv selectedClusters" id="selectedClusters12">
                     </div>
                     <div class="clustersort">
-                        <label for="sortSelected1">Sort By:</label>
+                        <label for="sortSelected12">Sort By:</label>
 
-                        <select name="sortSelected1" id="sortSelected1" onchange="sortSelected(1)">
+                        <select name="sortSelected12" id="sortSelected12" onchange="sortSelected(12)">
                             <option value="id">ID</option>
                             <option value="name">Name</option>
                             <option value="number"># of Researchers</option>
@@ -462,11 +463,11 @@
 
             <div class="together" style="align-items: flex-start;">
                 <div style="width: 100%;">
-                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetResearcherSearch(8, dbclick=null, idField='uniqueId'); document.getElementById('modal6').style.display = 'none';">Reset Form</button>
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetResearcherSearch(8, dbclick=null, idField='uniqueId', searchId=2); document.getElementById('modal6').style.display = 'none';">Reset Form</button>
                 </div>
                 <div class="spacer"></div>
                 <div style="width: 100%;">
-                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchResearcher(8, dbclick=null, idField='uniqueId'); document.getElementById('modal6').style.display = 'none';">Search</button>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchResearcher(8, dbclick=null, idField='uniqueId', searchId=2); document.getElementById('modal6').style.display = 'none';">Search</button>
                 </div>
             </div>
             <br>
@@ -485,7 +486,7 @@
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to confirm all changes? This action cannot be undone.</p>
             <div class="together">
-                <button class="buttonStyle" onclick="confirmChanges()">Confirm Changes</button>
+                <button class="buttonStyle" onclick="confirmChanges(); document.getElementById('modal7').style.display = 'none'">Confirm Changes</button>
                 <button id='cancel7' class="buttonStyle">Cancel</button>
             </div>
         </div>
@@ -602,37 +603,37 @@
             <p>Which fields do you want to recalculate? You can select more than one. Selecting "clusters" or "keywords" would require a few more parameters.</p>
             <div class="row">
                 <div class="col-xl">
-                    <input type="checkbox" id="genderField" name="genderField" value="gender">
+                    <input type="checkbox" id="genderField" name="Gender" value="gender">
                     <label for="genderField"> Gender</label>
                 </div>
                 <div class="col-xl">
-                    <input type="checkbox" id="cdsField" name="cdsField" value="cds">
+                    <input type="checkbox" id="cdsField" name="Career Stage" value="cds">
                     <label for="cdsField"> Career Stage</label>
                 </div>
                 <div class="col-xl">
-                    <input type="checkbox" id="schoolField" name="schoolField" value="school">
+                    <input type="checkbox" id="schoolField" name="School" value="school">
                     <label for="schoolField"> School</label>
                 </div>
                 <div class="col-xl">
-                    <input type="checkbox" id="profileField" name="profileField" value="profile">
+                    <input type="checkbox" id="profileField" name="Profile" value="profile">
                     <label for="profileField"> Profile</label>
                 </div>
             </div>
             <div class="row">
                 <div class="col-xl">
-                    <input type="checkbox" id="grantsField" name="grantsField" value="grants">
+                    <input type="checkbox" id="grantsField" name="Grants" value="grants">
                     <label for="grantsField"> Grants</label>
                 </div>
                 <div class="col-xl">
-                    <input type="checkbox" id="pubsField" name="pubsField" value="pubs">
+                    <input type="checkbox" id="pubsField" name="Publications" value="pubs">
                     <label for="pubsField"> Publications</label>
                 </div>
                 <div class="col-xl">
-                    <input type="checkbox" id="keywordsField" name="keywordsField" value="keywords" onclick="toggleKeywords()">
+                    <input type="checkbox" id="keywordsField" name="Keywords" value="keywords" onclick="toggleKeywords()">
                     <label for="keywordsField"> Keywords</label>
                 </div>
                 <div class="col-xl">
-                    <input type="checkbox" id="clustersField" name="clustersField" value="clusters" onclick="toggleClusters()">
+                    <input type="checkbox" id="clustersField" name="Clusters" value="clusters" onclick="toggleClusters()">
                     <label for="clustersField"> Clusters</label>
                 </div>
             </div>
@@ -751,20 +752,7 @@
 
             <p><b>Selected Researchers:</b> <span id="confirmedResearchers">Click the checkbox on the researcher's row to select the researcher. You might have to use the horizontal scroll-bar to find it.</span></p><br>
             
-            <div class="together">
-                <div>
-                    <label><b>GENERATED CLUSTERS</b>
-                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Since you recalculated the clusters, you can edit the clusters. Press the icon next to the cluster you want to edit to change its name. You can also add new clusters.">
-                            <!-- Makes the tooltip circular -->
-                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
-                        </button>
-                        <!-- TODO: add cluster edit here -->
-                    </label>
-                </div>
-                <div class="spacer"></div>
-                <div>
-                    <button onclick='openModal(7)' class="buttonStyle">Confirm Changes</button>
-                </div>
+            <button onclick='openModal(7)' class="buttonStyle">Confirm Changes</button>
             </div>
         </section>
     </main>
@@ -783,9 +771,29 @@
 })
     </script>
     <script>
+        // TODO: add confirmNames, ...
         selectedNames = [] // stores the names of the selected researchers
         selectedIds = [] // stores the uniqueID of the selected researchers
         selectedEmails = [] // stores the emails of the selected researchers
+
+        confirmedNames = [] // stores the names of the confirmed researchers
+        confirmedIds = [] // stores the uniqueID of the confirmed researchers
+        confirmedEmails = [] // stores the emails of the confirmed researchers
+
+        function refreshConfirmedResearchers() {
+            output = []
+
+            // go through each researcher
+            for (r in confirmedNames) {
+                researcherName = confirmedNames[r]
+                researcherId = confirmedIds[r]
+                // add the researcher's link to the list of links
+                output.push(`<a href='/researcher/${researcherId}'>${researcherName}</a>`)
+            }
+
+            // substitute the list of links for the confirmedResearchers element
+            document.getElementById("confirmedResearchers").innerHTML = output.join(', ')
+        }
 
         function refreshSelectedResearchers() {
             output = []
@@ -802,7 +810,7 @@
             document.getElementById("selectedResearchers").innerHTML = output.join(', ')
         }
 
-        function handleSelection(id) {
+        function handleSelection(element) {
             // get the id based of the element (should be in format [TABLENAME]-[ELEMENT ID])
             id = element.split('-')[1]
 
@@ -841,7 +849,7 @@
                         // all code here is executed only if the uniqueId is the id
 
                         // get the checkbox
-                        checkbox = document.getElementById(`select-${id}`);
+                        checkbox = document.getElementById(`select-${tableNumber}-${id}`);
 
                         // If the checkbox is checked, add it to the displayed list
                         if (checkbox.checked == true){
@@ -901,6 +909,64 @@
                     console.log("ERROR - No ID exists")
                     return
                 }
+
+                // TODO - this isnt the DB. its the table
+                for (i in tableData[8].dataSet) {
+                    row = tableData[8].dataSet[i]
+
+                    // the name should be a link
+                    uniqueId = row.uniqueId
+
+                    // skip the row if its not the right one
+                    if (uniqueId != id) { continue; }
+
+                    // all code here is executed only if the uniqueId is the id
+
+                    // get the checkbox
+                    checkbox = document.getElementById(`select-${tableNumber}-${id}`);
+
+                    // If the checkbox is checked, add it to the displayed list
+                    if (checkbox.checked == true){
+                        confirmedEmails.push(row.email)
+                        confirmedIds.push(row.uniqueId)
+                        confirmedNames.push(row.name)
+
+                        tableData[8].dataSet[tableIndex].selected = true // change the table data
+                    } else {
+                        // remove from emails list
+                        index = confirmedEmails.indexOf(row.email);
+                        // only splice array when item is found
+                        if (index > -1) { 
+                            confirmedEmails.splice(index, 1); // remove the researcher from the list
+                        } else {
+                            console.log("ERROR - Email does not exist in the list of emails")
+                        }
+
+                        // remove from names list
+                        index = confirmedNames.indexOf(row.name);
+                        // only splice array when item is found
+                        if (index > -1) { 
+                            confirmedNames.splice(index, 1); // remove the researcher from the list
+                        } else {
+                            console.log("ERROR - Name does not exist in the list of emails")
+                        }
+
+                        // remove from ids list
+                        index = confirmedIds.indexOf(row.uniqueId);
+                        // only splice array when item is found
+                        if (index > -1) { 
+                            confirmedIds.splice(index, 1); // remove the researcher from the list
+                        } else {
+                            console.log("ERROR - ID does not exist in the list of emails")
+                        }
+
+                        tableData[8].dataSet[tableIndex].selected = false // change the table data
+                    }
+
+                    refreshConfirmedResearchers() // refresh the text
+
+                    break; // exit the loop
+                }
             }
         }
     </script>
@@ -935,14 +1001,19 @@
     </script>
     <script>
         fieldsToCalculate = []
+        recalculatedFieldNames = []
+
+        generatedClusters = [] // will hold all cluster names
 
         function capitalizeFirstLetter(str) {
             return str[0].toUpperCase() + str.slice(1);
         }
 
         function checkField(field) {
-            if (document.getElementById(field + "Field").checked) {
+            ele = document.getElementById(field + "Field")
+            if (ele.checked) {
                 fieldsToCalculate.push(field)
+                recalculatedFieldNames.push(ele.name) // get the name (e.g., "Career Stage" not "cds")
             }
         }
 
@@ -1008,6 +1079,7 @@
                     document.getElementById('modal3').style.display = 'none'
                     document.getElementById("showAlert").textContent = 'Make sure you specified the Keywords Parameters section.'
                     openModal(4)
+                    return
                 }
             } else {
                 data['googleScholar'] = 'no'
@@ -1030,42 +1102,85 @@
                     return
                 } else {
                     result = result.result
-                    console.log(result)
 
                     // reset tabel header
                     tableHeader = '<th>Name</th>' // temporary storage
 
                     // add the field names to the table header
                     for (var i = 0; i < data.fields.length; i ++) {
-                        fieldName = data.fields[i]
+                        fieldName = recalculatedFieldNames[i]
                         tableHeader += `<th>${fieldName}</th>`
                     }
 
                     tableHeader += '<th>Select</th>'
-
                     document.getElementById("columnNames").innerHTML = tableHeader
 
                     // calculate which fields to show
                     tableData[8].showFields = ['name', ...data.fields, 'SELECT']
 
+                    // JUSTIFICATION: DICTIONARY IN DICTIONARY (TODO)
+                    researchersInDatabase = {}
+
+                    // get the information for the researchers who are already in the table
+                    fetch('/db/researchers').then(response => response.json()).then(data => {
+                        // iterate over the researchers
+                        for (var i = 0; i < data.length; i++) {
+                            researcher = data[i]
+
+                            // the name should be a link
+                            uniqueId = researcher.email.split("@")[0].replace(".", "")
+
+                            // skip researchers who arent selected
+                            if (!selectedIds.includes(uniqueId)) { continue }
+
+                            // add all the information to the temporary 'entry' dictionary
+                            entry = {}
+                            entry['name'] = researcher.name
+                            entry['email'] = researcher.email
+                            entry['uniqueId'] = uniqueId
+                            entry['school'] = researcher.school
+                            entry['gender'] = researcher.gender
+                            entry['cds'] = researcher.careerStage
+                            entry['activity'] = researcher.activity
+                            entry['clusters'] = researcher.clusters
+                            entry['keywords'] = researcher.keywords
+
+                            // add the researcher's default information to the researchersInDatabase dictionary
+                            researchersInDatabase[uniqueId] = entry
+                        }
+                    })
+
                     // iterate over the researchers
                     Object.entries(result).forEach(([uniqueId,researcher]) => {
-                        console.log(researcher)
-                        console.log(uniqueId)
-
                         row = {}
 
-                        // set the unique id
+                        // set the unique id, name, and email
                         row.uniqueId = uniqueId
-                        row.name = capitalizeFirstLetter(uniqueId.split('-')[0]) + ' ' + capitalizeFirstLetter(uniqueId.split('-')[1])
+                        row.email = uniqueId + '@sydney.edu.au'
+                        row.name = capitalizeFirstLetter(uniqueId.split('.')[0]) + ' ' + capitalizeFirstLetter(uniqueId.split('.')[1])
+
+                        // if the researcher is already in the database, get their default information
+                        if (researchersInDatabase[uniqueId] != undefined) {
+                            row = researchersInDatabase[uniqueId]
+                        }
 
                         // get all of the details and add them to the row
                         Object.entries(researcher).forEach(([k,v]) => {
                             console.log(k, v)
                             row[k] = v // add it to the row
+
+                            if (k == 'clusters') {
+                                // iterate over clusters
+                                for (c in v) {
+                                    clusterName = v[c]
+                                    if (!generatedClusters.includes(clusterName)) {
+                                        generatedClusters.push(clusterName)
+                                    }
+                                }
+                            }
                         })
 
-                        row.uniqueId = uniqueId
+                        // whether the row is selected
                         row.selected = false
 
                         // add to the table data
@@ -1083,8 +1198,54 @@
         }
     </script>
     <script>
+        function checkConfirmed(researcher) {
+            return researcher.selected
+        }
+
         function confirmChanges() {
-            console.log("HELLO")
+            const result = tableData[8].dataSet.filter(checkConfirmed);
+
+            if (data.fields.includes('clusters')) {
+                fetch('/addclusters', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({generatedClusters: generatedClusters})
+                }).then(response => response.json()).then(data => {
+                    if (data.success) {
+                        for (i in result) {
+                            fetch('/confirmrecalculation', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({researcher: result[i]})
+                            }).then(response => response.json()).then(data => {
+                                if (!data.success) {
+                                    //document.getElementById('showAlert').textContent = data.alert
+                                    //openModal(2)
+                                    console.log(data.alert)
+                                    return;
+                                }
+                            })
+                        }
+                    }
+                })
+            } else {
+                for (i in result) {
+                    dataToSend['researcher'] = result[i]
+
+                    fetch('/confirmrecalculation', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(dataToSend)
+                    }).then(response => response.json()).then(data => {
+                        if (!data.success) {
+                            //document.getElementById('showAlert').textContent = data.alert
+                            //openModal(2)
+                            console.log(data.alert)
+                            return;
+                        }
+                    })
+                }
+            }
         }
     </script>
 </body>

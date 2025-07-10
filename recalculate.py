@@ -318,7 +318,7 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
                 elif salutation == 'Professor':
                     cds = ['SR']
 
-                researchers[urlId] = {'cds': cds}
+                researchers[urlId]['cds'] = cds
             
             if 'school' in affectedFields:
                 affiliation = researcher['affiliationList'][0].lower()
@@ -389,9 +389,10 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
         profile, keywords = res[0], res[1]
 
         # Add keywords to data
-        keywords = '; '.join(keywords)
-        researchers[urlId]['keywords'] += '; ' + keywords
-        texts.append(researchers[urlId]['keywords'])
+        if 'keywords' in affectedFields or 'clusters' in affectedFields:
+            keywords = '; '.join(keywords)
+            researchers[urlId]['keywords'] += '; ' + keywords
+            texts.append(researchers[urlId]['keywords'])
 
         # Add profile to data
         researchers[urlId]['profile'] = profile
@@ -514,11 +515,11 @@ if len(affectedResearchers) == 0:
 
 '''
 affectedResearchers = 'all'
-affectedFields = ['name', 'clusters', 'keywords', 'gender', 'cds', 'pubs', 'grants', 'profile']
+affectedFields = ['gender', 'cds', 'school', 'pubs', 'grants', 'profile']
 clusterRangeSetting = 0.15
 strictness = 0.25
 maxNumber = 50
-googlescholar = True
+googlescholar = False
 '''
 
 url = "https://www.sydney.edu.au/AcademicProfiles/interfaces/rest/performSimpleAttributeSearch/+jobType:1%20+orgUnitCode:5000053020L0000%20+isMediaExpert:true/0/270/byRelevance/false"
