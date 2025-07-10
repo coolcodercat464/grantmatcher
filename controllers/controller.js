@@ -1611,6 +1611,56 @@ const removecodepost = async (req, res)=>{
         res.send({alert: 'Please login first :)'});
         return
     }
+
+    x = req.body
+    console.log(x)
+
+    if (!x.code) {
+        res.send({alert: 'Please ensure that all inputs are filled in.'})
+        return
+    }
+
+    try {
+        // get the current date
+        now = new Date();
+
+        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+        year = now.getFullYear()
+        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+        // stringify it
+        date = `${day}-${month}-${year}`
+
+        // add the researcher
+        await queryWithRetry('DELETE FROM codes WHERE code = $1', [x.code]);
+        
+        // get all changes
+        const mq4 = 'SELECT "changeID" FROM changelog'
+        const result4 = await queryWithRetry(mq4);
+
+        // calculate the maximum changeID
+        maxChangeID = 0
+        for (i in result4.rows) {
+            rowID = result4.rows[i].changeID
+            if (rowID > maxChangeID) {
+                maxChangeID = rowID
+            }
+        }
+
+        // calculate the next change ID
+        nextChangeID = maxChangeID + 1
+
+        // add 'grant edited' change to changelog
+        const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
+        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Code Deleted', date, `A code has been deleted`, '{}']); // TODO: get the user email
+        
+        res.send({success: 'success'})
+    } catch (err) {
+        console.log(err)
+
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+    }
 } 
 
 // Export of all methods as object 

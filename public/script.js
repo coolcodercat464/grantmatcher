@@ -629,7 +629,7 @@ function renderTable(tableNumber, dbclick=null, idField=null) {
         for (c in columns) {
             col = columns[c]
 
-            // if this should be a checkbox, not an actual value...
+            // if the column is "SELECT", this should be a checkbox, not an actual value...
             if (col == 'SELECT') {
                 id = item[idField]
                 // create a checkbox using the id
@@ -642,7 +642,15 @@ function renderTable(tableNumber, dbclick=null, idField=null) {
                     row += `<td><input type="checkbox" id="select-${tableNumber}-${id}" onclick="handleSelection('${tableNumber}-${id}')"></td>`
                 }
                 
-                break
+                continue
+            }
+
+            // if the column is "DELEte", this should be a delete button, not an actual value...
+            if (col == 'DELETE') {
+                id = item[idField]
+                // create a delete button using the id
+                row += `<td><i onclick="handleDelete('${tableNumber}-${id}')" id="delete-${tableNumber}-${id}" class="fa fa-trash"></i></td>`
+                continue
             }
 
             // get the value of item for that column
@@ -1636,7 +1644,7 @@ fetch('/db/grants').then(response => response.json()).then(data => {
 })
 
 // initialises tthe able and initialises the user dropdowns in the search modals
-fetch('/db/users').then(response => response.json()).then(data => {
+fetch('/db/users').then(response => response.json()).then(async data => {
     for (var i = 0; i < data.length; i++) {
         row = data[i]
 
@@ -1677,7 +1685,7 @@ fetch('/db/users').then(response => response.json()).then(data => {
 
     // THIS FETCH IS INSIDE HERE because it needs the user data
     // to find the username based on email
-    fetch('/db/changelog').then(response => response.json()).then(dataChange => {
+    await fetch('/db/changelog').then(response => response.json()).then(dataChange => {
         for (var i = 0; i < dataChange.length; i++) {
             row = dataChange[i]
             row.username = undefined
@@ -1733,7 +1741,7 @@ fetch('/db/users').then(response => response.json()).then(data => {
         
         try {
             tableData[9].totalPages = Math.ceil(dataCode.length / rowsPerPage)
-            renderTable(9)
+            renderTable(9, dbclick=null, idField="code")
         } catch {
 
         }

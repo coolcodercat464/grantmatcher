@@ -132,7 +132,7 @@
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to remove this code?</p>
             <div class="together">
-                <button class="delete()">Delete</button> <!-- TODO -->
+                <button class="buttonStyle" id="confirmDelete">Delete</button>
                 <button id='cancel4' class="buttonStyle">Cancel</button>
             </div>
         </div>
@@ -173,7 +173,7 @@
                     <div class="tablesort">
                         <label for="sortTable9">Sort By:</label>
 
-                        <select name="sortTable9" id="sortTable9" onchange="sortTable(9)" style="margin-bottom: 5px;">
+                        <select name="sortTable9" id="sortTable9" onchange="sortTable(9, dbclick=null, idField='code')" style="margin-bottom: 5px;">
                             <option value="userEmail">User's Email</option>
                             <option value="dateReformatted">Date Created</option>
                             <option value="role">Role</option>
@@ -219,12 +219,12 @@
                         </div>
                         <div class="ms-auto">
                             <!-- Numbering the IDs so I can use many tables (code reuse) -->
-                            <button class="btn" id="firstNav9" onclick="goToFirst(9)"><i class="fa fa-angle-double-left"></i></button>
-                            <button class="btn" id="prevNav9" onclick="goToPrev(9)"><i class="fa fa-angle-left"></i></button>
+                            <button class="btn" id="firstNav9" onclick="goToFirst(9, dbclick=null, idField='code')"><i class="fa fa-angle-double-left"></i></button>
+                            <button class="btn" id="prevNav9" onclick="goToPrev(9, dbclick=null, idField='code')"><i class="fa fa-angle-left"></i></button>
                             <!-- Tells the user what page they are on -->
                             <span id="pageStats9"></span>
-                            <button class="btn" id="nextNav9" onclick="goToNext(9)"><i class="fa fa-angle-right"></i></button>
-                            <button class="btn" id="lastNav9" onclick="goToLast(9)"><i class="fa fa-angle-double-right"></i></button>
+                            <button class="btn" id="nextNav9" onclick="goToNext(9, dbclick=null, idField='code')"><i class="fa fa-angle-right"></i></button>
+                            <button class="btn" id="lastNav9" onclick="goToLast(9, dbclick=null, idField='code')"><i class="fa fa-angle-double-right"></i></button>
                         </div>
                     </div>
                 </div>
@@ -245,6 +245,30 @@
         $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
+    </script>
+    <script>
+        function handleDelete(element) {
+            code = element.split('-')[1]
+            document.getElementById("confirmDelete").setAttribute("onclick", `deleteCode(${code})`)
+            openModal(4)
+        }
+
+        function deleteCode(code) {
+            fetch('/removecode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({code: code})
+            }).then(response => response.json()).then(result => {
+                if (result.status == "error") {
+                    // open the error modal if there is an error
+                    document.getElementById("modal3").style.display = 'none'
+                    document.getElementById('showAlert').textContent = result.alert
+                    openModal(5)
+                } else {
+                    window.location.reload() // reload the page (code table should be updated)
+                }
+            })
+        }
     </script>
     <script>
         // generate a random code

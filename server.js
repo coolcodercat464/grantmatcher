@@ -69,7 +69,8 @@ async function queryAll(table) {
   }
 }
 
-// database routs
+// database routes
+// TODO ADD SOME SECURITY TO THIS
 app.get('/db/researchers', async (req, res) => {
   res.send(await queryAll('researchers'))
 })
