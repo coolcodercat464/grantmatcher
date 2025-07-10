@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>GrantMatcher - Manage Codes</title>
+    <%- head %>
+</head>
+<body>
+    <!-- Navigation (sticky header). Links and dropdown collapse into a hamburger menu when the screen size is small. -->
+    <nav class="navbar navbar-expand-lg navbar-dark px-3" id="navbar">
+        <!-- Brand on the left -->
+        <a class="navbar-brand bigBrand" href="/" id="navbar-brand">Grant Matcher</a>
+
+        <!-- Toggler (for mobile view) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" id="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links on the right -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Links here -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tickets">Tickets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tutorial">Tutorial</a>
+                </li>
+
+                <!-- Dropdown (user menu) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <!-- Logout button (opens a modal) -->
+                        <li><button class="dropdown-item" onclick="openModal(1)">Logout</button></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- The modal the logout button in the navigation bar opens -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Log out</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close1">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to log out?</p>
+            <div class="together">
+                <form method="post" action="/">
+                    <input type="submit" value="Logout!" class="buttonStyle">
+                </form>
+                <button id='cancel1' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The modal the logout button in the navigation bar opens -->
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Search Code</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close2">&times;</span>
+            </div>
+            
+            <!-- TODO: make form -->
+        </div>
+    </div>
+
+    <!-- The modal the logout button in the navigation bar opens -->
+    <div id="modal3" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Add a Code</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close3">&times;</span>
+            </div>
+            
+            <!-- TODO: make form -->
+        </div>
+    </div>
+
+    <!-- The modal the logout button in the navigation bar opens -->
+    <div id="modal4" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Remove Code</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close4">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to remove this code?</p>
+            <div class="together">
+                <button class="delete()">Delete</button> <!-- TODO -->
+                <button id='cancel4' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The main content -->
+    <main>
+        <section>
+            <h1>Manage Codes</h1>
+        </section>
+        <hr/>
+
+        <section>
+            <h2>Researchers</h2>
+            <div class="tableContainer" id="tableContainer1">
+                <div>
+                    <div class="tableicons">
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Filter Researchers">
+                            <i onclick="openModal(2)" class=" fa fa-search"></i>
+                        </button>
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Add a Researcher">
+                            <i onclick="openModal(3)" class=" fa fa-plus-square-o"></i>
+                        </button>
+                    </div>
+                    <div class="tablesort">
+                        <label for="sortTable9">Sort By:</label>
+
+                        <select name="sortTable9" id="sortTable9" onchange="sortTable(9)" style="margin-bottom: 5px;">
+                            <option value="userEmail">User's Email</option>
+                            <option value="dateAdded">Date Created</option>
+                            <option value="role">Role</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="max-width: 100vw;" >
+                    <div class="scrollTableContainer">
+                        <table class="table table-bordered" style="margin-bottom: 0; border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;">
+                            <thead>
+                                <!-- Column names -->
+                                <tr>
+                                <th>Email</th>
+                                <th>Code</th>
+                                <th>Role</th>
+                                <th>Date Added</th>
+                                <th>Delete</th>
+                                </tr>
+                            </thead>
+                            <!-- Table items -->
+                            <tbody id="tableBody9"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Table footer (with pagination controls and download button) -->
+                <div class="pagination-controls" style="border: 1px solid black; margin-top: 0;">
+                    <!-- The download button should be left-aligned while the rest is right-aligned -->
+                    <!-- align-items-center ensures that the text and icons are aligned properly (otherwise the text sticks out vertically and its distracting) -->
+                    <div class="d-flex align-items-center gap-2 d-flex w-100 px-3 py-2">
+                        <div>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-download"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#">XML</a></li>
+                                    <li><a class="dropdown-item" href="#">CSV</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="ms-auto">
+                            <!-- Numbering the IDs so I can use many tables (code reuse) -->
+                            <button class="btn" id="firstNav9" onclick="goToFirst(9)"><i class="fa fa-angle-double-left"></i></button>
+                            <button class="btn" id="prevNav9" onclick="goToPrev(9)"><i class="fa fa-angle-left"></i></button>
+                            <!-- Tells the user what page they are on -->
+                            <span id="pageStats9"></span>
+                            <button class="btn" id="nextNav9" onclick="goToNext(9)"><i class="fa fa-angle-right"></i></button>
+                            <button class="btn" id="lastNav9" onclick="goToLast(9)"><i class="fa fa-angle-double-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <br><br>
+    </main>
+    
+    <!-- EJS partial (for code reuse and efficiency) -->
+    <%- footer %>
+
+    <!-- Bootstrap for JS -->
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <!-- This file allows for the user to interact with the elements on the site and for the site to give feedback to the user -->
+    <script src="script.js"></script>
+    <!-- JQuery for the tooltip -->
+    <script>
+        $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+    </script>
+</body>
+</html>

@@ -549,6 +549,14 @@ tableData = {
         "showFields": [],
         "showRows": []
     },
+    // codes (manage codes page)
+    8 : {
+        "dataSet": [],
+        "currentPage": 1,
+        "totalPages": 1,
+        "showFields": [],
+        "showRows": []
+    },
 }
 
 function dbclickRow(tableNumber, id, idField, dbclick) {

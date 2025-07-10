@@ -415,7 +415,7 @@ const grantpageget = async (req, res)=>{
 const addgrantget = async (req, res)=>{
     console.log("ADD GRANT GET")
 
-    // only allow them to signup if they havent been authenticated yet
+    // only allow them to add grants if they havent been authenticated yet
     if (req.isAuthenticated()) {
         res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
     } else {
@@ -542,6 +542,7 @@ const matchget = async (req, res)=>{
     }
 };
 
+// get the recalculation page
 const recalculateget = async (req, res) => {
     // only allow them to signup if they have already been authenticated
     if (req.isAuthenticated()) {
@@ -551,6 +552,20 @@ const recalculateget = async (req, res) => {
         res.redirect('/login')
     }
 }
+
+// present the manage codes page
+const managecodesget = async (req, res)=>{
+    console.log("MANAGE CODES GET")
+
+    // TODO: ensure the role is correct
+    // only allow them to manage codes if they havent been authenticated yet
+    if (req.isAuthenticated()) {
+        res.render('manageCodes.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
+    } else {
+        urlinit = '/managecodes' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
 
 // POST
 // when user logs out
@@ -1510,6 +1525,18 @@ const confirmrecalculationpost = async (req, res)=>{
     }
 } 
 
+// update the database when codes are updated
+const managecodespost = async (req, res)=>{
+    console.log("MANAGE CODES GET")
+
+    // TODO: ensure the role is correct
+    // only allow them to manage codes if they havent been authenticated yet
+    if (!req.isAuthenticated()) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+} 
+
 // Export of all methods as object 
 module.exports = { 
     indexget,
@@ -1520,6 +1547,7 @@ module.exports = {
     editgrantget,
     matchget,
     recalculateget,
+    managecodesget,
 
     indexpost,
     loginpost,
@@ -1529,5 +1557,6 @@ module.exports = {
     deletegrantpost,
     confirmmatchpost,
     confirmrecalculationpost,
-    addclusterspost
+    addclusterspost,
+    managecodespost
 }

@@ -40,7 +40,7 @@
                         <li><a class="dropdown-item" href="/settings">Settings</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <!-- Logout button (opens a modal) -->
-                        <li><button class="dropdown-item" id="modalBtn1" onclick="openModal(1)">Logout</button></li>
+                        <li><button class="dropdown-item" onclick="openModal(1)">Logout</button></li>
                     </ul>
                 </li>
             </ul>
@@ -526,13 +526,7 @@
                 <div>
                     <div class="tableicons">
                         <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Filter Researchers">
-                            <i id="modalBtn2" onclick="openModal(2)" class=" fa fa-search"></i>
-                        </button>
-                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Add a Researcher">
-                            <i id="modalBtn3" onclick="window.location.href = '/addresearcher'" class=" fa fa-plus-square-o"></i>
-                        </button>
-                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Recalculate the Researchers' Data">
-                            <i id="modalBtn4" onclick="window.location.href = '/recalculate'" class=" fa fa-refresh"></i>
+                            <i onclick="openModal(2)" class=" fa fa-search"></i>
                         </button>
                     </div>
                     <div class="tablesort">
@@ -702,7 +696,7 @@
                 <div>
                     <div class="tableicons">
                         <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Filter Researchers">
-                            <i id="modalBtn6" onclick="openModal(6)" class=" fa fa-search"></i>
+                            <i onclick="openModal(6)" class=" fa fa-search"></i>
                         </button>
                     </div>
                 </div>
