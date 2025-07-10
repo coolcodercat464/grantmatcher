@@ -719,6 +719,8 @@ function sortTable(tableNumber, dbclick=null, idField=null) {
 // SEARCHING
 // filter through the researchers table
 function searchResearcher(tableNumber, dbclick=null, idField=null, searchId='') {
+    // NOTE: searchId allows for multiple researcher search modals in one page (useful for recalculation page)
+
     // get the relevant data
     researcherTable = tableData[tableNumber]
     researcherData = researcherTable.dataSet
@@ -1470,7 +1472,7 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
         // the name should be a link
         uniqueId = row.email.split("@")[0]
         row.uniqueId = uniqueId
-        row.nameLink = `<a href='/researcher/${uniqueId}'>${row.name}</a>`
+        row.nameLink = `<a href='/researcher/${uniqueId.replace(".", "")}'>${row.name}</a>`
 
         // get the number of edits (for sorting)
         if (row.versionInformation == null) {

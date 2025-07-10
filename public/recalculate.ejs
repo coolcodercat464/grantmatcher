@@ -690,12 +690,10 @@
                     </div>
                 </div>
             </div>
-            <!-- TODO: Add confirmation modal for this -->
             <button class="buttonStyle pink" onclick="openModal(3)">Recalculate</button>
         </section>
 
-        <!-- TODO: add an id and hide/show this -->
-        <hr/>
+        <hr id="hr"/>
 
         <section style="display: none" id="recalcTable">
             <h2>Confirm Changes</h2>
@@ -771,7 +769,9 @@
 })
     </script>
     <script>
-        // TODO: add confirmNames, ...
+        // NOTE: selection is when the user selects a researcher to recalculate. confirmation
+        // is when the user selects which changes to keep.
+
         selectedNames = [] // stores the names of the selected researchers
         selectedIds = [] // stores the uniqueID of the selected researchers
         selectedEmails = [] // stores the emails of the selected researchers
@@ -785,6 +785,7 @@
 
             // go through each researcher
             for (r in confirmedNames) {
+                // get the info of the confirmed researcher
                 researcherName = confirmedNames[r]
                 researcherId = confirmedIds[r]
                 // add the researcher's link to the list of links
@@ -800,6 +801,7 @@
 
             // go through each researcher
             for (r in selectedNames) {
+                // get the info of the selected researcher
                 researcherName = selectedNames[r]
                 researcherId = selectedIds[r]
                 // add the researcher's link to the list of links
@@ -817,6 +819,7 @@
             // get the table number of the element
             tableNumber = parseInt(element.split('-')[0])
 
+            // if it is the selection (before recalculation)
             if (tableNumber == 7) {
                 // try to find the row to change
                 tableIndex = -1 // this will store the row that has the same id
@@ -828,12 +831,11 @@
                     }
                 }
 
+                // if the id doesnt exist
                 if (tableIndex == -1) {
                     console.log("ERROR - No ID exists")
                     return
                 }
-
-                console.log(tableIndex, tableData[7].dataSet[tableIndex])
 
                 fetch('/db/researchers').then(response => response.json()).then(data => {
                     // iterate over the researchers
@@ -853,6 +855,7 @@
 
                         // If the checkbox is checked, add it to the displayed list
                         if (checkbox.checked == true){
+                            // add to relevant lists
                             selectedEmails.push(row.email)
                             selectedIds.push(uniqueId)
                             selectedNames.push(row.name)
@@ -894,6 +897,7 @@
                         break; // exit the loop
                     }
                 })
+            // otherwise, if it is in the confirmed table (after recalculation)
             } else if (tableNumber == 8) {
                 // try to find the row to change
                 tableIndex = -1 // this will store the row that has the same id
@@ -905,11 +909,13 @@
                     }
                 }
 
+                // if the id doesnt exist...
                 if (tableIndex == -1) {
                     console.log("ERROR - No ID exists")
                     return
                 }
 
+                // go through the table data (not database, since new researchers might have been introduced)
                 for (i in tableData[8].dataSet) {
                     row = tableData[8].dataSet[i]
 
@@ -926,6 +932,7 @@
 
                     // If the checkbox is checked, add it to the displayed list
                     if (checkbox.checked == true){
+                        // add to relevant lists
                         confirmedEmails.push(row.email)
                         confirmedIds.push(row.uniqueId)
                         confirmedNames.push(row.name)
@@ -970,6 +977,7 @@
         }
     </script>
     <script>
+        // hide/show the cluster parameters div
         function toggleClusters() {
             // get the checkbox element
             checkbox = document.getElementById("clustersField")
@@ -984,6 +992,7 @@
             }
         }
 
+        // hide/show the keywords parameters div
         function toggleKeywords() {
             // get the checkbox element
             checkbox = document.getElementById("keywordsField")
@@ -999,247 +1008,305 @@
         }
     </script>
     <script>
+        // the field to recalculate (e.g., "cds")
+        // used for logic layer
         fieldsToCalculate = []
+
+        // the names of the fields to recalculate (e.g., "Career Stage")
+        // presented to user
         recalculatedFieldNames = []
 
         generatedClusters = [] // will hold all cluster names
 
+        // capitalise the first letter of a word (e.g., "paris" --> "Paris")
         function capitalizeFirstLetter(str) {
             return str[0].toUpperCase() + str.slice(1);
         }
 
+        // check whether a field has been checked
         function checkField(field) {
-            ele = document.getElementById(field + "Field")
+            ele = document.getElementById(field + "Field") // get the DOM element
             if (ele.checked) {
+                // add to relevant lists
                 fieldsToCalculate.push(field)
                 recalculatedFieldNames.push(ele.name) // get the name (e.g., "Career Stage" not "cds")
             }
         }
 
-        // TODO: add a try-catch thingy here
         function recalculate() {
-            fieldsToCalculate = []
-            checkField("school")
-            checkField("gender")
-            checkField("cds")
-            checkField("pubs")
-            checkField("grants")
-            checkField("profile")
-            checkField("keywords")
-            checkField("clusters")
+            try {
+                // reset the relevant lists
+                fieldsToCalculate = [] 
+                recalculatedFieldNames = []
 
-            data = {}
-            data['researchers'] = selectedIds
+                // check each field
+                checkField("school")
+                checkField("gender")
+                checkField("cds")
+                checkField("pubs")
+                checkField("grants")
+                checkField("profile")
+                checkField("keywords")
+                checkField("clusters")
 
-            if (fieldsToCalculate.length == 0) {
-                // open error modal
-                document.getElementById('modal3').style.display = 'none'
-                document.getElementById("showAlert").textContent = 'Make sure you select your fields.'
-                openModal(4)
-                return
-            } else {
-                data['fields'] = fieldsToCalculate
-            }
+                // the data to send to the backend
+                data = {}
 
-            // if clusters is selected
-            if (fieldsToCalculate.includes('clusters')) {
-                number = document.getElementById("numberCluster")
-                strictness = document.getElementById("strictnessCluster")
-                range = document.getElementById("rangeCluster")
+                // add the selected researchers to data
+                data['researchers'] = selectedIds
 
-                // if one of those fields isnt provided
-                if (number.value == '' || strictness.value == '' || range.value == '') {
+                // ensure that the user selected at least one field to calculate
+                if (fieldsToCalculate.length == 0) {
                     // open error modal
                     document.getElementById('modal3').style.display = 'none'
-                    document.getElementById("showAlert").textContent = 'Make sure the Cluster Parameters section is filled and valid.'
+                    document.getElementById("showAlert").textContent = 'Make sure you select your fields.'
                     openModal(4)
                     return
                 } else {
-                    data['number'] = number.value
-                    data['strictness'] = strictness.value
-                    data['range'] = range.value
+                    // otherwise, add it to data
+                    data['fields'] = fieldsToCalculate
                 }
-            } else {
-                data['number'] = 0
-                data['strictness'] = 0
-                data['range'] = 0
-            }
 
-            // if keywords is selected
-            if (fieldsToCalculate.includes('keywords')) {
-                googleScholar = document.querySelector('input[name="googleScholar"]:checked');
+                // if clusters is selected
+                if (fieldsToCalculate.includes('clusters')) {
+                    // get cluster parameters
+                    number = document.getElementById("numberCluster")
+                    strictness = document.getElementById("strictnessCluster")
+                    range = document.getElementById("rangeCluster")
 
-                // if the radio button is pressed
-                if (googleScholar) {
-                    value = googleScholar.value;
-                    data['googleScholar'] = value
-                } else {
-                    // open error modal
-                    document.getElementById('modal3').style.display = 'none'
-                    document.getElementById("showAlert").textContent = 'Make sure you specified the Keywords Parameters section.'
-                    openModal(4)
-                    return
-                }
-            } else {
-                data['googleScholar'] = 'no'
-            }
-
-            // hide the modal and show the spinner
-            document.getElementById('modal3').style.display = 'none'
-            document.getElementById("loadingSpinner").style.display = 'block'
-
-            fetch('/recalculate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            }).then(response => response.json()).then(result => {
-                // stop the spinner
-                document.getElementById("loadingSpinner").style.display = 'none'
-                if (result.status == 'error') {
-                    document.getElementById("showAlert").textContent = result.alert
-                    openModal(4)
-                    return
-                } else {
-                    result = result.result
-
-                    // reset tabel header
-                    tableHeader = '<th>Name</th>' // temporary storage
-
-                    // add the field names to the table header
-                    for (var i = 0; i < data.fields.length; i ++) {
-                        fieldName = recalculatedFieldNames[i]
-                        tableHeader += `<th>${fieldName}</th>`
+                    // if one of those fields isnt provided
+                    if (number.value == '' || strictness.value == '' || range.value == '') {
+                        // open error modal
+                        document.getElementById('modal3').style.display = 'none'
+                        document.getElementById("showAlert").textContent = 'Make sure the Cluster Parameters section is filled and valid.'
+                        openModal(4)
+                        return
+                    } else {
+                        // add cluster parameters to data
+                        data['number'] = number.value
+                        data['strictness'] = strictness.value
+                        data['range'] = range.value
                     }
+                } else {
+                    // if clusters isnt selected, use any value
+                    data['number'] = 0
+                    data['strictness'] = 0
+                    data['range'] = 0
+                }
 
-                    tableHeader += '<th>Select</th>'
-                    document.getElementById("columnNames").innerHTML = tableHeader
+                // if keywords is selected
+                if (fieldsToCalculate.includes('keywords')) {
+                    // whether googlescholar will be used or not
+                    googleScholar = document.querySelector('input[name="googleScholar"]:checked');
 
-                    // calculate which fields to show
-                    tableData[8].showFields = ['name', ...data.fields, 'SELECT']
+                    // if the radio button is pressed (the user selected an option)
+                    if (googleScholar) {
+                        value = googleScholar.value;
+                        data['googleScholar'] = value // add this to data
+                    } else {
+                        // open error modal
+                        document.getElementById('modal3').style.display = 'none'
+                        document.getElementById("showAlert").textContent = 'Make sure you specified the Keywords Parameters section.'
+                        openModal(4)
+                        return
+                    }
+                } else {
+                    // if keywords isnt selected, use any value
+                    data['googleScholar'] = 'no'
+                }
 
-                    // JUSTIFICATION: DICTIONARY IN DICTIONARY (TODO)
-                    researchersInDatabase = {}
+                // hide the modal and show the spinner
+                document.getElementById('modal3').style.display = 'none'
+                document.getElementById("loadingSpinner").style.display = 'block'
 
-                    // get the information for the researchers who are already in the table
-                    fetch('/db/researchers').then(response => response.json()).then(data => {
-                        // iterate over the researchers
-                        for (var i = 0; i < data.length; i++) {
-                            researcher = data[i]
+                // send the data to the database
+                fetch('/recalculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                }).then(response => response.json()).then(result => {
+                    // stop the spinner
+                    document.getElementById("loadingSpinner").style.display = 'none'
 
-                            // the name should be a link
-                            uniqueId = researcher.email.split("@")[0]
+                    // if there is an error...
+                    if (result.status == 'error') {
+                        // open error modal
+                        document.getElementById("showAlert").textContent = result.alert
+                        openModal(4)
+                        return
+                    } else {
+                        // get the result
+                        result = result.result
 
-                            // skip researchers who arent selected
-                            if (!selectedIds.includes(uniqueId)) { continue }
+                        // reset tabel header
+                        tableHeader = '<th>Name</th>' // temporary storage
 
-                            // add all the information to the temporary 'entry' dictionary
-                            entry = {}
-                            entry['name'] = researcher.name
-                            entry['email'] = researcher.email
-                            entry['uniqueId'] = uniqueId
-                            entry['school'] = researcher.school
-                            entry['gender'] = researcher.gender
-                            entry['cds'] = researcher.careerStage
-                            entry['activity'] = researcher.activity
-                            entry['clusters'] = researcher.clusters
-                            entry['keywords'] = researcher.keywords
-
-                            // add the researcher's default information to the researchersInDatabase dictionary
-                            researchersInDatabase[uniqueId] = entry
+                        // add the field names to the table header
+                        for (var i = 0; i < data.fields.length; i ++) {
+                            fieldName = recalculatedFieldNames[i]
+                            tableHeader += `<th>${fieldName}</th>`
                         }
-                    })
 
-                    // iterate over the researchers
-                    Object.entries(result).forEach(([uniqueId,researcher]) => {
-                        row = {}
+                        tableHeader += '<th>Select</th>'
+                        document.getElementById("columnNames").innerHTML = tableHeader // set the table header
 
-                        // set the unique id, name, and email
-                        row.uniqueId = uniqueId
-                        row.email = uniqueId + '@sydney.edu.au'
-                        row.name = capitalizeFirstLetter(uniqueId.split('.')[0]) + ' ' + capitalizeFirstLetter(uniqueId.split('.')[1])
+                        // calculate which fields to show
+                        tableData[8].showFields = ['name', ...data.fields, 'SELECT']
 
-                        // if the researcher is already in the database, get their default information
-                        if (researchersInDatabase[uniqueId] != undefined) {
-                            row = researchersInDatabase[uniqueId]
-                        }
+                        /* 
+                        DATA STRUCTURE JUSTIFICATION - Dictionary of Dictionaries:
+                        researchersInDatabase is a dictionary of dictionaries. The key is the
+                        researcher's uniqueId (URLID) and the value is all their information.
+                        This makes it easy to access a researcher's information based on their
+                        unique ID, shortening processing time and improving efficiency.
+                        */
+                        researchersInDatabase = {}
 
-                        // get all of the details and add them to the row
-                        Object.entries(researcher).forEach(([k,v]) => {
-                            console.log(k, v)
-                            row[k] = v // add it to the row
+                        // get the information for the researchers who are already in the table
+                        fetch('/db/researchers').then(response => response.json()).then(data => {
+                            // iterate over the researchers
+                            for (var i = 0; i < data.length; i++) {
+                                researcher = data[i]
 
-                            if (k == 'clusters') {
-                                // iterate over clusters
-                                for (c in v) {
-                                    clusterName = v[c]
-                                    if (!generatedClusters.includes(clusterName)) {
-                                        generatedClusters.push(clusterName)
-                                    }
-                                }
+                                // the name should be a link
+                                uniqueId = researcher.email.split("@")[0]
+
+                                // skip researchers who arent selected
+                                if (!selectedIds.includes(uniqueId)) { continue }
+
+                                // add all the information to the temporary 'entry' dictionary
+                                entry = {}
+                                entry['name'] = researcher.name
+                                entry['email'] = researcher.email
+                                entry['uniqueId'] = uniqueId
+                                entry['school'] = researcher.school
+                                entry['gender'] = researcher.gender
+                                entry['cds'] = researcher.careerStage
+                                entry['activity'] = researcher.activity
+                                entry['clusters'] = researcher.clusters
+                                entry['keywords'] = researcher.keywords
+
+                                // add the researcher's default information to the researchersInDatabase dictionary
+                                researchersInDatabase[uniqueId] = entry
                             }
                         })
 
-                        // whether the row is selected
-                        row.selected = false
+                        // iterate over the researchers
+                        Object.entries(result).forEach(([uniqueId,researcher]) => {
+                            // this will eventually be added to the table's dataset
+                            row = {}
 
-                        // add to the table data
-                        tableData[8].dataSet.push(row)
-                        tableData[8].showRows.push(row)
-                    })
+                            // set the unique id, name, and email based on the unique id
+                            row.uniqueId = uniqueId
+                            row.email = uniqueId + '@sydney.edu.au'
+                            row.name = capitalizeFirstLetter(uniqueId.split('.')[0]) + ' ' + capitalizeFirstLetter(uniqueId.split('.')[1])
 
-                    // initialise the table
-                    tableData[8].totalPages = Math.ceil(data.length / rowsPerPage)
-                    renderTable(8, dbclick=null, idField='uniqueId')
+                            // if the researcher is already in the database, get their default information
+                            if (researchersInDatabase[uniqueId] != undefined) {
+                                row = researchersInDatabase[uniqueId]
+                            }
 
-                    document.getElementById("recalcTable").style.display = 'block'
-                }
-            })
+                            // get all of the details and add them to the row
+                            Object.entries(researcher).forEach(([k,v]) => {
+                                console.log(k, v)
+                                row[k] = v // add it to the row
+
+                                if (k == 'clusters') {
+                                    // iterate over clusters
+                                    for (c in v) {
+                                        clusterName = v[c]
+                                        if (!generatedClusters.includes(clusterName)) {
+                                            // add to generatedClusters if it isnt in there already
+                                            generatedClusters.push(clusterName)
+                                        }
+                                    }
+                                }
+                            })
+
+                            // whether the row is selected
+                            row.selected = false
+
+                            // add to the table data
+                            tableData[8].dataSet.push(row)
+                            tableData[8].showRows.push(row)
+                        })
+
+                        // initialise the table
+                        tableData[8].totalPages = Math.ceil(data.length / rowsPerPage)
+                        renderTable(8, dbclick=null, idField='uniqueId')
+
+                        // show the table
+                        document.getElementById("recalcTable").style.display = 'block'
+                        document.getElementById("hr").style.display = 'block' // show horizontal rule
+                    }
+                })
+            } catch (err) {
+                console.log(err)
+
+                // open error modal
+                document.getElementById('modal3').style.display = 'none'
+                document.getElementById("showAlert").textContent = 'Something went wrong. Please try again. If the issue persists, please let me know.'
+                openModal(4)
+            }
         }
     </script>
     <script>
+        // check whether a researcher has been confirmed
         function checkConfirmed(researcher) {
             return researcher.selected
         }
 
         async function confirmChanges() {
+            // only get the confirmed researchers
             const result = tableData[8].dataSet.filter(checkConfirmed);
 
             if (data.fields.includes('clusters')) {
                 document.getElementById("loadingSpinner").style.display = 'block'
+
                 fetch('/addclusters', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({generatedClusters: generatedClusters})
                 }).then(response => response.json()).then(async data => {
-                    if (data.success) {
-                        success = true
+                    if (data.success == 'success') {
+                        success = true // will store whether the researcher DB operations were successful
 
+                        // update the database for each researcher (otherwise the body might be too long if all researchers are sent in one go)
                         for (i in result) {
-
                             await fetch('/confirmrecalculation', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({researcher: result[i]})
                             }).then(response => response.json()).then(data => {
                                 if (!data.success) {
+                                    // open the error modal
                                     document.getElementById("loadingSpinner").style.display = 'none'
                                     document.getElementById('showAlert').textContent = data.alert
                                     openModal(4)
-                                    success = false;
+                                    success = false; // the researcher DB operations were not successful
                                     return;
                                 }
                             })
                         }
-                        // database updated! redirect them to the homepage
+                        
                         document.getElementById("loadingSpinner").style.display = 'none'
+
+                        // if database updated successfully, redirect them to the homepage
                         if (success) {
                             window.location.href = `/`
                         }
+                    } else {
+                        // open error modal
+                        document.getElementById("loadingSpinner").style.display = 'none'
+                        document.getElementById('showAlert').textContent = data.alert
+                        openModal(4)
                     }
                 })
             } else {
-                success = true;
+                success = true; // will store whether the researcher DB operations were successful
                 document.getElementById("loadingSpinner").style.display = 'block'
+
+                // update the database for each researcher (otherwise the body might be too long if all researchers are sent in one go)
                 for (i in result) {
                     await fetch('/confirmrecalculation', {
                         method: 'POST',
@@ -1247,16 +1314,19 @@
                         body: JSON.stringify({researcher: result[i]})
                     }).then(response => response.json()).then(data => {
                         if (!data.success) {
+                            // open error modal
                             document.getElementById("loadingSpinner").style.display = 'none'
                             document.getElementById('showAlert').textContent = data.alert
                             openModal(4)
-                            success = false;
+                            success = false; // the researcher DB operations were not successful
                             return;
                         }
                     })
                 }
-                // database updated! redirect them to the homepage
+
                 document.getElementById("loadingSpinner").style.display = 'none'
+
+                // if database updated successfully, redirect them to the homepage
                 if (success) {
                     window.location.href = `/`
                 }

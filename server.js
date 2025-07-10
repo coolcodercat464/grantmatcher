@@ -202,7 +202,7 @@ app.post('/match', async (req, res) => {
         schoolCorrect = (x.school == "all" || researcher.school == x.school)
         genderCorrect = (x.gender == "all" || researcher.gender == x.gender)
         careerCorrect = (x.career == "all" || researcher.careerStage == x.career) 
-        activityCorrect = (researcher.activity >= x.lower && researcher.activity <= x.higher)
+        activityCorrect = ((researcher.activity >= x.lower && researcher.activity <= x.higher))
 
         // if the cluster list is empty, then set this to true
         clusterCorrect = (x.clusters[0].length == 0)
@@ -229,12 +229,9 @@ app.post('/match', async (req, res) => {
             }
         }
 
-        // add this property to the researchers
-        researcher.clustersNames = clustersNames
-
         // only add the researchers to the list if they match all criteria
         if (schoolCorrect && genderCorrect && careerCorrect && activityCorrect && clusterCorrect) {
-          researcherPool.push(researcher)
+          researcherPool.push({clustersNames: clustersNames, email: researcher.email, keywords: researcher.keywords})
         }
       }
 
@@ -307,14 +304,12 @@ app.post('/recalculate', async (req, res) => {
     }
 
     x = req.body
-    console.log(x)
 
-    // TRY CATCH DOESNT WORK. FIX THIS TODO
     try {
       // store the output (its very long so the JSON will get processed over multiple .stdout.on() events)
       output = '';
 
-      error = false;
+      error = false; // whether an error occured or not (prevents multiple headers error)
 
       // execute the python script
       const scriptExecution = spawn(pythonExecutable, 
@@ -329,9 +324,9 @@ app.post('/recalculate', async (req, res) => {
       scriptExecution.stderr.on('data', (data) => {
         console.log(data.toString())
         
-        // ensure that no errors occured
+        // ensure that no errors occured already (otherwise a message would have already been sent)
         if (!error) {
-          error = true;
+          error = true; // set error to true
 
           res.send({status: "error", alert: "Something wrong happened while recalculating researchers. Please try again. If this problem persists, please open a ticket to let me know."})
         }

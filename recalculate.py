@@ -320,6 +320,7 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
 
                 researchers[urlId]['cds'] = cds
             
+            # Get the researcher's school
             if 'school' in affectedFields:
                 affiliation = researcher['affiliationList'][0].lower()
                 if 'chemistry' in affiliation:
@@ -514,6 +515,7 @@ if len(affectedResearchers) == 0:
     affectedResearchers = 'all'
 
 '''
+# Default values for testing purposes
 affectedResearchers = 'all'
 affectedFields = ['gender', 'cds', 'school', 'pubs', 'grants', 'profile']
 clusterRangeSetting = 0.15
@@ -524,4 +526,4 @@ googlescholar = False
 
 url = "https://www.sydney.edu.au/AcademicProfiles/interfaces/rest/performSimpleAttributeSearch/+jobType:1%20+orgUnitCode:5000053020L0000%20+isMediaExpert:true/0/270/byRelevance/false"
 researchers, clusters = main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, maxNumber, googlescholar, url)
-sys.stdout.write(json.dumps(researchers))
+sys.stdout.write(json.dumps(researchers)) # output

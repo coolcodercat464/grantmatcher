@@ -369,7 +369,7 @@
 
         <section>
             <h2>FILTERING SPECIFICATIONS</h2>
-            <!-- TODO: Add explanation here -->
+            <p>Filter the researcher candidate pool before matching. Note that inputs in this section are much more strict (e.g., entering "Organic Chemistry" in the clusters means that any researcher without the "Organic Chemistry" cluster will not be considered).</p>
             <div class="together">
                 <div style="width: 100%;">
                     <label><b>SCHOOL</b></label><br>
@@ -488,7 +488,7 @@
 
         <section>
             <h2>MATCHING OPTIONS</h2>
-            <!-- TODO: Add explanation here -->
+            <p>Enter some parameters for matching. Inputs here are looser, meaning that a researcher only has to be relevant to your inputted keywords, not an exact match.</p>
             <div class="together">
                 <div style="width: 100%">
                     <div class="together">
@@ -501,7 +501,6 @@
                     </div>
 
                     <div>
-                        <!-- TODO: make the grant keywords here default -->
                         <div class="listbox" style="overflow:auto; ">
                             <div class="listboxdiv" style="height: 70px;">
                                 <!-- Numbering the IDs so I can use many selectors (code reuse) -->
@@ -533,15 +532,14 @@
                             <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
                         </button>
                     </label>
-                    <input type="number" name="number" id="number" style="width: 100%" min="0" step="1"><br><br>
-                    <!-- TODO: implement this -->
+                    <input onchange="numberChange()" type="number" name="number" id="number" style="width: 100%" min="0" step="1"><br><br>
                     <label for="strictness"><b>STRICTNESS</b>
                         <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="What fraction of researchers to remove from list. The higher the strictness, the less researchers you get. No need for strictness if you specified number!">
                             <!-- Makes the tooltip circular -->
                             <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
                         </button>
                     </label>
-                    <input type="number" id="strictness" name="strictness" style="width: 100%" min="0" max="1" step="0.01" disabled>
+                    <input onchange="strictnessChange()" type="number" id="strictness" name="strictness" style="width: 100%" min="0" max="1" step="0.01">
                 </div>
             </div>
             <br>
@@ -558,8 +556,8 @@
                 </div>
             </div>
         </section>
-        <!-- TODO: add an id and hide/show this -->
-        <hr/>
+
+        <hr id="hr"/>
 
         <section style="display: none" id="matchTable">
             <h2>Select Researchers</h2>
@@ -652,6 +650,34 @@
 })
     </script>
     <script>
+        cutoffMethod = "number"
+
+        function numberChange() {
+            number = document.getElementById("number")
+
+            // un-disable strictness if its empty
+            if (number.value == '') {
+                document.getElementById("strictness").removeAttribute("disabled")
+            // ..., otherwise, disable strictness
+            } else {
+                document.getElementById("strictness").setAttribute("disabled", "")
+                cutoffMethod = "number"
+            }
+        }
+
+        function strictnessChange() {
+            strictness = document.getElementById("strictness")
+
+            // un-disable strictness if its empty
+            if (strictness.value == '') {
+                document.getElementById("number").removeAttribute("disabled")
+            // ..., otherwise, disable strictness
+            } else {
+                document.getElementById("number").setAttribute("disabled", "")
+                cutoffMethod = "strictness"
+            }
+        }
+
         function directMatch() {
             // get the user input
             school = document.getElementById("schoolMatch").value
@@ -670,17 +696,32 @@
                 clusters[1][x] = parseInt(clusters[1][x].split('S')[1])
             }
 
-            data = {
-                "matchKeywords": getKeywords(2),
-                "school": school,
-                "career": career,
-                "gender": gender,
-                "lower": lower,
-                "higher": higher,
-                "clusters": clusters,
-                "cutOff": number,
-                "cutOffMethod": "number",
-                "matchMethod": "direct"
+            if (cutoffMethod == "number") {
+                data = {
+                    "matchKeywords": getKeywords(2),
+                    "school": school,
+                    "career": career,
+                    "gender": gender,
+                    "lower": lower,
+                    "higher": higher,
+                    "clusters": clusters,
+                    "cutOff": number,
+                    "cutOffMethod": "number",
+                    "matchMethod": "direct"
+                }
+            } else {
+                data = {
+                    "matchKeywords": getKeywords(2),
+                    "school": school,
+                    "career": career,
+                    "gender": gender,
+                    "lower": lower,
+                    "higher": higher,
+                    "clusters": clusters,
+                    "cutOff": strictness,
+                    "cutOffMethod": "strictness",
+                    "matchMethod": "direct"
+                }
             }
 
             // hide the modal and show the spinner
@@ -700,6 +741,7 @@
                     matchResults = matchResults.result
                     document.getElementById("tableBody6").innerHTML = '' // reset the table
                     document.getElementById("matchTable").style.display = 'block' // show the table
+                    document.getElementById("hr").style.display = 'block' // show horizontal rule
                     document.getElementById("loadingSpinner").style.display = 'none' // remove the spinner
                     fetch('/db/researchers').then(response => response.json()).then(data => {
                         // iterate over the researchers
@@ -750,17 +792,32 @@
                 clusters[1][x] = parseInt(clusters[1][x].split('S')[1])
             }
 
-            data = {
-                "matchKeywords": getKeywords(2),
-                "school": school,
-                "career": career,
-                "gender": gender,
-                "lower": lower,
-                "higher": higher,
-                "clusters": clusters,
-                "cutOff": number,
-                "cutOffMethod": "number",
-                "matchMethod": "direct"
+            if (cutoffMethod == "number") {
+                data = {
+                    "matchKeywords": getKeywords(2),
+                    "school": school,
+                    "career": career,
+                    "gender": gender,
+                    "lower": lower,
+                    "higher": higher,
+                    "clusters": clusters,
+                    "cutOff": number,
+                    "cutOffMethod": "number",
+                    "matchMethod": "direct"
+                }
+            } else {
+                data = {
+                    "matchKeywords": getKeywords(2),
+                    "school": school,
+                    "career": career,
+                    "gender": gender,
+                    "lower": lower,
+                    "higher": higher,
+                    "clusters": clusters,
+                    "cutOff": strictness,
+                    "cutOffMethod": "strictness",
+                    "matchMethod": "direct"
+                }
             }
 
             // hide the modal and show the spinner
@@ -778,8 +835,10 @@
                     openModal(2)
                 } else {
                     console.log(matchResults)
+                    matchResults = matchResults.result
                     document.getElementById("tableBody6").innerHTML = '' // reset the table
                     document.getElementById("matchTable").style.display = 'block' // show the table
+                    document.getElementById("hr").style.display = 'block' // show horizontal rule
                     document.getElementById("loadingSpinner").style.display = 'none' // remove the spinner
                     fetch('/db/researchers').then(response => response.json()).then(data => {
                         // iterate over the researchers
@@ -829,14 +888,17 @@
                 }
             }
 
+            // add the cluster names to the page
             clusterNames = clusterNames.join(', ')
             document.getElementById('grantClusters').textContent = clusterNames
 
             keywords = `<%= keywords %>`
             keywords = keywords.split("\n")
+            // go through each keyword
             for (x in keywords) {
                 keyword = keywords[x]
-                document.getElementById('grantKeywords').value += '- ' + keyword + '\n'
+                document.getElementById('grantKeywords').value += '- ' + keyword + '\n' // add keyword to textarea
+                addKeywordManual(2, keyword) // add to the matching options keyword list
             }
         }
     </script>
@@ -932,7 +994,7 @@
                     // all code here is executed only if the uniqueId is the id
 
                     // get the checkbox
-                    checkbox = document.getElementById(`select-${tableNumber}-${id}`);
+                    checkbox = document.getElementById(`select-6-${id}`);
 
                     // If the checkbox is checked, add it to the displayed list
                     if (checkbox.checked == true){

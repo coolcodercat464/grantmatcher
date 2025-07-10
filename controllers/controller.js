@@ -94,28 +94,32 @@ async function save_user(newUser, role) {
 
 // query database with retry (in case of deadlock)
 async function queryWithRetry(query, params=[], maxRetries=5) {
-  let attempts = 0;
+    let attempts = 0; // number of attempts so far
 
-  while (attempts < maxRetries) {
-    try {
-      return await db.query(query, params);
-    } catch (err) {
-      // Deadlock error code in PostgreSQL is 40P01
-      if (err.code === '40P01') {
-        attempts++;
-        console.warn(`Deadlock detected. Retry ${attempts}/${maxRetries}`);
-        if (attempts === maxRetries) {
-          throw new Error('Max retries reached due to deadlock');
+    while (attempts < maxRetries) {
+        try {
+            // try the query
+            return await db.query(query, params);
+        } catch (err) {
+            // error code for deadlock is 40P01
+            if (err.code === '40P01') {
+                attempts++; // add attempts
+                console.warn(`Deadlock detected. Retry ${attempts}/${maxRetries}`);
+
+                // quit on maximum retries (5 by default)
+                if (attempts === maxRetries) {
+                    throw new Error('Max retries reached due to deadlock');
+                }
+
+                // wait a while
+                const delay = Math.floor(Math.random() * 100) + 50 * attempts;
+                await new Promise((resolve) => setTimeout(resolve, delay));
+            } else {
+                    // any other error should be rethrown (it isnt deadlock)
+                    throw err;
+            }
         }
-
-        const delay = Math.floor(Math.random() * 100) + 50 * attempts;
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      } else {
-        // Any other error should be re-thrown
-        throw err;
-      }
     }
-  }
 }
 
 // get a list of dictionaries of users
@@ -504,6 +508,7 @@ const matchget = async (req, res)=>{
             res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
         }
 
+        // 404 if no grant is found
         if (grant.length == 0) {
             res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'This grant does not exist yet. Maybe you can help make it by adding a grant!'});
             return
@@ -1078,7 +1083,7 @@ const confirmmatchpost = async (req, res)=>{
     x = req.body
     console.log(x)
 
-    // ensure that reason is provided
+    // ensure that researcher names and emails are provided
     if (!x.researchersNames || !x.researchersEmails) {
         res.send({alert: 'It looks like no researchers were selected. Please try again.'});
         return
@@ -1176,7 +1181,7 @@ const confirmmatchpost = async (req, res)=>{
     }
 } 
 
-// add some clusters to the database
+// add some clusters to the database (after recalculation)
 const addclusterspost = async (req, res)=>{
     console.log("ADD CLUSTERS POST")
 
@@ -1188,16 +1193,14 @@ const addclusterspost = async (req, res)=>{
 
     x = req.body
 
-    // ensure that reason is provided
+    // ensure that clusters are provided
     if (!x.generatedClusters || x.generatedClusters == []) {
         res.send({alert: 'It looks like no clusters were selected. Please try again.'});
         return
     }
 
     try {
-        clusterDictionary = {}
-
-        // get all clusters
+         // get all clusters
         const mq = 'SELECT "clusterID" FROM clusters'
         const result = await queryWithRetry(mq);
 
@@ -1213,8 +1216,11 @@ const addclusterspost = async (req, res)=>{
         // add each cluster to the database
         for (i in x.generatedClusters) {
             clusterName = x.generatedClusters[i]
+
+            // add the cluster to the database
             await queryWithRetry('INSERT INTO clusters ("clusterID", name, description) VALUES ($1, $2, $3)', [maxClusterID+1, clusterName, "No description for this cluster yet."]);
-            clusterDictionary[clusterName] = maxClusterID + 1 // map cluster name to cluster ID
+            
+            // update cluster ID
             maxClusterID += 1
         }
 
@@ -1238,7 +1244,7 @@ const confirmrecalculationpost = async (req, res)=>{
 
     x = req.body
 
-    // ensure that reason is provided
+    // ensure that researcher is provided
     if (!x.researcher || x.researcher == {}) {
         res.send({alert: 'It looks like no researchers were selected. Please try again.'});
         return
@@ -1260,14 +1266,30 @@ const confirmrecalculationpost = async (req, res)=>{
         const mq1 =  'SELECT * FROM researchers'
         const result1 = await queryWithRetry(mq1);
         rows = result1.rows
-        allResearchers = {}
 
+        /* 
+        DATA STRUCTURE JUSTIFICATION - Dictionary of Dictionaries:
+        allResearchers is a dictionary of dictionaries. This allows the program
+        to easily access the researchers information without another for-loop,
+        improving efficiency and the cleanness of the code.
+        */
+
+        // get all researchers
+        allResearchers = {} // maps email to researcher data
+        
         for (r in rows) {
             row = rows[r]
             allResearchers[row['email']] = row
         }
 
-        clusterDictionary = {}
+        /* 
+        DATA STRUCTURE JUSTIFICATION - Dictionary:
+        clusterDictionary is a dictionary. This allows the program to easily
+        access the cluster ID based on the cluster name, without using a nested
+        for-loop (which is O(n^2), very bad). This improves efficiency by getting
+        all the necessary calculations done in one go.
+        */
+        clusterDictionary = {} // maps cluster name to ID
 
         // get all clusters
         const mq = 'SELECT * FROM clusters'
@@ -1295,6 +1317,12 @@ const confirmrecalculationpost = async (req, res)=>{
         researcherPubKW = researcher.pubs_keywords
         researcherCluster = researcher.clusters
 
+        /* 
+        DATA STRUCTURE JUSTIFICATION - Dictionary:
+        newResearcher is a dictionary. This allows the program to easily access 
+        the researchers information without another for-loop, improving efficiency 
+        and the cleanness of the code.
+        */
         newResearcher = {
             'name':researcherName,
             'email':researcherEmail,
@@ -1311,49 +1339,66 @@ const confirmrecalculationpost = async (req, res)=>{
             'keywords':researcherKW,
         }
 
+        // if the researcher is in the database
         if (allResearchers[researcherEmail] != undefined) {
-            // researcher is in the database
             prevResearcher = allResearchers[researcherEmail]
             // get the previous version
+            // JSON.stringify is better than .toString() because it doesnt crash from a null value and can also store lists
             previousVersion = [JSON.stringify(prevResearcher.name), JSON.stringify(prevResearcher.email), JSON.stringify(prevResearcher.school), JSON.stringify(prevResearcher.gender), JSON.stringify(prevResearcher.careerStage), JSON.stringify(prevResearcher.activity), JSON.stringify(prevResearcher.clusters), JSON.stringify(prevResearcher.keywords.join("\n"), prevResearcher.publications.join("\n"), prevResearcher.publicationKeywords.join("\n"), prevResearcher.grants), JSON.stringify(prevResearcher.grantKeywords), JSON.stringify(prevResearcher.profile), "This researcher's data has been recalculated."]
-            // add the date to the verion history list
+            // add the date to the previous version
             previousVersion.push(date)
-            // add the users name to the version history list
+            // add the users name to the previous version
             previousVersion.push(req.session.useremail)
             previousVersion.push(req.session.username)
-            // add it to the version information list
+            // get the versioninformation list of the researcher
             versionInformation = prevResearcher.versionInformation
+            // ensure that versionInformation is a list
             if (versionInformation == undefined || versionInformation == null) {
                 versionInformation = []
             }
+            // add it to the version information list
             versionInformation.push(previousVersion)
 
             // update each piece of information to the database
             Object.entries(newResearcher).forEach(async ([column,newValue]) => {
                 if (newValue == undefined || prevResearcher[column] == newValue) {
                     // that value hasnt been updated
+                    // so dont have to do anything
                 } else {
                     // ensure that its cluster ID, not cluster name
                     if (column == 'clusters') {
-                        temp = []
+                        temp = [] // this will store the cluster IDs (newValue currently stores cluster names)
                         for (n in newValue) {
                             clusterName = newValue[n]
-                            clusterID = clusterDictionary[clusterName]
-                            temp.push(clusterID)
+                            clusterID = clusterDictionary[clusterName] // get the cluster ID
+                            temp.push(clusterID) // add to temp
                         }
                         newValue = temp
                     }
 
                     // ensure that its a number, not a string, for CDS
                     if (column == 'careerStage') {
+                        // convert the string value for CDS to an integer
                         if (newValue == 'PD') {
                             newValue = 1
                         } else if (newValue == 'ECR') {
                             newValue = 2
                         } else if (newValue == 'MCR') {
                             newValue = 3
-                        } else { // SR
+                        // SR by default
+                        } else {
                             newValue = 4
+                        }
+                    }
+
+                    // ensure that gender is in the correct format
+                    if (column == 'gender') {
+                        if (newValue == 'female' || newValue == 'mostly_female') {
+                            newValue = 'F'
+                        } else if (newValue == 'male' || newValue == 'mostly_male') {
+                            newValue = 'M'
+                        } else {
+                            newValue = 'U'
                         }
                     }
 
@@ -1368,7 +1413,7 @@ const confirmrecalculationpost = async (req, res)=>{
             })
         } else {
             // add the researcher
-            await queryWithRetry('INSERT INTO researchers (email, name) VALUES ($1, $2)', [researcherEmail, researcherName]);
+            await queryWithRetry('INSERT INTO researchers (email, name, school, gender, publications, "publicationKeywords", grants, "grantKeywords", clusters, profile, activity, "careerStage", "versionInformation") VALUES ($1, $2)', [researcherEmail, researcherName, '', 'U', [], [], [], [], [], [], '', 1, 0, []]);
 
             // update each piece of information to the database
             Object.entries(newResearcher).forEach(async ([column,newValue]) => {
@@ -1377,25 +1422,38 @@ const confirmrecalculationpost = async (req, res)=>{
                 } else {
                     // ensure that its cluster ID, not cluster name
                     if (column == 'clusters') {
-                        temp = []
+                        temp = [] // this will store the cluster IDs (newValue currently stores cluster names)
                         for (n in newValue) {
                             clusterName = newValue[n]
-                            clusterID = clusterDictionary[clusterName]
-                            temp.push(clusterID)
+                            clusterID = clusterDictionary[clusterName] // get the cluster ID
+                            temp.push(clusterID) // add to temp
                         }
                         newValue = temp
                     }
 
                     // ensure that its a number, not a string, for CDS
                     if (column == 'careerStage') {
+                        // convert the string value for CDS to an integer
                         if (newValue == 'PD') {
                             newValue = 1
                         } else if (newValue == 'ECR') {
                             newValue = 2
                         } else if (newValue == 'MCR') {
                             newValue = 3
-                        } else { // SR
+                        // SR by default
+                        } else {
                             newValue = 4
+                        }
+                    }
+
+                    // ensure that gender is in the correct format
+                    if (column == 'gender') {
+                        if (newValue == 'female' || newValue == 'mostly_female') {
+                            newValue = 'F'
+                        } else if (newValue == 'male' || newValue == 'mostly_male') {
+                            newValue = 'M'
+                        } else {
+                            newValue = 'U'
                         }
                     }
 
