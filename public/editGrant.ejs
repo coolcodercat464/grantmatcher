@@ -85,13 +85,13 @@
     <div id="modal3" class="modal">
         <div class="modal-content">
             <div class="together">
-                <h2>Add Grant</h2>
+                <h2>Edit Grant</h2>
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
                 <span class="close" id="close3">&times;</span>
             </div>
             
             <!-- Confirmation message (for user control) -->
-            <p>Are you sure you want to add this grant now?</p>
+            <p>Are you sure you want to edit this grant now?</p>
             <div class="together">
                 <button class="buttonStyle" onclick="submit()">Confirm Changes</button>
                 <button id='cancel3' class="buttonStyle">Cancel</button>
@@ -113,10 +113,35 @@
         </div>
     </div>
 
+    <!-- Confirmation modal for going back to grant page -->
+    <div id="modal5" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Go Back</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close5">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to go back the the grant page?</p>
+            <div class="together">
+                <button class="buttonStyle" onclick="window.location.href = '/grant/<%= id %>'">Go Back</button>
+                <button id='cancel5' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section>
-            <h1>Edit <%= title %></h1>
+            <div class="together align-items-center" style="justify-content: space-between;">
+                <div>
+                    <h1>Edit <%= title %></h1>
+                </div>
+                <div>
+                    <i class="fa fa-times" onclick="openModal(5)"></i>
+                </div>
+            </div>
         </section>
         <hr/>
 
@@ -288,16 +313,9 @@
                             <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
                         </button>
                     </label>
-                    <textarea id="reason" class="form-control" name="reason" required></textarea>
+                    <textarea id="reason" class="form-control" name="reason" required></textarea><br>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(3)">Confirm Changes</button>
                 </div>
-            </div>
-            <br>
-
-            <div class="together" style="align-items: flex-start;">
-                <!-- TODO: Add this feature and add confirmation modals -->
-                <button class="buttonStyle blue" style="width: 100%;" onclick="clearForm()">Reset Form</button>
-                <div class="spacer"></div>
-                <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(3)">Confirm Changes</button>
             </div>
             <br><br>
         </section>

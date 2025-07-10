@@ -95,10 +95,53 @@
         </div>
     </div>
 
+    <!-- Confirmation modal for going back to dashboard -->
+    <div id="modal4" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Go Back</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close4">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to go back the the dashboard?</p>
+            <div class="together">
+                <button class="buttonStyle" onclick="window.location.href = '/'">Go Back</button>
+                <button id='cancel4' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation modal before submitting the form -->
+    <div id="modal5" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Add Grant</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close5">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to add this grant now?</p>
+            <div class="together">
+                <button class="buttonStyle" onclick="submit()">Add Grant</button>
+                <button id='cancel5' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section>
-            <h1>Add a Grant</h1>
+            <div class="together align-items-center" style="justify-content: space-between;">
+                <div>
+                    <h1>Add a Grant</h1>
+                </div>
+                <div>
+                    <i class="fa fa-times" onclick="openModal(4)"></i>
+                </div>
+            </div>
         </section>
         <hr/>
 
@@ -197,11 +240,6 @@
 
             <div class="together">
                 <div style="width: 100%;">
-                    <label><b>DESCRIPTION</b></label><br>
-                    <textarea rows="4" style="width: 100%;" id="description" class="form-control" name="description" required></textarea>
-                </div>
-                <div class="spacer"></div>
-                <div style="width: 100%;">
                     <label><b>KEYWORDS</b></label><br>
                     <div style="width: 100%;">
                         <div class="listbox" style="overflow:auto; ">
@@ -227,17 +265,14 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <br>
-
-            <div class="together" style="align-items: flex-start;">
-                <!-- TODO: Add this feature and add confirmation modals -->
-                <button class="buttonStyle blue" style="width: 100%;" onclick="clearForm()">Reset Form</button>
                 <div class="spacer"></div>
-                <!-- TODO: Add this feature and add confirmation modals -->
-                <button class="buttonStyle pink" style="width: 100%;" onclick="submit()">Add this Grant</button>
+                <div style="width: 100%;">
+                    <label><b>DESCRIPTION</b></label><br>
+                    <textarea rows="4" style="width: 100%;" id="description" class="form-control" name="description" required></textarea><br>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(5)">Add this Grant</button>
+                </div>
             </div>
-            <br>
+            <br><br>
         </section>
     </main>
     
