@@ -312,11 +312,11 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
             # Find possible career stages based on their salutation
             if 'cds' in affectedFields:
                 if salutation == 'Dr':
-                    cds = ['PD', 'ECR', 'MCR']
+                    cds = 'ECR'
                 elif salutation == 'Associate Professor':
-                    cds = ['MCR']
+                    cds = 'MCR'
                 elif salutation == 'Professor':
-                    cds = ['SR']
+                    cds = 'SR'
 
                 researchers[urlId]['cds'] = cds
             

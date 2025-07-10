@@ -28,7 +28,7 @@ async function users_list() {
 
     try {
         // get all user credentials
-        res = await db.query('SELECT name, email, password FROM users');
+        res = await queryWithRetry('SELECT name, email, password FROM users');
 
         // res is a list of dictionaries
         res = res.rows
@@ -65,11 +65,11 @@ async function save_user(newUser, role) {
     try {
         // insert the user's data into the database
         const mq1 = 'INSERT INTO users (name, email, password, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences", "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)'
-        const result1 = await db.query(mq1, [userName, email, password, role, 0, 0, date, "light", false, []]);
+        const result1 = await queryWithRetry(mq1, [userName, email, password, role, 0, 0, date, "light", false, []]);
         
         // get all changes
         const mq2 = 'SELECT "changeID" FROM changelog'
-        const result2 = await db.query(mq2);
+        const result2 = await queryWithRetry(mq2);
 
         // calculate the maximum changeID
         maxChangeID = 0
@@ -85,11 +85,37 @@ async function save_user(newUser, role) {
 
         // add 'user joined' change to changelog
         const mq3 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result3 = await db.query(mq3, [nextChangeID, email, 'User Joined', date, `${newUser.name} joined Grant Matcher! Please make them feel welcome!`, '{}']);
+        const result3 = await queryWithRetry(mq3, [nextChangeID, email, 'User Joined', date, `${newUser.name} joined Grant Matcher! Please make them feel welcome!`, '{}']);
         
     } catch (err) {
         console.error(err);
     }
+}
+
+// query database with retry (in case of deadlock)
+async function queryWithRetry(query, params=[], maxRetries=5) {
+  let attempts = 0;
+
+  while (attempts < maxRetries) {
+    try {
+      return await db.query(query, params);
+    } catch (err) {
+      // Deadlock error code in PostgreSQL is 40P01
+      if (err.code === '40P01') {
+        attempts++;
+        console.warn(`Deadlock detected. Retry ${attempts}/${maxRetries}`);
+        if (attempts === maxRetries) {
+          throw new Error('Max retries reached due to deadlock');
+        }
+
+        const delay = Math.floor(Math.random() * 100) + 50 * attempts;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      } else {
+        // Any other error should be re-thrown
+        throw err;
+      }
+    }
+  }
 }
 
 // get a list of dictionaries of users
@@ -101,7 +127,7 @@ async function get_codes() {
 
     try {
         // get all codes
-        res = await db.query('SELECT "userEmail", code, role FROM codes');
+        res = await queryWithRetry('SELECT "userEmail", code, role FROM codes');
 
         // res is a list of dictionaries
         res = res.rows
@@ -340,7 +366,7 @@ const grantpageget = async (req, res)=>{
     try {
         // get the grants data
         const mq = 'SELECT * FROM grants WHERE "grantID" = $1'
-        const result = await db.query(mq, [id]);
+        const result = await queryWithRetry(mq, [id]);
         grant = result.rows
     } catch (err) {
         console.error(err);
@@ -413,7 +439,7 @@ const editgrantget = async (req, res)=>{
         try {
             // get the grants data
             const mq = 'SELECT * FROM grants WHERE "grantID" = $1'
-            const result = await db.query(mq, [id]);
+            const result = await queryWithRetry(mq, [id]);
             grant = result.rows
         } catch (err) {
             console.error(err);
@@ -471,7 +497,7 @@ const matchget = async (req, res)=>{
         try {
             // get the grants data
             const mq = 'SELECT * FROM grants WHERE "grantID" = $1'
-            const result = await db.query(mq, [id]);
+            const result = await queryWithRetry(mq, [id]);
             grant = result.rows
         } catch (err) {
             console.error(err);
@@ -744,7 +770,7 @@ const addgrantpost = async (req, res)=>{
     try {
         // get all grant IDs
         const mq1 = 'SELECT "grantID" FROM grants'
-        const result1 = await db.query(mq1);
+        const result1 = await queryWithRetry(mq1);
 
         // calculate the maximum grantID
         maxGrantID = 0
@@ -770,11 +796,11 @@ const addgrantpost = async (req, res)=>{
 
         // add the grant to grants table
         const mq2 = 'INSERT INTO grants ("grantID", "userEmail", "grantName", url, deadline, duration, description, clusters, keywords, researchers, matched, "dateAdded", "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)'
-        const result2 = await db.query(mq2, [nextGrantID, req.session.useremail, grantName, url, reformattedDeadline, duration, description, clustersId, keywords, [[]], false, date, []]);
+        const result2 = await queryWithRetry(mq2, [nextGrantID, req.session.useremail, grantName, url, reformattedDeadline, duration, description, clustersId, keywords, [[]], false, date, []]);
         
         // get all changes
         const mq3 = 'SELECT "changeID" FROM changelog'
-        const result3 = await db.query(mq3);
+        const result3 = await queryWithRetry(mq3);
 
         // calculate the maximum changeID
         maxChangeID = 0
@@ -790,7 +816,7 @@ const addgrantpost = async (req, res)=>{
 
         // add 'grant added' change to changelog
         const mq4 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result4 = await db.query(mq4, [nextChangeID, req.session.useremail, 'Grant Added', date, `The grant "${grantName}" has been added. Check it out now!`, '{}']);
+        const result4 = await queryWithRetry(mq4, [nextChangeID, req.session.useremail, 'Grant Added', date, `The grant "${grantName}" has been added. Check it out now!`, '{}']);
 
         // redirect to the grant page
         res.send({"id": nextGrantID})
@@ -877,7 +903,7 @@ const editgrantpost = async (req, res)=>{
     try {
         // get the grant information (to make versionInformation)
         const mq1 = 'SELECT * FROM grants WHERE "grantID" = $1'
-        const result1 = await db.query(mq1, [id]);
+        const result1 = await queryWithRetry(mq1, [id]);
 
         // ensure that the grant exists
         if (result1.rows.length == 0) {
@@ -914,11 +940,11 @@ const editgrantpost = async (req, res)=>{
 
         // add the grant to grants table
         const mq2 = 'UPDATE grants SET "grantName" = $1, url = $2, deadline = $3, duration = $4, description = $5, clusters = $6, keywords = $7, researchers = $8, "versionInformation" = $9 WHERE "grantID" = $10;'
-        const result2 = await db.query(mq2, [grantName, url, reformattedDeadline, duration, description, clustersId, keywords, researchers, versionInformation, id]);
+        const result2 = await queryWithRetry(mq2, [grantName, url, reformattedDeadline, duration, description, clustersId, keywords, researchers, versionInformation, id]);
         
         // get all changes
         const mq3 = 'SELECT "changeID" FROM changelog'
-        const result3 = await db.query(mq3);
+        const result3 = await queryWithRetry(mq3);
 
         // calculate the maximum changeID
         maxChangeID = 0
@@ -934,7 +960,7 @@ const editgrantpost = async (req, res)=>{
 
         // add 'grant edited' change to changelog
         const mq4 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result4 = await db.query(mq4, [nextChangeID, req.session.useremail, 'Grant Edited', date, `The grant "${grantName}" has been edited. Check it out now!`, '{}']);
+        const result4 = await queryWithRetry(mq4, [nextChangeID, req.session.useremail, 'Grant Edited', date, `The grant "${grantName}" has been edited. Check it out now!`, '{}']);
 
         // redirect to the grant page
         res.send({"id": id})
@@ -977,7 +1003,7 @@ const deletegrantpost = async (req, res)=>{
     try {
         // get the grants name
         const mq1 =  'SELECT "grantName" FROM grants WHERE "grantID" = $1'
-        const result1 = await db.query(mq1, [id]);
+        const result1 = await queryWithRetry(mq1, [id]);
 
         if (result1.rows.length == 0) {
             res.send({alert: 'Looks like your grant doesn\'t exist in the first place! Please try again.'})
@@ -988,7 +1014,7 @@ const deletegrantpost = async (req, res)=>{
 
         // remove the grant from the database
         const mq2 = 'DELETE FROM grants WHERE "grantID" = $1'
-        const result2 = await db.query(mq2, [id]);
+        const result2 = await queryWithRetry(mq2, [id]);
 
         // get the current date (when this version stopped being the most recent version)
         now = new Date();
@@ -1003,7 +1029,7 @@ const deletegrantpost = async (req, res)=>{
         
         // get all changes
         const mq3 = 'SELECT "changeID" FROM changelog'
-        const result3 = await db.query(mq3);
+        const result3 = await queryWithRetry(mq3);
 
         // calculate the maximum changeID
         maxChangeID = 0
@@ -1019,7 +1045,7 @@ const deletegrantpost = async (req, res)=>{
 
         // add 'grant edited' change to changelog
         const mq4 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result4 = await db.query(mq4, [nextChangeID, req.session.useremail, 'Grant Deleted', date, `The grant "${grantName}" has been deleted. The reason provided was "${x.reason}"`, '{}']);
+        const result4 = await queryWithRetry(mq4, [nextChangeID, req.session.useremail, 'Grant Deleted', date, `The grant "${grantName}" has been deleted. The reason provided was "${x.reason}"`, '{}']);
 
         res.send({success: 'success'})
     } catch (err) {
@@ -1065,7 +1091,7 @@ const confirmmatchpost = async (req, res)=>{
 
         // get the grants name
         const mq1 =  'SELECT * FROM grants WHERE "grantID" = $1'
-        const result1 = await db.query(mq1, [id]);
+        const result1 = await queryWithRetry(mq1, [id]);
 
         if (result1.rows.length == 0) {
             res.send({alert: 'Looks like your grant doesn\'t exist in the first place! Please try again.'})
@@ -1081,7 +1107,7 @@ const confirmmatchpost = async (req, res)=>{
 
         // get the current xp
         const mq2 = 'SELECT xp FROM users WHERE email = $1'
-        const result2 = await db.query(mq2, [req.session.useremail]);
+        const result2 = await queryWithRetry(mq2, [req.session.useremail]);
 
         if (result2.rows.length == 0) {
             res.send({alert: 'Something went wrong when getting your XP and account details. If the issue persists, please let me know.'})
@@ -1091,7 +1117,7 @@ const confirmmatchpost = async (req, res)=>{
         // otherwise, add 5 to the xp
         currentXp = result2.rows[0].xp
         const mq3 = 'UPDATE users SET xp = $1 WHERE email = $2'
-        const result3 = await db.query(mq3, [currentXp + 5, req.session.useremail]);
+        const result3 = await queryWithRetry(mq3, [currentXp + 5, req.session.useremail]);
 
         // get the current date
         now = new Date();
@@ -1106,7 +1132,7 @@ const confirmmatchpost = async (req, res)=>{
         
         // get all changes
         const mq4 = 'SELECT "changeID" FROM changelog'
-        const result4 = await db.query(mq4);
+        const result4 = await queryWithRetry(mq4);
 
         // calculate the maximum changeID
         maxChangeID = 0
@@ -1122,7 +1148,7 @@ const confirmmatchpost = async (req, res)=>{
 
         // add 'grant edited' change to changelog
         const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result5 = await db.query(mq5, [nextChangeID, req.session.useremail, 'Grant Matched', date, `The grant "${grantName}" has been matched. The researchers notified were ${researchers}.`, '{}']);
+        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Grant Matched', date, `The grant "${grantName}" has been matched. The researchers notified were ${researchers}.`, '{}']);
 
         // update the grant
         console.log(researchersEmails)
@@ -1140,7 +1166,7 @@ const confirmmatchpost = async (req, res)=>{
         console.log(researchers)
 
         const mq6 =  'UPDATE grants SET matched = true, researchers = researchers || $1, "versionInformation" = $2 WHERE "grantID" = $3;'
-        const result6 = await db.query(mq6, [researchersEmails, versionInformation, id]);
+        const result6 = await queryWithRetry(mq6, [researchersEmails, versionInformation, id]);
 
         res.send({success: 'success'})
     } catch (err) {
@@ -1173,7 +1199,7 @@ const addclusterspost = async (req, res)=>{
 
         // get all clusters
         const mq = 'SELECT "clusterID" FROM clusters'
-        const result = await db.query(mq);
+        const result = await queryWithRetry(mq);
 
         // calculate the maximum clusterID
         maxClusterID = 0
@@ -1187,7 +1213,7 @@ const addclusterspost = async (req, res)=>{
         // add each cluster to the database
         for (i in x.generatedClusters) {
             clusterName = x.generatedClusters[i]
-            await db.query('INSERT INTO clusters ("clusterID", name, description) VALUES ($1, $2, $3)', [maxClusterID+1, clusterName, "No description for this cluster yet."]);
+            await queryWithRetry('INSERT INTO clusters ("clusterID", name, description) VALUES ($1, $2, $3)', [maxClusterID+1, clusterName, "No description for this cluster yet."]);
             clusterDictionary[clusterName] = maxClusterID + 1 // map cluster name to cluster ID
             maxClusterID += 1
         }
@@ -1232,7 +1258,7 @@ const confirmrecalculationpost = async (req, res)=>{
 
         // get all researcher data
         const mq1 =  'SELECT * FROM researchers'
-        const result1 = await db.query(mq1);
+        const result1 = await queryWithRetry(mq1);
         rows = result1.rows
         allResearchers = {}
 
@@ -1245,7 +1271,7 @@ const confirmrecalculationpost = async (req, res)=>{
 
         // get all clusters
         const mq = 'SELECT * FROM clusters'
-        const result = await db.query(mq);
+        const result = await queryWithRetry(mq);
 
         // map the cluster name to ID
         for (i in result.rows) {
@@ -1332,14 +1358,14 @@ const confirmrecalculationpost = async (req, res)=>{
                     if (column == 'keywords') {
                         newValue = newValue.split('; ')
                     }
-                    
+
                     // update that value
-                    await db.query('UPDATE researchers SET ' + column + ' = $1 WHERE email = $2;', [newValue, researcherEmail]);
+                    await queryWithRetry('UPDATE researchers SET ' + column + ' = $1 WHERE email = $2;', [newValue, researcherEmail]);
                 }
             })
         } else {
             // add the researcher
-            await db.query('INSERT INTO researchers (email, name) VALUES ($1, $2)', [researcherEmail, researcherName]);
+            await queryWithRetry('INSERT INTO researchers (email, name) VALUES ($1, $2)', [researcherEmail, researcherName]);
 
             // update each piece of information to the database
             Object.entries(newResearcher).forEach(async ([column,newValue]) => {
@@ -1376,14 +1402,14 @@ const confirmrecalculationpost = async (req, res)=>{
                     }
 
                     // update that value
-                    await db.query('UPDATE researchers SET "' + column + '" = $1 WHERE email = $2;', [newValue, researcherEmail]);
+                    await queryWithRetry('UPDATE researchers SET "' + column + '" = $1 WHERE email = $2;', [newValue, researcherEmail]);
                 }
             })
         }
 
         // get the current xp
         const mq2 = 'SELECT xp FROM users WHERE email = $1'
-        const result2 = await db.query(mq2, [req.session.useremail]);
+        const result2 = await queryWithRetry(mq2, [req.session.useremail]);
 
         if (result2.rows.length == 0) {
             res.send({alert: 'Something went wrong when getting your XP and account details. If the issue persists, please let me know.'})
@@ -1393,11 +1419,11 @@ const confirmrecalculationpost = async (req, res)=>{
         // otherwise, add 5 to the xp
         currentXp = result2.rows[0].xp
         const mq3 = 'UPDATE users SET xp = $1 WHERE email = $2'
-        const result3 = await db.query(mq3, [currentXp + 5, req.session.useremail]);
+        const result3 = await queryWithRetry(mq3, [currentXp + 5, req.session.useremail]);
 
         // get all changes
         const mq4 = 'SELECT "changeID" FROM changelog'
-        const result4 = await db.query(mq4);
+        const result4 = await queryWithRetry(mq4);
 
         // calculate the maximum changeID
         maxChangeID = 0
@@ -1413,7 +1439,7 @@ const confirmrecalculationpost = async (req, res)=>{
 
         // add 'grant edited' change to changelog
         const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result5 = await db.query(mq5, [nextChangeID, req.session.useremail, 'Researcher Recalculated', date, `${researcherName}'s data has been recalculated.`, '{}']);
+        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Researcher Recalculated', date, `${researcherName}'s data has been recalculated.`, '{}']);
         
         res.send({success: 'success'})
     } catch (err) {

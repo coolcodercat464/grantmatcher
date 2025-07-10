@@ -327,13 +327,13 @@ app.post('/recalculate', async (req, res) => {
 
       // Handle error output
       scriptExecution.stderr.on('data', (data) => {
+        console.log(data.toString())
+        
         // ensure that no errors occured
         if (!error) {
           error = true;
 
-          console.log(data.toString())
           res.send({status: "error", alert: "Something wrong happened while recalculating researchers. Please try again. If this problem persists, please open a ticket to let me know."})
-          return
         }
       });
 

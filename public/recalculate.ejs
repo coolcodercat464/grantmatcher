@@ -654,7 +654,7 @@
                     <div class="spacer"></div>
                     <div>
                         <label><b>STRICTNESS</b>
-                            <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="The minimum score for a cluster to be added to the researcher's list. A higher strictness would result in less but more relevant clusters.">
+                            <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="The minimum score for a cluster to be added to the researcher's list. A higher strictness would result in less but more relevant clusters. Strictness around 0.25 work best (otherwise your researchers won't have any clusters!).">
                                 <!-- Makes the tooltip circular -->
                                 <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
                             </button>
@@ -1202,18 +1202,20 @@
             return researcher.selected
         }
 
-        function confirmChanges() {
+        async function confirmChanges() {
             const result = tableData[8].dataSet.filter(checkConfirmed);
 
             if (data.fields.includes('clusters')) {
+                document.getElementById("loadingSpinner").style.display = 'block'
                 fetch('/addclusters', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({generatedClusters: generatedClusters})
-                }).then(response => response.json()).then(data => {
+                }).then(response => response.json()).then(async data => {
                     if (data.success) {
                         for (i in result) {
-                            fetch('/confirmrecalculation', {
+
+                            await fetch('/confirmrecalculation', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({researcher: result[i]})
@@ -1226,25 +1228,31 @@
                                 }
                             })
                         }
+                        // database updated! redirect them to the homepage
+                        document.getElementById("loadingSpinner").style.display = 'none'
+                        window.location.href = `/`
                     }
                 })
             } else {
+                document.getElementById("loadingSpinner").style.display = 'block'
                 for (i in result) {
                     dataToSend['researcher'] = result[i]
 
-                    fetch('/confirmrecalculation', {
+                    await fetch('/confirmrecalculation', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(dataToSend)
                     }).then(response => response.json()).then(data => {
                         if (!data.success) {
-                            //document.getElementById('showAlert').textContent = data.alert
-                            //openModal(2)
-                            console.log(data.alert)
+                            document.getElementById('showAlert').textContent = data.alert
+                            openModal(2)
                             return;
                         }
                     })
                 }
+                // database updated! redirect them to the homepage
+                document.getElementById("loadingSpinner").style.display = 'none'
+                window.location.href = `/`
             }
         }
     </script>
