@@ -1428,7 +1428,7 @@ const confirmrecalculationpost = async (req, res)=>{
             })
         } else {
             // add the researcher
-            await queryWithRetry('INSERT INTO researchers (email, name, school, gender, publications, "publicationKeywords", grants, "grantKeywords", clusters, profile, activity, "careerStage", "versionInformation") VALUES ($1, $2)', [researcherEmail, researcherName, '', 'U', [], [], [], [], [], [], '', 1, 0, []]);
+            await queryWithRetry('INSERT INTO researchers (email, name, school, gender, publications, "publicationKeywords", grants, "grantKeywords", keywords, clusters, profile, activity, "careerStage", "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)', [researcherEmail, researcherName, '', 'U', [], [], [], [], [], [], '', 1, 0, []]);
 
             // update each piece of information to the database
             Object.entries(newResearcher).forEach(async ([column,newValue]) => {
@@ -1525,9 +1525,85 @@ const confirmrecalculationpost = async (req, res)=>{
     }
 } 
 
-// update the database when codes are updated
-const managecodespost = async (req, res)=>{
-    console.log("MANAGE CODES GET")
+// update the database when a code is added
+const addcodepost = async (req, res)=>{
+    console.log("ADD CODE POST")
+
+    // TODO: ensure the role is correct
+    // only allow them to manage codes if they havent been authenticated yet
+    if (!req.isAuthenticated()) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    x = req.body
+    console.log(x)
+
+    if (!x.email || !x.code || !x.role) {
+        res.send({alert: 'Please ensure that all inputs are filled in.'})
+        return
+    }
+
+    try {
+        // get the current date
+        now = new Date();
+
+        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+        year = now.getFullYear()
+        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+        // stringify it
+        date = `${day}-${month}-${year}`
+
+        // add the researcher
+        await queryWithRetry('INSERT INTO codes ("userEmail", code, "role", "dateAdded") VALUES ($1, $2, $3, $4)', [x.email, x.code, x.role, date]);
+        
+        // get the current xp
+        const mq2 = 'SELECT xp FROM users WHERE email = $1'
+        const result2 = await queryWithRetry(mq2, [req.session.useremail]);
+
+        if (result2.rows.length == 0) {
+            res.send({alert: 'Something went wrong when getting your XP and account details. If the issue persists, please let me know.'})
+            return
+        }
+
+        // otherwise, add 5 to the xp
+        currentXp = result2.rows[0].xp
+        const mq3 = 'UPDATE users SET xp = $1 WHERE email = $2'
+        const result3 = await queryWithRetry(mq3, [currentXp + 5, req.session.useremail]);
+
+        // get all changes
+        const mq4 = 'SELECT "changeID" FROM changelog'
+        const result4 = await queryWithRetry(mq4);
+
+        // calculate the maximum changeID
+        maxChangeID = 0
+        for (i in result4.rows) {
+            rowID = result4.rows[i].changeID
+            if (rowID > maxChangeID) {
+                maxChangeID = rowID
+            }
+        }
+
+        // calculate the next change ID
+        nextChangeID = maxChangeID + 1
+
+        // add 'grant edited' change to changelog
+        const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
+        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Code Added', date, `A new code has been added for a new user with the email ${x.email}.`, '{}']);
+        
+        res.send({success: 'success'})
+    } catch (err) {
+        console.log(err)
+
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+    }
+} 
+
+// update the database when a code is removed
+const removecodepost = async (req, res)=>{
+    console.log("REMOVE CODE POST")
 
     // TODO: ensure the role is correct
     // only allow them to manage codes if they havent been authenticated yet
@@ -1558,5 +1634,6 @@ module.exports = {
     confirmmatchpost,
     confirmrecalculationpost,
     addclusterspost,
-    managecodespost
+    addcodepost,
+    removecodepost,
 }

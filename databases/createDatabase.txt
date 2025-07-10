@@ -75,7 +75,7 @@ ALTER TABLE public.codes OWNER TO postgres;
 --
 
 CREATE TABLE public.grants (
-    versioninformation text[][],
+    "versionInformation" text[][],
     "grantID" integer,
     "grantName" text,
     url text,
@@ -104,7 +104,7 @@ CREATE TABLE public.replies (
     "userEmail" text,
     "replyDate" text,
     content text,
-    versioninformation text[][]
+    "versionInformation" text[][]
 );
 
 
@@ -116,7 +116,7 @@ ALTER TABLE public.replies OWNER TO postgres;
 --
 
 CREATE TABLE public.researchers (
-    versioninformation text[][],
+    "versionInformation" text[][],
     name text,
     email text,
     school text,
@@ -141,7 +141,7 @@ ALTER TABLE public.researchers OWNER TO postgres;
 --
 
 CREATE TABLE public.tickets (
-    versioninformation text[][],
+    "versionInformation" text[][],
     "ticketID" integer,
     "userEmail" text,
     "ticketDate" text,
@@ -162,7 +162,7 @@ ALTER TABLE public.tickets OWNER TO postgres;
 --
 
 CREATE TABLE public.users (
-    versioninformation text[][],
+    "versionInformation" text[][],
     name text,
     email text,
     role text,

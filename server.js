@@ -53,7 +53,7 @@ const db = require('./databases/postgres.js')             // database stuff
 
 // get and post routing
 app.get(['/', '/login', '/signup', '/addgrant', '/grant/:id', '/editgrant/:id', '/match/:id', '/recalculate', '/managecodes'], routes)
-app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id', '/deletegrant/:id', '/confirmmatch/:id', '/confirmrecalculation', '/addclusters', '/managecodes'], routes)
+app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id', '/deletegrant/:id', '/confirmmatch/:id', '/confirmrecalculation', '/addclusters', '/addcode', '/removecode'], routes)
 
 // database routes
 
@@ -101,6 +101,10 @@ app.get('/db/users', async (req, res) => {
 
 app.get('/db/changelog', async (req, res) => {
   res.send(await queryAll('changelog'))
+})
+
+app.get('/db/codes', async (req, res) => {
+  res.send(await queryAll('codes'))
 })
 
 // js nlp routes (faster but less accurate)

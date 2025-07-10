@@ -550,7 +550,7 @@ tableData = {
         "showRows": []
     },
     // codes (manage codes page)
-    8 : {
+    9 : {
         "dataSet": [],
         "currentPage": 1,
         "totalPages": 1,
@@ -1702,6 +1702,38 @@ fetch('/db/users').then(response => response.json()).then(data => {
         try {
             tableData[5].totalPages = Math.ceil(dataChange.length / rowsPerPage)
             renderTable(5, dbclick="description", idField="changeID")
+        } catch {
+
+        }
+    })
+
+    // THIS FETCH IS INSIDE HERE because it needs the user data
+    // to check whether its claimed or not
+    fetch('/db/codes').then(response => response.json()).then(dataCode => {
+        for (var i = 0; i < dataCode.length; i++) {
+            row = dataCode[i]
+            row.claimed = false
+
+            // loop through to find the user's name based on email
+            for (x in data) {
+                if (data[x].email == row.userEmail) {
+                    row.claimed = true;
+                    break;
+                }
+            }
+
+            // reformat date so its easier to sort
+            row.dateReformatted = row.dateAdded.split('-').reverse().join('/')
+
+            // add to the table data
+            tableData[9].dataSet.push(row)
+            tableData[9].showRows.push(row)
+            tableData[9].showFields = ['userEmail', 'code', 'role', 'dateReformatted', 'claimed', 'DELETE']
+        }
+        
+        try {
+            tableData[9].totalPages = Math.ceil(dataCode.length / rowsPerPage)
+            renderTable(9)
         } catch {
 
         }

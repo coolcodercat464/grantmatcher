@@ -16,7 +16,9 @@ router.get('/', control.indexget)
 router.post('/', control.indexpost)
 
 router.get('/managecodes', control.managecodesget)
-router.post('/managecodes', control.managecodespost)
+
+router.post('/addcode', control.addcodepost)
+router.post('/removecode', control.removecodepost)
 
 router.get('/addgrant', control.addgrantget)
 router.post('/addgrant', control.addgrantpost)
