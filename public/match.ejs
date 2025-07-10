@@ -710,8 +710,8 @@
                             if (!matchResults[row.email]) { continue; }
 
                             // the name should be a link
-                            uniqueId = row.email.split("@")[0].replace(".", "")
-                            row.nameLink = `<a href='/researcher/${uniqueId}'>${row.name}</a>`
+                            uniqueId = row.email.split("@")[0]
+                            row.nameLink = `<a href='/researcher/${uniqueId.replace(".", "")}'>${row.name}</a>`
                             row.score = matchResults[row.email]
                             row.keywordsString = row.keywords.join(", ")
                             row.uniqueId = uniqueId
@@ -790,8 +790,8 @@
                             if (!matchResults[row.email]) { continue; }
 
                             // the name should be a link
-                            uniqueId = row.email.split("@")[0].replace(".", "")
-                            row.nameLink = `<a href='/researcher/${uniqueId}'>${row.name}</a>`
+                            uniqueId = row.email.split("@")[0]
+                            row.nameLink = `<a href='/researcher/${uniqueId.replace(".", "")}'>${row.name}</a>`
                             row.score = matchResults[row.email]
                             row.keywordsString = row.keywords.join(", ")
                             row.uniqueId = uniqueId
@@ -924,7 +924,7 @@
                     row = data[i]
 
                     // the name should be a link
-                    uniqueId = row.email.split("@")[0].replace(".", "")
+                    uniqueId = row.email.split("@")[0]
 
                     // skip the row if its not the right one
                     if (uniqueId != id) { continue; }

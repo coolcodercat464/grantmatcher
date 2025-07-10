@@ -840,8 +840,8 @@
                     for (var i = 0; i < data.length; i++) {
                         row = data[i]
 
-                        // the name should be a link
-                        uniqueId = row.email.split("@")[0].replace(".", "")
+                        // get unique ID
+                        uniqueId = row.email.split("@")[0]
 
                         // skip the row if its not the right one
                         if (uniqueId != id) { continue; }
@@ -854,7 +854,7 @@
                         // If the checkbox is checked, add it to the displayed list
                         if (checkbox.checked == true){
                             selectedEmails.push(row.email)
-                            selectedIds.push(row.uniqueId)
+                            selectedIds.push(uniqueId)
                             selectedNames.push(row.name)
 
                             tableData[7].dataSet[tableIndex].selected = true // change the table data
@@ -910,11 +910,10 @@
                     return
                 }
 
-                // TODO - this isnt the DB. its the table
                 for (i in tableData[8].dataSet) {
                     row = tableData[8].dataSet[i]
 
-                    // the name should be a link
+                    // get the unique ID
                     uniqueId = row.uniqueId
 
                     // skip the row if its not the right one
@@ -1128,7 +1127,7 @@
                             researcher = data[i]
 
                             // the name should be a link
-                            uniqueId = researcher.email.split("@")[0].replace(".", "")
+                            uniqueId = researcher.email.split("@")[0]
 
                             // skip researchers who arent selected
                             if (!selectedIds.includes(uniqueId)) { continue }
@@ -1213,6 +1212,8 @@
                     body: JSON.stringify({generatedClusters: generatedClusters})
                 }).then(response => response.json()).then(async data => {
                     if (data.success) {
+                        success = true
+
                         for (i in result) {
 
                             await fetch('/confirmrecalculation', {
@@ -1221,38 +1222,44 @@
                                 body: JSON.stringify({researcher: result[i]})
                             }).then(response => response.json()).then(data => {
                                 if (!data.success) {
-                                    //document.getElementById('showAlert').textContent = data.alert
-                                    //openModal(2)
-                                    console.log(data.alert)
+                                    document.getElementById("loadingSpinner").style.display = 'none'
+                                    document.getElementById('showAlert').textContent = data.alert
+                                    openModal(4)
+                                    success = false;
                                     return;
                                 }
                             })
                         }
                         // database updated! redirect them to the homepage
                         document.getElementById("loadingSpinner").style.display = 'none'
-                        window.location.href = `/`
+                        if (success) {
+                            window.location.href = `/`
+                        }
                     }
                 })
             } else {
+                success = true;
                 document.getElementById("loadingSpinner").style.display = 'block'
                 for (i in result) {
-                    dataToSend['researcher'] = result[i]
-
                     await fetch('/confirmrecalculation', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(dataToSend)
+                        body: JSON.stringify({researcher: result[i]})
                     }).then(response => response.json()).then(data => {
                         if (!data.success) {
+                            document.getElementById("loadingSpinner").style.display = 'none'
                             document.getElementById('showAlert').textContent = data.alert
-                            openModal(2)
+                            openModal(4)
+                            success = false;
                             return;
                         }
                     })
                 }
                 // database updated! redirect them to the homepage
                 document.getElementById("loadingSpinner").style.display = 'none'
-                window.location.href = `/`
+                if (success) {
+                    window.location.href = `/`
+                }
             }
         }
     </script>

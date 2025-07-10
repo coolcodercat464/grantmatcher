@@ -1468,7 +1468,7 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
         row = data[i]
 
         // the name should be a link
-        uniqueId = row.email.split("@")[0].replace(".", "")
+        uniqueId = row.email.split("@")[0]
         row.uniqueId = uniqueId
         row.nameLink = `<a href='/researcher/${uniqueId}'>${row.name}</a>`
 

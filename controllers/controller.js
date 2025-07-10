@@ -1315,7 +1315,7 @@ const confirmrecalculationpost = async (req, res)=>{
             // researcher is in the database
             prevResearcher = allResearchers[researcherEmail]
             // get the previous version
-            previousVersion = [prevResearcher.name, prevResearcher.email, prevResearcher.school, prevResearcher.gender, prevResearcher.careerStage.toString(), prevResearcher.activity.toString(), prevResearcher.clusters.join(", "), prevResearcher.keywords.join("\n"), prevResearcher.publications.join("\n"), prevResearcher.publicationKeywords.join("\n"), prevResearcher.grants.join("\n"), prevResearcher.grantKeywords.join("\n"), prevResearcher.profile, "This researcher's data has been recalculated."]
+            previousVersion = [JSON.stringify(prevResearcher.name), JSON.stringify(prevResearcher.email), JSON.stringify(prevResearcher.school), JSON.stringify(prevResearcher.gender), JSON.stringify(prevResearcher.careerStage), JSON.stringify(prevResearcher.activity), JSON.stringify(prevResearcher.clusters), JSON.stringify(prevResearcher.keywords.join("\n"), prevResearcher.publications.join("\n"), prevResearcher.publicationKeywords.join("\n"), prevResearcher.grants), JSON.stringify(prevResearcher.grantKeywords), JSON.stringify(prevResearcher.profile), "This researcher's data has been recalculated."]
             // add the date to the verion history list
             previousVersion.push(date)
             // add the users name to the version history list
@@ -1323,6 +1323,9 @@ const confirmrecalculationpost = async (req, res)=>{
             previousVersion.push(req.session.username)
             // add it to the version information list
             versionInformation = prevResearcher.versionInformation
+            if (versionInformation == undefined || versionInformation == null) {
+                versionInformation = []
+            }
             versionInformation.push(previousVersion)
 
             // update each piece of information to the database
