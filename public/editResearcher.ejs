@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>GrantMatcher - Edit <%= name %></title>
+    <%- head %>
+</head>
+<body>
+    <!-- Navigation (sticky header). Links and dropdown collapse into a hamburger menu when the screen size is small. -->
+    <nav class="navbar navbar-expand-lg navbar-dark px-3" id="navbar">
+        <!-- Brand on the left -->
+        <a class="navbar-brand bigBrand" href="/" id="navbar-brand">Grant Matcher</a>
+
+        <!-- Toggler (for mobile view) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" id="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links on the right -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Links here -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tickets">Tickets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tutorial">Tutorial</a>
+                </li>
+
+                <!-- Dropdown (user menu) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <!-- Logout button (opens a modal) -->
+                        <li><button class="dropdown-item" id="modalBtn1" onclick="openModal(1)">Logout</button></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- The modal the logout button in the navigation bar opens -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Log out</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close1">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to log out?</p>
+            <div class="together">
+                <form method="post" action="/">
+                    <input type="submit" value="Logout!" class="buttonStyle">
+                </form>
+                <button id='cancel1' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error modal -->
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Error!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close2">&times;</span>
+            </div>
+            <hr/>
+            
+            <p id="showAlert"><%= showAlert %></p>
+        </div>
+    </div>
+
+    <!-- Confirmation modal before submitting the form -->
+    <div id="modal3" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Edit Researcher</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close3">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to edit this researcher now?</p>
+            <div class="together">
+                <button class="buttonStyle" onclick="submit()">Confirm Changes</button>
+                <button id='cancel3' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Another error modal -->
+    <div id="modal4" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Error!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close4">&times;</span>
+            </div>
+            <hr/>
+            
+            <p>Please ensure that you have filled in all areas.</p>
+        </div>
+    </div>
+
+    <!-- Confirmation modal for going back to researcher page -->
+    <div id="modal5" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Go Back</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close5">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to go back the the researcher's page?</p>
+            <div class="together">
+                <button class="buttonStyle" onclick="window.location.href = '/researcher/<%= id %>'">Go Back</button>
+                <button id='cancel5' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The main content -->
+    <main>
+        <section>
+            <div class="together align-items-center" style="justify-content: space-between;">
+                <div>
+                    <h1>Edit <%= name %></h1>
+                </div>
+                <div>
+                    <i class="fa fa-times" onclick="openModal(5)"></i>
+                </div>
+            </div>
+        </section>
+        <hr/>
+
+        <section>
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>NAME</b></label>
+                    <input type="text" id="name" class="form-control" name="name" value="<%= name %>" required>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>EMAIL</b></label>
+                    <input type="email" id="email" class="form-control" name="email" value="<%= email %>" required>
+                </div>
+            </div>
+            <br>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>SCHOOL</b></label>
+                    <select name="school" class="form-control" id="school" style="width: 100%" required>
+                        <option value="geoscience" id="schoolgeoscience">Geosciences</option>
+                        <option value="philosophy" id="schoolphilosophy">History and Philosophy</option>
+                        <option value="chemistry" id="schoolchemistry">Chemistry</option>
+                        <option value="biology" id="schoolbiology">Life and Environmental Sciences</option>
+                        <option value="mathematics" id="schoolmathematics">Mathematics and Statistics</option>
+                        <option value="physics" id="schoolphysics">Physics</option>
+                        <option value="psychology" id="schoolpsychology">Psychology</option>
+                        <option value="veterinary" id="schoolveterinary">Veterinary Science</option>
+                    </select>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>GENDER</b></label>
+                    <select name="gender" class="form-control" id="gender" style="width: 100%" required>
+                        <option value="F" id="genderF">Female</option>
+                        <option value="M" id="genderM">Male</option>
+                        <option value="N" id="genderN">Non-Binary</option>
+                        <option value="U" id="genderU">Unknown Gender</option>
+                    </select>
+                </div>
+            </div>
+            <br>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>CAREER STAGE</b></label>
+                    <select name="career" class="form-control" id="career" style="width: 100%" required>
+                        <option value=1 id="cds1">Post-Doctorate</option>
+                        <option value=2 id="cds2">Early Career Researcher</option>
+                        <option value=3 id="cds3">Mid-Career Researcher</option>
+                        <option value=4 id="cds4">Senior Researcher</option>
+                    </select>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>ACTIVITY</b></label>
+                    <input type="number" min=0 max="1" id="activity" step="0.1" class="form-control" value="<%= activity %>" name="activity" required>
+                </div>
+            </div>
+            <br>
+
+            <label><b>SELECT CLUSTERS</b></label>
+            <p>Click clusters in the unselected list to select them, and click clusters in the selected list to deselect them. You can search and sort the two lists separately.</p>
+            <div class="together clusterselector">
+                <!-- List of the unselected clusters -->
+                <div class="unselected">
+                    <div class="listboxinput">
+                        <div class="listboxtextdiv">
+                            <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                            <!-- This is where the user enters some text that is matched to the clusters in the unselectedClusters list -->
+                            <input class="listboxtext" type="text" id="searchUnselectedClusters1" name="searchUnselectedClusters1" placeholder="Enter a cluster">
+                        </div>
+                        <div class="listboxsubmitdiv">
+                            <!-- User can press this button to search from the list -->
+                            <button class="listboxsubmit" onclick="findUnselectedCluster(1)"><i class="fa fa-search"></i></button>
+                        </div>
+                        <div class="listboxsubmitdiv">
+                            <!-- Added a reset button so its easier for the user to reset the form (displaying all clusters in the list) -->
+                            <button class="listboxsubmit" onclick="resetUnselectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
+                        </div>
+                    </div>
+                    <!-- Contains all unselected clusters -->
+                    <div class="listboxdiv unselectedClusters" id="unselectedClusters1">
+                    </div>
+                    <div class="clustersort">
+                        <label for="sortUnselected1">Sort By:</label>
+
+                        <!-- Sort-by dropdown -->
+                        <select name="sortUnselected1" id="sortUnselected1" onchange="sortUnselected(1)">
+                            <option value="id">ID</option>
+                            <option value="name">Name</option>
+                            <option value="number"># of Researchers</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Adds space between the selected and unselected lists -->
+                <div class="spacer"></div>
+
+                <!-- Duplicate of the unselected list (for consistency and symmetrical balance) but with different names -->
+                <div class="selected">
+                    <div class="listboxinput">
+                        <div class="listboxtextdiv">
+                            <input class="listboxtext" type="text" id="searchSelectedClusters1" name="searchSelectedClusters1" placeholder="Enter a cluster">
+                        </div>
+                        <div class="listboxsubmitdiv">
+                            <button class="listboxsubmit" onclick="findSelectedCluster(1)"><i class="fa fa-search"></i></button>
+                        </div>
+                        <div class="listboxsubmitdiv">
+                            <button class="listboxsubmit" onclick="resetSelectedClusterSearch(1)"><i class="fa fa-refresh"></i></button>
+                        </div>
+                    </div>
+                    <div class="listboxdiv selectedClusters" id="selectedClusters1">
+                    </div>
+                    <div class="clustersort">
+                        <label for="sortSelected1">Sort By:</label>
+
+                        <select name="sortSelected1" id="sortSelected1" onchange="sortSelected(1)">
+                            <option value="id">ID</option>
+                            <option value="name">Name</option>
+                            <option value="number"># of Researchers</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <br>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>PROFILE</b></label><br>
+                    <textarea rows="4" style="width: 100%;" id="profile" class="form-control" name="profile" required><%= profile %></textarea>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>KEYWORDS</b></label><br>
+                    <div style="width: 100%;">
+                        <div class="listbox" style="overflow:auto; ">
+                            <div class="listboxdiv" style="height: 70px;">
+                                <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                                <!-- All keywords displayed here -->
+                                <ul class="listboxul" id="list1" style="height: 70px;" name="list1">
+                                </ul>
+                            </div>
+
+                            <!-- The two elements in the div are on the same line -->
+                            <div class="listboxinput">
+                                <!-- User enters keywords here -->
+                                <div class="listboxtextdiv">
+                                    <input class="listboxtext" type="text" id="keyword1" name="keyword1" placeholder="Enter a keyword">
+                                </div>
+
+                                <!-- User presses this button to add the keyword to the list -->
+                                <div class="listboxsubmitdiv">
+                                    <button class="listboxsubmit" onclick="addKeyword(1)"><i class="fa fa-arrow-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+
+            <div class="together" style="align-items: flex-start;">
+                <div style="width: 100%;">
+                    <label><b>PUBLICATIONS</b></label><br>
+                    <div style="width: 100%;">
+                        <div class="listbox" style="overflow:auto; ">
+                            <div class="listboxdiv" style="height: 70px;">
+                                <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                                <!-- All keywords displayed here -->
+                                <ul class="listboxul" id="list2" style="height: 70px;" name="list2">
+                                </ul>
+                            </div>
+
+                            <!-- The two elements in the div are on the same line -->
+                            <div class="listboxinput">
+                                <!-- User enters keywords here -->
+                                <div class="listboxtextdiv">
+                                    <input class="listboxtext" type="text" id="keyword2" name="keyword2" placeholder="Enter a publication name">
+                                </div>
+
+                                <!-- User presses this button to add the keyword to the list -->
+                                <div class="listboxsubmitdiv">
+                                    <button class="listboxsubmit" onclick="addKeyword(2)"><i class="fa fa-arrow-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>PUBLICATION KEYWORDS</b></label><br>
+                    <div style="width: 100%;">
+                        <div class="listbox" style="overflow:auto; ">
+                            <div class="listboxdiv" style="height: 70px;">
+                                <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                                <!-- All keywords displayed here -->
+                                <ul class="listboxul" id="list3" style="height: 70px;" name="list3">
+                                </ul>
+                            </div>
+
+                            <!-- The two elements in the div are on the same line -->
+                            <div class="listboxinput">
+                                <!-- User enters keywords here -->
+                                <div class="listboxtextdiv">
+                                    <input class="listboxtext" type="text" id="keyword3" name="keyword3" placeholder="Enter a publication keyword">
+                                </div>
+
+                                <!-- User presses this button to add the keyword to the list -->
+                                <div class="listboxsubmitdiv">
+                                    <button class="listboxsubmit" onclick="addKeyword(3)"><i class="fa fa-arrow-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+
+            <div class="together" style="align-items: flex-start;">
+                <div style="width: 100%;">
+                    <label><b>GRANTS</b></label><br>
+                    <div style="width: 100%;">
+                        <div class="listbox" style="overflow:auto; ">
+                            <div class="listboxdiv" style="height: 70px;">
+                                <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                                <!-- All keywords displayed here -->
+                                <ul class="listboxul" id="list4" style="height: 70px;" name="list4">
+                                </ul>
+                            </div>
+
+                            <!-- The two elements in the div are on the same line -->
+                            <div class="listboxinput">
+                                <!-- User enters keywords here -->
+                                <div class="listboxtextdiv">
+                                    <input class="listboxtext" type="text" id="keyword4" name="keyword4" placeholder="Enter a grant name">
+                                </div>
+
+                                <!-- User presses this button to add the keyword to the list -->
+                                <div class="listboxsubmitdiv">
+                                    <button class="listboxsubmit" onclick="addKeyword(4)"><i class="fa fa-arrow-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>GRANT KEYWORDS</b></label><br>
+                    <div style="width: 100%;">
+                        <div class="listbox" style="overflow:auto; ">
+                            <div class="listboxdiv" style="height: 70px;">
+                                <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                                <!-- All keywords displayed here -->
+                                <ul class="listboxul" id="list5" style="height: 70px;" name="list5">
+                                </ul>
+                            </div>
+
+                            <!-- The two elements in the div are on the same line -->
+                            <div class="listboxinput">
+                                <!-- User enters keywords here -->
+                                <div class="listboxtextdiv">
+                                    <input class="listboxtext" type="text" id="keyword5" name="keyword5" placeholder="Enter a grant keyword">
+                                </div>
+
+                                <!-- User presses this button to add the keyword to the list -->
+                                <div class="listboxsubmitdiv">
+                                    <button class="listboxsubmit" onclick="addKeyword(5)"><i class="fa fa-arrow-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+
+            <label><b>REASON</b>
+                <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Briefly explain why you edited this grant and what changes you made.">
+                    <!-- Makes the tooltip circular -->
+                    <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                </button>
+            </label>
+            <div class="together" style="align-items: flex-start;">
+                <div style="width: 100%;">
+                    <textarea id="reason" class="form-control" name="reason" required></textarea><br>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(3)">Confirm Changes</button>
+                </div>
+            </div>
+            <br><br>
+        </section>
+    </main>
+    
+    <!-- EJS partial (for code reuse and efficiency) -->
+    <%- footer %>
+
+    <!-- Bootstrap for JS -->
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <!-- This file allows for the user to interact with the elements on the site and for the site to give feedback to the user -->
+    <script src="/script.js"></script>
+    <!-- JQuery for the tooltip -->
+    <script>
+        $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+    </script>
+    <script>
+        function submit() {
+            researcherName = document.getElementById("name").value
+            email = document.getElementById("email").value
+            school = document.getElementById("school").value
+            gender = document.getElementById("gender").value
+            careerStage = document.getElementById("career").value
+            activity = document.getElementById("activity").value
+            profile = document.getElementById("profile").value
+            reason = document.getElementById("reason").value
+
+            // validation for name, url, deadline, duration, and description
+            if (researcherName.trim() == '' || email.trim() == '' || reason.trim() == '') {
+                openModal(4)
+            } else {
+                data = {
+                    "name": researcherName,
+                    "email": email,
+                    "school": school,
+                    "gender": gender,
+                    "careerStage": careerStage,
+                    "activity": activity,
+                    "clusters": getSelectedClusterNames(1),
+                    "profile": profile,
+                    "keywords": getKeywords(1),
+                    "publications": getKeywords(2),
+                    "publicationKeywords": getKeywords(3),
+                    "grants": getKeywords(4),
+                    "grantKeywords": getKeywords(5),
+                    "reason": reason
+                }
+
+                fetch('/editresearcher/<%= id %>', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                }).then(response => response.json()).then(data => {
+                    if (data.id == undefined) {
+                        document.getElementById('showAlert').textContent = data.alert
+                        document.getElementById('modal3').style.display = 'none'
+                        openModal(2)
+                    } else {
+                        window.location.href = `/researcher/${data.id}`
+                    }
+                });
+            }
+        }
+    </script>
+    <script>
+        function initialise() {
+            // add clusters to the cluster selector
+            try {
+                clusters = "<%= clusters %>"
+                clusters = clusters.split(", ")
+                for (x in clusters) {
+                    clusterId = clusters[x]
+                    buttonId = '1U' + clusterId
+                    selectCluster(buttonId)
+                }
+            } catch {
+                console.log("no clusters :(")
+            }
+
+            // add keywords, grants, grant keywords, ... to the keyword selectors
+            keywords = `<%= keywords %>`
+            keywords = keywords.split("\n")
+            for (x in keywords) {
+                keyword = keywords[x]
+                if (keyword.trim() != '') {
+                    addKeywordManual(1, keyword)
+                }
+            }
+
+            publications = `<%= publications %>`
+            publications = publications.split("\n")
+            for (x in publications) {
+                publication = publications[x]
+                if (publication.trim() != '') {
+                    addKeywordManual(2, publication)
+                }
+            }
+
+            publicationKeywords = `<%= publicationKeywords %>`
+            publicationKeywords = publicationKeywords.split("\n")
+            for (x in publicationKeywords) {
+                publicationKeyword = publicationKeywords[x]
+                if (publicationKeyword.trim() != '') {
+                    addKeywordManual(3, publicationKeyword)
+                }
+            }
+
+            grants = `<%= grants %>`
+            grants = grants.split("\n")
+            for (x in grants) {
+                grant = grants[x]
+                if (grant.trim() != '') {
+                    addKeywordManual(4, grant)
+                }
+            }
+
+            grantKeywords = `<%= grantKeywords %>`
+            grantKeywords = grantKeywords.split("\n")
+            for (x in grantKeywords) {
+                grantKeyword = grantKeywords[x]
+                if (grantKeyword.trim() != '') {
+                    addKeywordManual(5, grantKeyword)
+                }
+            }
+
+            // add default values for the dropdowns
+            if (document.getElementById('gender<%= gender %>') != null) {
+                document.getElementById('gender<%= gender %>').setAttribute("selected", "selected")
+            }
+
+            console.log(document.getElementById('school<%= school %>'), 'school<%= school %>')
+
+            if (document.getElementById('school<%= school %>') != null) {
+                document.getElementById('school<%= school %>').setAttribute("selected", "selected")
+            }
+
+            if (document.getElementById('cds<%= careerStage %>') != null) {
+                document.getElementById('cds<%= careerStage %>').setAttribute("selected", "selected")
+            }
+        }
+    </script>
+    <script>
+        // wait for a condition to be true
+        const waitFor = (conditionFn, callback, interval = 50) => {
+            const checker = setInterval(() => {
+            if (conditionFn()) {
+                clearInterval(checker);
+                callback();
+            }
+            }, interval);
+        };
+
+        // wait for clusters to be initialised
+        waitFor(
+            () => clustersInitialised === true,
+            () => {
+                initialise()
+            }
+        );
+    </script>
+</body>
+</html>

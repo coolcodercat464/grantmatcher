@@ -929,12 +929,12 @@ const researcherpageget = async (req, res)=>{
         researcher = result.rows
     } catch (err) {
         console.error(err);
-        res.status(500).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", cluster: "unknown", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], versionInformation: []});
+        res.status(500).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", clusters: "", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], versionInformation: []});
         return
     }
 
     if (researcher.length == 0) {
-        res.status(404).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", cluster: "unknown", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], versionInformation: []});
+        res.status(404).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", clusters: "", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], versionInformation: []});
         return
     } else {
         researcher = researcher[0]
@@ -1038,6 +1038,88 @@ const researcherpageget = async (req, res)=>{
   }
 };
 
+// present the edit researcher page
+const editresearcherget = async (req, res)=>{
+    console.log("EDIT RESEARCHER GET")
+    id = req.params.id
+    console.log(id)
+
+    // only allow them to signup if they havent been authenticated yet
+    if (req.isAuthenticated()) {
+        // get the researcher data
+        try {
+            // get the researchers data
+            const mq = 'SELECT * FROM researchers WHERE "email" = $1'
+            const result = await queryWithRetry(mq, [id + '@sydney.edu.au']);
+            researcher = result.rows
+        } catch (err) {
+            console.error(err);
+            res.status(500).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", cluster: "unknown", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], versionInformation: []});
+            return
+        }
+
+        if (researcher.length == 0) {
+            res.status(404).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", cluster: "unknown", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], versionInformation: []});
+            return
+        } else {
+            researcher = researcher[0]
+        }
+        
+        // get the relevant fields
+        researcherName = researcher.name
+        email = researcher.email
+        school = researcher.school
+        gender = researcher.gender
+        careerStage = researcher.careerStage
+        activity = researcher.activity
+        
+        // prevents errors (check if the field is null before joining)
+        // TODO: do this validation for edit grant page as well (clean-up)
+        if (researcher.publications == null || researcher.publications == undefined || researcher.publications.length == 0) {
+            publications = ""
+        } else {
+            publications = researcher.publications.join("\n")
+        }
+
+        if (researcher.publicationKeywords == null || researcher.publicationKeywords == undefined || researcher.publicationKeywords.length == 0) {
+            publicationKeywords = ""
+        } else {
+            publicationKeywords = researcher.publicationKeywords.join("\n")
+        }
+
+        if (researcher.grants == null || researcher.grants == undefined || researcher.grants.length == 0) {
+            grants = ""
+        } else {
+            grants = researcher.grants.join("\n")
+        }
+
+        if (researcher.grantKeywords == null || researcher.grantKeywords == undefined || researcher.grantKeywords.length == 0) {
+            grantKeywords = ""
+        } else {
+            grantKeywords = researcher.grantKeywords.join("\n")
+        }
+
+        if (researcher.keywords == null || researcher.keywords == undefined || researcher.keywords.length == 0) {
+            keywords = ""
+        } else {
+            keywords = researcher.keywords.join("\n")
+        }
+        
+        if (researcher.clusters == null || researcher.clusters == undefined || researcher.clusters.length == 0) {
+            clusters = ""
+        } else {
+            clusters = researcher.clusters.join(", ")
+        }
+
+        profile = researcher.profile
+        versionInformation = researcher.versionInformation
+
+        res.render('editResearcher.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'no', email: email, name: researcherName, gender: gender, school: school, cluster: clusters, activity: activity, careerStage: careerStage, profile: profile, keywords: keywords, grants: grants, grantKeywords: grantKeywords, publications: publications, publicationKeywords: publicationKeywords, versionInformation: versionInformation});
+    } else {
+        urlinit = '/editresearcher/' + id // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
+    }
+}
 
 // POST
 // when user logs out
@@ -1834,9 +1916,6 @@ const confirmrecalculationpost = async (req, res)=>{
             previousVersion = [JSON.stringify(prevResearcher.name), JSON.stringify(prevResearcher.email), JSON.stringify(prevResearcher.school), JSON.stringify(prevResearcher.gender), JSON.stringify(prevResearcher.careerStage), JSON.stringify(prevResearcher.activity), JSON.stringify(prevResearcher.clusters), JSON.stringify(prevResearcher.keywords.join("\n"), prevResearcher.publications.join("\n"), prevResearcher.publicationKeywords.join("\n"), prevResearcher.grants), JSON.stringify(prevResearcher.grantKeywords), JSON.stringify(prevResearcher.profile), "This researcher's data has been recalculated."]
             // add the date to the previous version
             previousVersion.push(date)
-            // add the users name to the previous version
-            previousVersion.push(req.session.useremail)
-            previousVersion.push(req.session.username)
             // get the versioninformation list of the researcher
             versionInformation = prevResearcher.versionInformation
             // ensure that versionInformation is a list
@@ -1845,6 +1924,8 @@ const confirmrecalculationpost = async (req, res)=>{
             }
             // add it to the version information list
             versionInformation.push(previousVersion)
+
+            await queryWithRetry('UPDATE researchers SET "versionInformation" = $1 WHERE email = $2;', [versionInformation, researcherEmail]);
 
             // update each piece of information to the database
             Object.entries(newResearcher).forEach(async ([column,newValue]) => {
@@ -1895,7 +1976,7 @@ const confirmrecalculationpost = async (req, res)=>{
                     }
 
                     // update that value
-                    await queryWithRetry('UPDATE researchers SET ' + column + ' = $1 WHERE email = $2;', [newValue, researcherEmail]);
+                    await queryWithRetry('UPDATE researchers SET "' + column + '" = $1 WHERE email = $2;', [newValue, researcherEmail]);
                 }
             })
         } else {
@@ -2261,6 +2342,160 @@ const deleteresearcherpost = async (req, res)=>{
     }
 } 
 
+// edit a researcher
+const editresearcherpost = async (req, res)=>{
+    console.log("EDIT RESEARCHER POST")
+
+    // ensure that user is authenticated
+    if (req.isAuthenticated() == false) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    // get the id (from the route name itself)
+    id = req.params.id
+    console.log(id);
+
+    try {
+        // get the user inputs
+        x = req.body
+
+        // isolate each field
+        researcherName = x.name
+        email = x.email
+        school = x.school
+        gender = x.gender
+        careerStage = x.careerStage
+        activity = x.activity
+        clusters = x.clusters
+        profile = x.profile
+        keywords = x.keywords
+        publications = x.publications
+        publicationKeywords = x.publicationKeywords
+        grants = x.grants
+        grantKeywords = x.grantKeywords
+        reason = x.reason
+
+        // parse the activity
+        activity = parseFloat(activity)
+
+        if (activity < 0 || activity > 1) {
+            res.send({alert: 'The activity value is invalid. Please try again.'});
+            return
+        }
+        
+        // the clusters list will contain two lists - one is a list of names and the
+        // other is a list of element IDs (from the DOM)
+        clustersElementId = clusters[1]
+        clustersId = []
+
+        // isolate the cluster IDs from the element ID list
+        for (i in clustersElementId) {
+            clusterID = clustersElementId[i].split('S')[1]
+            if (isStringInteger(clusterID) == false || parseInt(clusterID) < 0) {
+                res.send({alert: 'Your clusters are invalid. Please refresh the page and try again.'});
+                return
+            }
+            clustersId.push(parseInt(clusterID))
+        }
+
+        // ensure the dropdown inputs are valid
+        if (!['F', 'M', 'U', 'N'].includes(gender)) {
+            res.send({alert: 'The gender field is invalid. Please try again.'});
+            return
+        }
+
+        if (!['1', '2', '3', '4'].includes(careerStage)) {
+            res.send({alert: 'The career stage field is invalid. Please try again.'});
+            return
+        }
+
+        if (!['geoscience', 'philosophy', 'chemistry', 'biology', 'mathematics', 'physics', 'psychology', 'veterinary'].includes(school)) {
+            res.send({alert: 'The gender field is invalid. Please try again.'});
+            return
+        }
+
+        // ensure the email is the correct domain
+        if (email.split("@")[1] != 'sydney.edu.au') {
+            res.send({alert: 'Please ensure the email domain is a USYD one (i.e., @sydney.edu.au).'});
+            return
+        }
+    } catch (err) {
+        console.error(err);
+
+        // if an error occurs, tell the user
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+        return
+    }
+
+    try {
+        // get the researcher information (to make versionInformation)
+        const mq1 = 'SELECT * FROM researchers WHERE "email" = $1'
+        const result1 = await queryWithRetry(mq1, [id + '@sydney.edu.au']);
+
+        // ensure that the grant exists
+        if (result1.rows.length == 0) {
+            res.send({alert: 'Something went wrong and we couldn\'t find the researcher you were trying to edit. Please check that it exists. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+            return
+        }
+        researcher = result1.rows[0]
+
+        // get the previous version
+        // TODO: turn the other previousVersions into JSON.stringify() instead of toString()
+        previousVersion = [JSON.stringify(researcher.name), JSON.stringify(researcher.email), JSON.stringify(researcher.school), JSON.stringify(researcher.gender), JSON.stringify(researcher.publications), JSON.stringify(researcher.publicationKeywords), JSON.stringify(researcher.grants), JSON.stringify(researcher.grantKeywords), JSON.stringify(researcher.keywords), JSON.stringify(researcher.clusters), JSON.stringify(researcher.profile), JSON.stringify(researcher.activity), JSON.stringify(researcher.careerStage), JSON.stringify(reason)]
+
+        // get the current date (when this version stopped being the most recent version)
+        now = new Date();
+
+        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+        year = now.getFullYear()
+        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+        // stringify it
+        date = `${day}-${month}-${year}`
+
+        // add it to the list
+        previousVersion.push(date)
+
+        // add it to the version information list
+        versionInformation = researcher.versionInformation
+        versionInformation.push(previousVersion)
+
+        // add the researcher to researchers table
+        const mq2 = 'UPDATE researchers SET name = $1, email = $2, school = $3, gender = $4, publications = $5, "publicationKeywords" = $6, grants = $7, "grantKeywords" = $8, keywords = $9, clusters = $10, activity = $11, "careerStage" = $12, "versionInformation" = $13 WHERE email = $14'
+        const result2 = await queryWithRetry(mq2, [researcherName, email, school, gender, publications, publicationKeywords, grants, grantKeywords, keywords, clustersId, activity, careerStage, versionInformation, id + '@sydney.edu.au']);
+        
+        // get all changes
+        const mq3 = 'SELECT "changeID" FROM changelog'
+        const result3 = await queryWithRetry(mq3);
+
+        // calculate the maximum changeID
+        maxChangeID = 0
+        for (x in result3.rows) {
+            rowID = result3.rows[x].changeID
+            if (rowID > maxChangeID) {
+                maxChangeID = rowID
+            }
+        }
+
+        // calculate the next change ID
+        nextChangeID = maxChangeID + 1
+
+        // add 'researcher edited' change to changelog
+        const mq4 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
+        const result4 = await queryWithRetry(mq4, [nextChangeID, req.session.useremail, 'Researcher Edited', date, `The researcher "${researcherName}" has been edited for reason "${reason}". Check it out now!`, '{}']);
+
+        // redirect to the grant page
+        res.send({"id": id})
+    } catch (err) {
+        console.error(err);
+
+        // if an error occurs, tell the user
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+    }
+}
+
 // Export of all methods as object 
 module.exports = { 
     dbgrants,
@@ -2285,6 +2520,7 @@ module.exports = {
     recalculateget,
     managecodesget,
     researcherpageget,
+    editresearcherget,
 
     indexpost,
     loginpost,
@@ -2298,4 +2534,5 @@ module.exports = {
     addcodepost,
     removecodepost,
     deleteresearcherpost,
+    editresearcherpost,
 }

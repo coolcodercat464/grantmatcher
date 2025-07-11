@@ -45,6 +45,9 @@ router.get('/researcher/:id', control.researcherpageget)
 router.get('/editgrant/:id', control.editgrantget)
 router.post('/editgrant/:id', control.editgrantpost)
 
+router.get('/editresearcher/:id', control.editresearcherget)
+router.post('/editresearcher/:id', control.editresearcherpost)
+
 router.post('/deletegrant/:id', control.deletegrantpost)
 router.post('/deleteresearcher/:id', control.deleteresearcherpost)
 
