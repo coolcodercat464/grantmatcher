@@ -590,6 +590,7 @@
                 </div>
             </div><br>
             <p><b>Selected Researchers:</b> <span id="selectedResearchers">Click the checkbox on the researcher's row to select the researcher. You might have to use the horizontal scroll-bar to find it.</span></p>
+            <button onclick="selectAll()" class="buttonStyle blue">Select All Researchers</button><br>
         </section>
         <hr/>
 
@@ -745,7 +746,8 @@
 
             <p><b>Selected Researchers:</b> <span id="confirmedResearchers">Click the checkbox on the researcher's row to select the researcher. You might have to use the horizontal scroll-bar to find it.</span></p><br>
             
-            <button onclick='openModal(7)' class="buttonStyle">Confirm Changes</button>
+            <button onclick="confirmAll()" class="buttonStyle blue">Confirm All Researchers</button>
+            <button onclick='openModal(7)' class="buttonStyle pink">Confirm Changes</button><br><br>
             </div>
         </section>
     </main>
@@ -969,6 +971,54 @@
                     break; // exit the loop
                 }
             }
+        }
+        
+        // confirm all researchers (saves time, improves efficiency)
+        function confirmAll() {
+            // update the dataset for each researcher
+            for (x in tableData[8].dataSet) {
+                tableData[8].dataSet[x].selected = true
+
+                // get the researcher's information
+                researcher = tableData[8].dataSet[x]
+                email = researcher.email
+                name = researcher.name
+                uniqueId = email.split("@")[0]
+
+                if (!confirmedIds.includes(email)) {
+                    confirmedIds.push(uniqueId)
+                    confirmedEmails.push(email)
+                    confirmedNames.push(name)
+                }
+            }
+
+            // refresh the presentation layer
+            refreshConfirmedResearchers()
+            renderTable(8, dbclick=null, idField='uniqueId')
+        }
+
+        // select all researchers (saves time, improves efficiency)
+        function selectAll() {
+            // update the dataset for each researcher
+            for (x in tableData[7].dataSet) {
+                tableData[7].dataSet[x].selected = true
+
+                // get the researcher's information
+                researcher = tableData[7].dataSet[x]
+                email = researcher.email
+                name = researcher.name
+                uniqueId = email.split("@")[0]
+
+                if (!selectedIds.includes(email)) {
+                    selectedIds.push(uniqueId)
+                    selectedEmails.push(email)
+                    selectedNames.push(name)
+                }
+            }
+
+            // refresh the presentation layer
+            refreshSelectedResearchers()
+            renderTable(7, dbclick=null, idField='uniqueId')
         }
     </script>
     <script>
@@ -1265,6 +1315,7 @@
                 }).then(response => response.json()).then(async data => {
                     if (data.success == 'success') {
                         success = true // will store whether the researcher DB operations were successful
+                        researcherNames = [] // store all the researcher names (to be added to the changelog description field)
 
                         // update the database for each researcher (otherwise the body might be too long if all researchers are sent in one go)
                         for (i in result) {
@@ -1280,15 +1331,31 @@
                                     openModal(4)
                                     success = false; // the researcher DB operations were not successful
                                     return;
+                                } else {
+                                    researcherNames.push(data.success) // add their name to the list of names
                                 }
                             })
                         }
-                        
-                        document.getElementById("loadingSpinner").style.display = 'none'
 
-                        // if database updated successfully, redirect them to the homepage
                         if (success) {
-                            window.location.href = `/`
+                            // update the changelog
+                            fetch('/concluderecalculation', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({researchers: researcherNames})
+                            }).then(response => response.json()).then(async data => {
+                                if (data.success == 'success') {
+                                    // if database updated successfully, redirect them to the homepage
+                                    document.getElementById("loadingSpinner").style.display = 'none'
+                                    window.location.href = `/`
+                                } else {
+                                    // open the error modal
+                                    document.getElementById("loadingSpinner").style.display = 'none'
+                                    document.getElementById('showAlert').textContent = data.alert
+                                    openModal(4)
+                                    return;
+                                }
+                            })
                         }
                     } else {
                         // open error modal
@@ -1300,6 +1367,7 @@
             } else {
                 success = true; // will store whether the researcher DB operations were successful
                 document.getElementById("loadingSpinner").style.display = 'block'
+                researcherNames = [] // store all the researcher names (to be added to the changelog description field)
 
                 // update the database for each researcher (otherwise the body might be too long if all researchers are sent in one go)
                 for (i in result) {
@@ -1315,6 +1383,8 @@
                             openModal(4)
                             success = false; // the researcher DB operations were not successful
                             return;
+                        } else {
+                            researcherNames.push(data.success) // add their name to the list of names
                         }
                     })
                 }
@@ -1323,7 +1393,23 @@
 
                 // if database updated successfully, redirect them to the homepage
                 if (success) {
-                    window.location.href = `/`
+                    fetch('/concluderecalculation', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({researchers: researcherNames})
+                    }).then(response => response.json()).then(async data => {
+                        if (data.success == 'success') {
+                            // if database updated successfully, redirect them to the homepage
+                            document.getElementById("loadingSpinner").style.display = 'none'
+                            window.location.href = `/`
+                        } else {
+                            // open the error modal
+                            document.getElementById("loadingSpinner").style.display = 'none'
+                            document.getElementById('showAlert').textContent = data.alert
+                            openModal(4)
+                            return;
+                        }
+                    })
                 }
             }
         }

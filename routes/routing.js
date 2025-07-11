@@ -54,8 +54,9 @@ router.post('/deleteresearcher/:id', control.deleteresearcherpost)
 
 router.post('/confirmmatch/:id', control.confirmmatchpost)
 
-router.post('/confirmrecalculation', control.confirmrecalculationpost)
 router.post('/addclusters', control.addclusterspost)
+router.post('/confirmrecalculation', control.confirmrecalculationpost)
+router.post('/concluderecalculation', control.concluderecalculationpost)
 
 router.get('/match/:id', control.matchget)
 

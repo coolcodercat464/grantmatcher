@@ -101,7 +101,7 @@ def google_scholar(urlId):
 
         # if still nothing, theres no hope to be found :(
         if len(search_query) == 0:
-            return ''
+            return []
 
         # but if theres more than one person, use fuzzywuzzy
         # to get the information on the person whose first
@@ -120,7 +120,7 @@ def google_scholar(urlId):
         author = scholarly.fill(search_query[0])
 
     # return their interests information
-    return ' '.join(author['interests']).replace('-', ' ')
+    return author['interests']
 
 def researcher_clusters(term, model, category_embeddings, categories, clusterRangeSetting, strictness):
     '''Find which cluster a researcher belongs to'''
@@ -343,7 +343,7 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
             # Get their keywords
             if 'keywords' in affectedFields:
                 Mediakeywords = researcher['mediaKeyword'].replace('-', ' ')
-                researchers[urlId]['keywords'] = Mediakeywords
+                researchers[urlId]['keywords'] = Mediakeywords.split("; ")
                 texts.append(Mediakeywords)
 
                 # If no media keywords are available, get keywords from
@@ -354,7 +354,7 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
             elif 'clusters' in affectedFields:
                 # Add the keywords to the dictionary
                 keywords = researcher['mediaKeyword'].replace('-', ' ')
-                researchers[urlId]['keywords'] = keywords
+                researchers[urlId]['keywords'] = keywords.split("; ")
                 texts.append(keywords)
 
             # APPLY POOLS
@@ -391,9 +391,8 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
 
         # Add keywords to data
         if 'keywords' in affectedFields or 'clusters' in affectedFields:
-            keywords = '; '.join(keywords)
-            researchers[urlId]['keywords'] += '; ' + keywords
-            texts.append(researchers[urlId]['keywords'])
+            researchers[urlId]['keywords'] += keywords
+            texts.append('; '.join(keywords))
 
         # Add profile to data
         researchers[urlId]['profile'] = profile
@@ -412,11 +411,11 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
         # Get output
         keywords = job.get()
 
-        # Add to keywords
-        keywords = keywords + ' ' + '; '.join(researchers[urlId]['keywords'])
-
         # Add keywords to data
-        texts.append(keywords)
+        texts.append('; '.join(keywords))
+
+        # Add to keywords
+        keywords += researchers[urlId]['keywords']
         researchers[urlId]['keywords'] = keywords
 
     # Close pool to free up resources
@@ -487,7 +486,7 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
 
         # Match researchers to clusters
         for urlId in researchers:
-            researchers[urlId]['clusters'] = researcher_clusters(researchers[urlId]['keywords'], model, category_embeddings, categories, clusterRangeSetting, strictness)
+            researchers[urlId]['clusters'] = researcher_clusters('; '.join(researchers[urlId]['keywords']), model, category_embeddings, categories, clusterRangeSetting, strictness)
 
         # Check time
         toc = time.perf_counter()
@@ -496,7 +495,7 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
         return researchers, clusters_dictionary
     
     return researchers, None
-
+'''
 # get the information from nodejs
 affectedFields = json.loads(sys.argv[1])
 affectedResearchers = json.loads(sys.argv[2])
@@ -517,12 +516,12 @@ if len(affectedResearchers) == 0:
 '''
 # Default values for testing purposes
 affectedResearchers = 'all'
-affectedFields = ['gender', 'cds', 'school', 'pubs', 'grants', 'profile']
+affectedFields = ['keywords', 'clusters']
 clusterRangeSetting = 0.15
 strictness = 0.25
 maxNumber = 50
-googlescholar = False
-'''
+googlescholar = True
+
 
 url = "https://www.sydney.edu.au/AcademicProfiles/interfaces/rest/performSimpleAttributeSearch/+jobType:1%20+orgUnitCode:5000053020L0000%20+isMediaExpert:true/0/270/byRelevance/false"
 researchers, clusters = main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, maxNumber, googlescholar, url)

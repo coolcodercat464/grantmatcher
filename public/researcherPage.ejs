@@ -123,10 +123,10 @@
                     </div>
                 </div>
                 <div>
-                    <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Edit the Grant">
+                    <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Edit the Researcher">
                         <i onclick="window.location.href = '/editresearcher/<%= id %>'" class="fa fa-pencil-square-o"></i>
                     </button>
-                    <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Delete this Grant">
+                    <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Delete this Researcher">
                         <i id="modalBtn2" class="fa fa-trash" onclick="openModal(3)"></i>
                     </button>
                 </div>
@@ -337,8 +337,7 @@
                     accordion = document.getElementById("accordion")
                     
                     reasonCurrent = "First version" // the reason for the current version
-                    dateCurrent = "Unknown" // the date of the current version
-                    // TODO: add dateAdded column to researchers table
+                    dateCurrent = "<%= dateAdded %>" // the date of the current version
 
                     // loop through each version
                     for (i in versionInformation) {
@@ -350,11 +349,39 @@
                         email = JSON.parse(version[1])
                         school = JSON.parse(version[2])
                         gender = JSON.parse(version[3])
-                        publications = JSON.parse(version[4]).join('\n')
-                        publicationKeywords = JSON.parse(version[5]).join('\n')
-                        grants = JSON.parse(version[6]).join('\n')
-                        grantKeywords = JSON.parse(version[7]).join('\n')
-                        keywords = JSON.parse(version[8]).join('\n')
+
+                        // ensure that they arent null
+                        console.log(JSON.parse(version[4]) != null)
+                        if (JSON.parse(version[4]) != null) {
+                            publications = JSON.parse(version[4]).join('\n')
+                        } else {
+                            publications = ''
+                        }
+
+                        if (JSON.parse(version[5]) != null) {
+                            publicationKeywords = JSON.parse(version[5]).join('\n')
+                        } else {
+                            publicationKeywords = ''
+                        }
+
+                        if (JSON.parse(version[6]) != null) {
+                            grants = JSON.parse(version[6]).join('\n')
+                        } else {
+                            grants = ''
+                        }
+
+                        if (JSON.parse(version[7]) != null) {
+                            grantKeywords = JSON.parse(version[7]).join('\n')
+                        } else {
+                            grantKeywords = ''
+                        }
+
+                        if (JSON.parse(version[8]) != null) {
+                            keywords = JSON.parse(version[8]).join('\n')
+                        } else {
+                            keywords = ''
+                        }
+
                         clusters = JSON.parse(version[9])
                         profile = JSON.parse(version[10])
                         activity = JSON.parse(version[11])
@@ -398,7 +425,7 @@
                         clusters = clusterNames.join(", ")
 
                         // the reason and date for the next version
-                        reasonNext = JSON.parse(version[13])
+                        reasonNext = version[13]
                         dateNext = version[14]
 
                         // create the HTML to display the accordion item on the main page
@@ -495,7 +522,7 @@
                     document.getElementById("versionSpan").textContent = `Version ${parseInt(i)+2} (${dateCurrent})`
                     document.getElementById("reasonSpan").textContent = reasonCurrent
                 } else {
-                    document.getElementById("versionSpan").textContent = `Version 1 ()`
+                    document.getElementById("versionSpan").textContent = `Version 1 (<%= dateAdded %>)`
                     document.getElementById("reasonP").style.display = "none"
                 }
             });
@@ -510,31 +537,54 @@
         );
     </script>
     <script>
-        // copy the researchers in the version with the given ID
-        function copyResearchers(id) {
-            researchers = document.getElementById("researchersArea-" + id)
-            researchers.removeAttribute("disabled");
-            researchers.select();
+        // copy the items in the version with the given ID
+
+        function copyProfile(id) {
+            textarea = document.getElementById("profileArea-" + id)
+            textarea.removeAttribute("disabled");
+            textarea.select();
             document.execCommand('copy');
-            researchers.setAttribute("disabled", "");
+            textarea.setAttribute("disabled", "");
         }
 
-        // copy the keywords in the version with the given ID
         function copyKeywords(id) {
-            keywords = document.getElementById("keywordsArea-" + id)
-            keywords.removeAttribute("disabled");
-            keywords.select();
+            textarea = document.getElementById("keywordsArea-" + id)
+            textarea.removeAttribute("disabled");
+            textarea.select();
             document.execCommand('copy');
-            keywords.setAttribute("disabled", "");
+            textarea.setAttribute("disabled", "");
         }
 
-        // copy the description in the version with the given ID
-        function copyDescription(id) {
-            description = document.getElementById("descriptionArea-" + id)
-            description.removeAttribute("disabled");
-            description.select();
+        function copyGrants(id) {
+            textarea = document.getElementById("grantsArea-" + id)
+            textarea.removeAttribute("disabled");
+            textarea.select();
             document.execCommand('copy');
-            description.setAttribute("disabled", "");
+            textarea.setAttribute("disabled", "");
+        }
+        
+        function copyGrantKeywords(id) {
+            textarea = document.getElementById("grantKeywordsArea-" + id)
+            textarea.removeAttribute("disabled");
+            textarea.select();
+            document.execCommand('copy');
+            textarea.setAttribute("disabled", "");
+        }
+
+        function copyPublications(id) {
+            textarea = document.getElementById("publicationsArea-" + id)
+            textarea.removeAttribute("disabled");
+            textarea.select();
+            document.execCommand('copy');
+            textarea.setAttribute("disabled", "");
+        }
+
+        function copyPublicationKeywords(id) {
+            textarea = document.getElementById("publicationKeywordsArea-" + id)
+            textarea.removeAttribute("disabled");
+            textarea.select();
+            document.execCommand('copy');
+            textarea.setAttribute("disabled", "");
         }
     </script>
 </body>

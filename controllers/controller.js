@@ -943,12 +943,12 @@ const researcherpageget = async (req, res)=>{
         researcher = result.rows
     } catch (err) {
         console.error(err);
-        res.status(500).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", clusters: "", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: []});
+        res.status(500).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "", name: "", gender: "", school: "", clusters: "", activity: "", careerStage: "", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], dateAdded: ''});
         return
     }
 
     if (researcher.length == 0) {
-        res.status(404).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", clusters: "", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: []});
+        res.status(404).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "", name: "", gender: "", school: "", clusters: "", activity: "", careerStage: "", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], dateAdded: ''});
         return
     } else {
         researcher = researcher[0]
@@ -961,6 +961,7 @@ const researcherpageget = async (req, res)=>{
     gender = researcher.gender
     careerStage = researcher.careerStage
     activity = researcher.activity
+    dateAdded = researcher.dateAdded
 
     // prevents errors (check if the field is null before joining)
     // TODO: do this validation for grant page as well (clean-up)
@@ -1045,7 +1046,7 @@ const researcherpageget = async (req, res)=>{
         if (gender == 'U') { gender = 'Unknown' }
     }
 
-    res.render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'no', email: email, name: researcherName, gender: gender, school: school, cluster: clusters, activity: activity, careerStage: careerStage, profile: profile, keywords: keywords, grants: grants, grantKeywords: grantKeywords, publications: publications, publicationKeywords: publicationKeywords});
+    res.render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'no', email: email, name: researcherName, gender: gender, school: school, cluster: clusters, activity: activity, careerStage: careerStage, profile: profile, keywords: keywords, grants: grants, grantKeywords: grantKeywords, publications: publications, publicationKeywords: publicationKeywords, dateAdded: dateAdded});
   } else {
     urlinit = '/researcher/' + id // redirect them to the current url after they logged in
     res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
@@ -1815,7 +1816,7 @@ const addclusterspost = async (req, res)=>{
     }
 } 
 
-// after the researchers have been recalculated, update the database
+// after the researchers have been recalculated, update the database (researcher table)
 const confirmrecalculationpost = async (req, res)=>{
     console.log("CONFIRM RECALCULATION POST")
 
@@ -1927,7 +1928,8 @@ const confirmrecalculationpost = async (req, res)=>{
             prevResearcher = allResearchers[researcherEmail]
             // get the previous version
             // JSON.stringify is better than .toString() because it doesnt crash from a null value and can also store lists
-            previousVersion = [JSON.stringify(prevResearcher.name), JSON.stringify(prevResearcher.email), JSON.stringify(prevResearcher.school), JSON.stringify(prevResearcher.gender), JSON.stringify(prevResearcher.careerStage), JSON.stringify(prevResearcher.activity), JSON.stringify(prevResearcher.clusters), JSON.stringify(prevResearcher.keywords.join("\n"), prevResearcher.publications.join("\n"), prevResearcher.publicationKeywords.join("\n"), prevResearcher.grants), JSON.stringify(prevResearcher.grantKeywords), JSON.stringify(prevResearcher.profile), "This researcher's data has been recalculated."]
+            previousVersion = [JSON.stringify(researcher.name), JSON.stringify(researcher.email), JSON.stringify(researcher.school), JSON.stringify(researcher.gender), JSON.stringify(researcher.publications), JSON.stringify(researcher.publicationKeywords), JSON.stringify(researcher.grants), JSON.stringify(researcher.grantKeywords), JSON.stringify(researcher.keywords), JSON.stringify(researcher.clusters), JSON.stringify(researcher.profile), JSON.stringify(researcher.activity), JSON.stringify(researcher.careerStage), "This researcher's data has been recalculated."]
+
             // add the date to the previous version
             previousVersion.push(date)
             // get the versioninformation list of the researcher
@@ -1983,19 +1985,13 @@ const confirmrecalculationpost = async (req, res)=>{
                             newValue = 'U'
                         }
                     }
-
-                    // turn the string keywords into a list
-                    if (column == 'keywords') {
-                        newValue = newValue.split('; ')
-                    }
-
                     // update that value
                     await queryWithRetry('UPDATE researchers SET "' + column + '" = $1 WHERE email = $2;', [newValue, researcherEmail]);
                 }
             })
         } else {
             // add the researcher
-            await queryWithRetry('INSERT INTO researchers (email, name, school, gender, publications, "publicationKeywords", grants, "grantKeywords", keywords, clusters, profile, activity, "careerStage", "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)', [researcherEmail, researcherName, '', 'U', [], [], [], [], [], [], '', 1, 0, []]);
+            await queryWithRetry('INSERT INTO researchers (email, name, school, gender, publications, "publicationKeywords", grants, "grantKeywords", keywords, clusters, profile, activity, "careerStage", "versionInformation", "dateAdded") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)', [researcherEmail, researcherName, '', 'U', [], [], [], [], [], [], '', 1, 0, [], date]);
 
             // update each piece of information to the database
             Object.entries(newResearcher).forEach(async ([column,newValue]) => {
@@ -2039,16 +2035,52 @@ const confirmrecalculationpost = async (req, res)=>{
                         }
                     }
 
-                    // turn the string keywords into a list
-                    if (column == 'keywords') {
-                        newValue = newValue.split('; ')
-                    }
-
                     // update that value
                     await queryWithRetry('UPDATE researchers SET "' + column + '" = $1 WHERE email = $2;', [newValue, researcherEmail]);
                 }
             })
         }
+
+        res.send({success: researcherName})
+    } catch (err) {
+        console.log(err)
+
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+    }
+}
+
+// after the researchers have been recalculated, update the database (changelog)
+const concluderecalculationpost = async (req, res)=>{
+    console.log("CONFIRM RECALCULATION POST")
+
+    // ensure that user is authenticated
+    if (req.isAuthenticated() == false) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    x = req.body
+
+    // ensure that researchers names are provided
+    if (!x.researchers || x.researchers == []) {
+        res.send({alert: 'It looks like no researchers were selected. Please try again.'});
+        return
+    }
+
+    try {
+        // get researcher names
+        researcherNames = x.researchers.join(", ")
+
+        // get the current date
+        now = new Date();
+
+        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+        year = now.getFullYear()
+        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+        // stringify it
+        date = `${day}-${month}-${year}`
 
         // get the current xp
         const mq2 = 'SELECT xp FROM users WHERE email = $1'
@@ -2059,10 +2091,9 @@ const confirmrecalculationpost = async (req, res)=>{
             return
         }
 
-        // TODO: move this to another post
         // otherwise, add 5 to the xp
         currentXp = result2.rows[0].xp
-        const mq3 = 'UPDATE users SET xp = $1 WHERE email = $2'
+        const mq3 = 'UPDATE users SET xp = $1 WHERE email = $2' // TODO: get rid of mq (put the fries in the bag lil bro)
         const result3 = await queryWithRetry(mq3, [currentXp + 5, req.session.useremail]);
 
         // get all changes
@@ -2083,7 +2114,7 @@ const confirmrecalculationpost = async (req, res)=>{
 
         // add 'researcher recalculated' change to changelog
         const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Researcher Recalculated', date, `${researcherName}'s data has been recalculated.`, '{}']);
+        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Researcher Recalculated', date, `The following researchers had their data recalculated: ${researcherNames}`, '{}']);
         
         res.send({success: 'success'})
     } catch (err) {
@@ -2501,7 +2532,7 @@ const editresearcherpost = async (req, res)=>{
         const result4 = await queryWithRetry(mq4, [nextChangeID, req.session.useremail, 'Researcher Edited', date, `The researcher "${researcherName}" has been edited for reason "${reason}". Check it out now!`, '{}']);
 
         // redirect to the grant page
-        res.send({"id": id})
+        res.send({"id": email.split("@")[0]})
     } catch (err) {
         console.error(err);
 
@@ -2545,6 +2576,7 @@ module.exports = {
     deletegrantpost,
     confirmmatchpost,
     confirmrecalculationpost,
+    concluderecalculationpost,
     addclusterspost,
     addcodepost,
     removecodepost,
