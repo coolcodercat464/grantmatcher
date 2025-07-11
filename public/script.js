@@ -733,6 +733,7 @@ function sortTable(tableNumber, dbclick=null, idField=null) {
 }
 
 // SEARCHING
+// TODO: make all these search and reset things more consistent and tidy (clean-up)
 // filter through the researchers table
 function searchResearcher(tableNumber, dbclick=null, idField=null, searchId='') {
     // NOTE: searchId allows for multiple researcher search modals in one page (useful for recalculation page)
@@ -1591,7 +1592,7 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
         // the name should be a link
         uniqueId = row.email.split("@")[0]
         row.uniqueId = uniqueId
-        row.nameLink = `<a href='/researcher/${uniqueId.replace(".", "")}'>${row.name}</a>`
+        row.nameLink = `<a href='/researcher/${uniqueId}'>${row.name}</a>`
 
         // get the number of edits (for sorting)
         if (row.versionInformation == null) {
@@ -1703,15 +1704,19 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
 
         try {
             // if there are a bunch of cluster IDs (not names)
-            clusterIds = document.getElementById("clusterText").textContent.split(", ")
-            clusterNames = []
-            for (x in clustersData) {
-                if (clusterIds.includes(clustersData[x].id.toString())) {
-                    clusterNames.push(clustersData[x].name)
+            if (document.getElementById("clusterText").textContent != '') {
+                clusterIds = document.getElementById("clusterText").textContent.split(", ")
+                clusterNames = []
+                for (x in clustersData) {
+                    if (clusterIds.includes(clustersData[x].id.toString())) {
+                        clusterNames.push(clustersData[x].name)
+                    }
                 }
-            }
 
-            document.getElementById("clusterText").textContent = clusterNames.join(", ")
+                document.getElementById("clusterText").textContent = clusterNames.join(", ")
+            } else {
+                document.getElementById("clusterText").textContent = 'None'
+            }
         } catch {
 
         }

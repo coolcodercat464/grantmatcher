@@ -509,7 +509,7 @@ const nlpmatch = async (req, res) => {
                 break
             }
         }
-        
+
         // only add the researchers to the list if they match all criteria
         if (schoolCorrect && genderCorrect && careerCorrect && activityCorrect && clusterCorrect) {
           researcherPool.push({clustersNames: clustersNames, email: researcher.email, keywords: researcher.keywords})
@@ -703,6 +703,7 @@ const grantpageget = async (req, res)=>{
     } catch (err) {
         console.error(err);
         res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
+        return
     }
 
     if (grant.length == 0) {
@@ -909,6 +910,134 @@ const managecodesget = async (req, res)=>{
         res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
     }
 } 
+
+// present the researcher page
+const researcherpageget = async (req, res)=>{
+  console.log("RESEARCHER PAGE GET")
+
+  // get the id (from the route name itself)
+  id = req.params.id
+  console.log(id);
+  
+  // only allow them to access this page if they have been authenticated
+  if (req.isAuthenticated()) {
+    // get the researcher data
+    try {
+        // get the researchers data
+        const mq = 'SELECT * FROM researchers WHERE "email" = $1'
+        const result = await queryWithRetry(mq, [id + '@sydney.edu.au']);
+        researcher = result.rows
+    } catch (err) {
+        console.error(err);
+        res.status(500).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", cluster: "unknown", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], versionInformation: []});
+        return
+    }
+
+    if (researcher.length == 0) {
+        res.status(404).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", cluster: "unknown", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], versionInformation: []});
+        return
+    } else {
+        researcher = researcher[0]
+    }
+    
+    // get the relevant fields
+    researcherName = researcher.name
+    email = researcher.email
+    school = researcher.school
+    gender = researcher.gender
+    careerStage = researcher.careerStage
+    activity = researcher.activity
+
+    // prevents errors (check if the field is null before joining)
+    // TODO: do this validation for grant page as well (clean-up)
+    if (researcher.publications == null || researcher.publications == undefined || researcher.publications.length == 0) {
+        publications = "Unknown"
+    } else {
+        publications = researcher.publications.join("\n")
+    }
+
+    if (researcher.publicationKeywords == null || researcher.publicationKeywords == undefined || researcher.publicationKeywords.length == 0) {
+        publicationKeywords = "Unknown"
+    } else {
+        publicationKeywords = researcher.publicationKeywords.join("\n")
+    }
+
+    if (researcher.grants == null || researcher.grants == undefined || researcher.grants.length == 0) {
+        grants = "Unknown"
+    } else {
+        grants = researcher.grants.join("\n")
+    }
+
+    if (researcher.grantKeywords == null || researcher.grantKeywords == undefined || researcher.grantKeywords.length == 0) {
+        grantKeywords = "Unknown"
+    } else {
+        grantKeywords = researcher.grantKeywords.join("\n")
+    }
+
+    if (researcher.keywords == null || researcher.keywords == undefined || researcher.keywords.length == 0) {
+        keywords = "Unknown"
+    } else {
+        keywords = researcher.keywords.join("\n")
+    }
+    
+    if (researcher.clusters == null || researcher.clusters == undefined || researcher.clusters.length == 0) {
+        clusters = ""
+    } else {
+        clusters = researcher.clusters.join(", ")
+    }
+
+    profile = researcher.profile
+    versionInformation = researcher.versionInformation
+
+    // turn the careerstage integer from an integer to a string
+    if (careerStage == 1) {
+        careerStage = "Post-Doc"
+    } else if (careerStage == 2) {
+        careerStage = "Early-Career Researcher"
+    } else if (careerStage == 3) {
+        careerStage = "Mid-Career Researcher"
+    } else if (careerStage == 4) {
+        careerStage = "Senior Researcher"
+    } else {
+        careerStage = "Unknown"
+    }
+
+    // handle when the fields are null
+    if (activity == null || activity == undefined || activity == '') {
+        activity = "Unknown"
+    }
+
+    if (school == null || school == undefined || school == '') {
+        school = "Unknown"
+    } else {
+        // parse the school value
+        if (school == 'chemistry') { school = 'School of Chemistry' }
+        if (school == 'geoscience') { school = 'School of Geosciences' }
+        if (school == 'biology') { school = 'School of Life and Environmental Sciences' }
+        if (school == 'veterinary') { school = 'School of Veterinary Science' }
+        if (school == 'mathematics') { school = 'School of Mathematics and Statistics' }
+        if (school == 'physics') { school = 'School of Physics' }
+        if (school == 'philosphy') { school = 'School of History and Philosophy of Science' }
+        if (school == 'psychology') { school = 'School of Psychology' }
+    }
+
+    if (gender == null || gender == undefined || gender == '') {
+        gender = "Unknown"
+    } else {
+        // parse the gender value
+        if (gender == 'F') { gender = 'Female' }
+        if (gender == 'M') { gender = 'Male' }
+        if (gender == 'N') { gender = 'Non-Binary' }
+        if (gender == 'U') { gender = 'Unknown' }
+    }
+
+    res.render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'no', email: email, name: researcherName, gender: gender, school: school, cluster: clusters, activity: activity, careerStage: careerStage, profile: profile, keywords: keywords, grants: grants, grantKeywords: grantKeywords, publications: publications, publicationKeywords: publicationKeywords, versionInformation: versionInformation});
+  } else {
+    urlinit = '/researcher/' + id // redirect them to the current url after they logged in
+    res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
+  }
+};
+
 
 // POST
 // when user logs out
@@ -1835,6 +1964,7 @@ const confirmrecalculationpost = async (req, res)=>{
             return
         }
 
+        // TODO: move this to another post
         // otherwise, add 5 to the xp
         currentXp = result2.rows[0].xp
         const mq3 = 'UPDATE users SET xp = $1 WHERE email = $2'
@@ -2051,6 +2181,86 @@ const removecodepost = async (req, res)=>{
     }
 } 
 
+// delete a researcher
+const deleteresearcherpost = async (req, res)=>{
+    console.log("DELETE RESEARCHER POST")
+
+    // ensure that user is authenticated
+    if (req.isAuthenticated() == false) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    // get the id (from the route name itself)
+    id = req.params.id
+    console.log(id);
+
+    x = req.body
+
+    // ensure that reason is provided
+    if (!x.reason) {
+        res.send({alert: 'It looks like no reason for researcher deletion was provided. Please try again.'});
+        return
+    } else {
+        reason = x.reason
+    }
+
+    try {
+        // get the researcher's name
+        const mq1 =  'SELECT "name" FROM researchers WHERE "email" = $1'
+        const result1 = await queryWithRetry(mq1, [id + '@sydney.edu.au']);
+
+        // ensure that it exists
+        if (result1.rows.length == 0) {
+            res.send({alert: 'Looks like the researcher doesn\'t exist in the first place! Please try again.'})
+            return
+        }
+        
+        researcherName = result1.rows[0].name
+
+        // remove the grant from the database
+        const mq2 = 'DELETE FROM researchers WHERE "email" = $1'
+        const result2 = await queryWithRetry(mq2, [id + '@sydney.edu.au']);
+
+        // get the current date (when this version stopped being the most recent version)
+        now = new Date();
+
+        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+        year = now.getFullYear()
+        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+        // stringify it
+        date = `${day}-${month}-${year}`
+        
+        // get all changes
+        const mq3 = 'SELECT "changeID" FROM changelog'
+        const result3 = await queryWithRetry(mq3);
+
+        // calculate the maximum changeID
+        maxChangeID = 0
+        for (x in result3.rows) {
+            rowID = result3.rows[x].changeID
+            if (rowID > maxChangeID) {
+                maxChangeID = rowID
+            }
+        }
+
+        // calculate the next change ID
+        nextChangeID = maxChangeID + 1
+
+        // add 'researcher deleted' change to changelog
+        const mq4 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
+        const result4 = await queryWithRetry(mq4, [nextChangeID, req.session.useremail, 'Researcher Deleted', date, `The researcher "${researcherName}" has been deleted. The reason provided was "${reason}"`, '{}']);
+
+        res.send({success: 'success'})
+    } catch (err) {
+        console.log(err)
+
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+    }
+} 
+
 // Export of all methods as object 
 module.exports = { 
     dbgrants,
@@ -2074,6 +2284,7 @@ module.exports = {
     matchget,
     recalculateget,
     managecodesget,
+    researcherpageget,
 
     indexpost,
     loginpost,
@@ -2086,4 +2297,5 @@ module.exports = {
     addclusterspost,
     addcodepost,
     removecodepost,
+    deleteresearcherpost,
 }

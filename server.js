@@ -44,8 +44,8 @@ const db = require('./databases/postgres.js')             // database stuff
 
 // get and post routing
 app.get(['/db/grants', '/db/researchers', '/db/users', '/db/clusters', '/db/changelog', '/db/grants/version/:id', '/db/codes'], routes) // database stuff
-app.get(['/', '/login', '/signup', '/addgrant', '/grant/:id', '/editgrant/:id', '/match/:id', '/recalculate', '/managecodes'], routes)
-app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id', '/deletegrant/:id', '/confirmmatch/:id', '/confirmrecalculation', '/addclusters', '/addcode', '/removecode'], routes)
+app.get(['/', '/login', '/signup', '/addgrant', '/grant/:id', '/editgrant/:id', '/match/:id', '/recalculate', '/managecodes', '/researcher/:id'], routes)
+app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id', '/deletegrant/:id', '/deleteresearcher/:id','/confirmmatch/:id', '/confirmrecalculation', '/addclusters', '/addcode', '/removecode'], routes)
 app.post(['/clustermatch', '/match', '/recalculate'], routes) // nlp routes
 
 // listen to port

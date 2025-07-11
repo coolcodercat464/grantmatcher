@@ -40,11 +40,13 @@ router.get('/addgrant', control.addgrantget)
 router.post('/addgrant', control.addgrantpost)
 
 router.get('/grant/:id', control.grantpageget)
+router.get('/researcher/:id', control.researcherpageget)
 
 router.get('/editgrant/:id', control.editgrantget)
 router.post('/editgrant/:id', control.editgrantpost)
 
 router.post('/deletegrant/:id', control.deletegrantpost)
+router.post('/deleteresearcher/:id', control.deleteresearcherpost)
 
 router.post('/confirmmatch/:id', control.confirmmatchpost)
 
