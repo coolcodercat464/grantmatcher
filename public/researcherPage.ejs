@@ -316,7 +316,7 @@
         // get the grant's version information data
         // using fetch because 2D array cant be reliably sent through EJS variable passing
         function setUpVersionInformation() {
-            fetch('/db/grants/version/<%= id %>', {
+            fetch('/db/researchers/version/<%= id %>', {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' }
             }).then(response => response.json()).then(data => {
@@ -337,8 +337,8 @@
                     accordion = document.getElementById("accordion")
                     
                     reasonCurrent = "First version" // the reason for the current version
-                    dateCurrent = "" // the date of the current version
-                    userCurrent = ""
+                    dateCurrent = "Unknown" // the date of the current version
+                    // TODO: add dateAdded column to researchers table
 
                     // loop through each version
                     for (i in versionInformation) {
@@ -346,15 +346,46 @@
 
                         // get the information from the dictionary
                         id = parseInt(i)+1 // version number
-                        grantName = version[0]
-                        url = version[1]
-                        deadline = version[2]
-                        duration = version[3]
-                        description = version[4]
-                        clusters = version[5].split(', ')
-                        keywords = version[6]
-                        researchers = version[7]
-                        matched = version[8]
+                        researcherName = JSON.parse(version[0])
+                        email = JSON.parse(version[1])
+                        school = JSON.parse(version[2])
+                        gender = JSON.parse(version[3])
+                        publications = JSON.parse(version[4]).join('\n')
+                        publicationKeywords = JSON.parse(version[5]).join('\n')
+                        grants = JSON.parse(version[6]).join('\n')
+                        grantKeywords = JSON.parse(version[7]).join('\n')
+                        keywords = JSON.parse(version[8]).join('\n')
+                        clusters = JSON.parse(version[9])
+                        profile = JSON.parse(version[10])
+                        activity = JSON.parse(version[11])
+                        careerStage = JSON.parse(version[12])
+
+                        // process the gender, school, and career stage
+                        if (gender == 'F') { gender = 'Female' }
+                        if (gender == 'M') { gender = 'Male' }
+                        if (gender == 'N') { gender = 'Non-Binary' }
+                        if (gender == 'U') { gender = 'Unknown' }
+
+                        if (school == 'chemistry') { school = 'School of Chemistry' }
+                        if (school == 'geoscience') { school = 'School of Geosciences' }
+                        if (school == 'biology') { school = 'School of Life and Environmental Sciences' }
+                        if (school == 'veterinary') { school = 'School of Veterinary Science' }
+                        if (school == 'mathematics') { school = 'School of Mathematics and Statistics' }
+                        if (school == 'physics') { school = 'School of Physics' }
+                        if (school == 'philosphy') { school = 'School of History and Philosophy of Science' }
+                        if (school == 'psychology') { school = 'School of Psychology' }
+
+                        if (careerStage == 1) {
+                            careerStage = "Post-Doc"
+                        } else if (careerStage == 2) {
+                            careerStage = "Early-Career Researcher"
+                        } else if (careerStage == 3) {
+                            careerStage = "Mid-Career Researcher"
+                        } else if (careerStage == 4) {
+                            careerStage = "Senior Researcher"
+                        } else {
+                            careerStage = "Unknown"
+                        }
 
                         // process cluster IDs
                         clusterNames = []
@@ -367,9 +398,8 @@
                         clusters = clusterNames.join(", ")
 
                         // the reason and date for the next version
-                        reasonNext = version[9]
-                        dateNext = version[10]
-                        userNext = version[12] // user name, not email
+                        reasonNext = JSON.parse(version[13])
+                        dateNext = version[14]
 
                         // create the HTML to display the accordion item on the main page
                         accordionItem = `<div class="accordion-item">
@@ -382,25 +412,20 @@
                             <div class="accordion-body">
                                 <div class="together">
                                     <div style="width: 100%;">
-                                        <p><b>URL:</b> ${url}</p>
-                                        <p><b>Deadline:</b> ${deadline}</p>
-                                        <p><b>Duration:</b> ${duration} years</p>
-                                        <p><b>Clusters:</b> ${clusters}</span></p>
-                                        <p><b>Matched:</b> ${matched}</span></p>
-                                        <p><b>User Responsible:</b> ${userCurrent}</span></p>
+                                        <p><b>Name:</b> ${researcherName}</p>
+                                        <p><b>Email:</b> ${email}</p>
+                                        <p><b>School:</b> ${school}</p>
+                                        <p><b>Gender:</b> ${gender}</p>
                                     </div>
                                     <div class="spacer"></div>
                                     <div style="width: 100%;">
-                                        <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
-                                            <label><b>Description</b></label>
-                                            <i class="fa fa-clone" onclick="copyDescription(${id})"></i>
-                                        </div>
-                                        
-                                        <textarea rows="5" style="width: 100%;" id="descriptionArea-${id}" disabled>${description}</textarea>
+                                        <p><b>Clusters:</b> <span id="clusterText">${clusters}</span></p>
+                                        <p><b>Activity:</b> ${activity}></p>
+                                        <p><b>Career Stage:</b> ${careerStage}</p>
                                     </div>
-                                </div>
+                                </div><br>
 
-                                <div class="together">
+                                <div class="together" style="align-items: flex-start">
                                     <div style="width: 100%;">
                                         <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                                             <label><b>Keywords</b></label>
@@ -411,15 +436,48 @@
                                     <div class="spacer"></div>
                                     <div style="width: 100%;">
                                         <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
-                                            <label><b>Researchers</b>
-                                                <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Researchers who have been matched to the grant.">
-                                                    <!-- Makes the tooltip circular -->
-                                                    <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
-                                                </button>
-                                            </label>
-                                            <i class="fa fa-clone" onclick="copyResearchers(${id})"></i>
+                                            <label><b>Profile</b></label>
+                                            <i class="fa fa-clone" onclick="copyProfile(${id})"></i>
                                         </div>
-                                        <textarea rows="4" style="width: 100%;" id="researchersArea-${id}" disabled>${researchers}</textarea>
+
+                                        <textarea rows="5" style="width: 100%;" id="profileArea-${id}" disabled>${profile}</textarea>
+                                    </div>
+                                </div><br>
+
+                                <div class="together" style="align-items: flex-start">
+                                    <div style="width: 100%;">
+                                        <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
+                                            <label><b>Publications</b></label>
+                                            <i class="fa fa-clone" onclick="copyPublications(${id})"></i>
+                                        </div>
+                                        <textarea rows="4" style="width: 100%;" id="publicationsArea-${id}" disabled>${publications}</textarea>
+                                    </div>
+                                    <div class="spacer"></div>
+                                    <div style="width: 100%;">
+                                        <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
+                                            <label><b>Publication Keywords</b></label>
+                                            <i class="fa fa-clone" onclick="copyPublicationKeywords(${id})"></i>
+                                        </div>
+
+                                        <textarea rows="5" style="width: 100%;" id="publicationKeywordsArea-${id}" disabled>${publicationKeywords}</textarea>
+                                    </div>
+                                </div><br>
+
+                                <div class="together" style="align-items: flex-start">
+                                    <div style="width: 100%;">
+                                        <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
+                                            <label><b>Grants</b></label>
+                                            <i class="fa fa-clone" onclick="copyGrants(${id})"></i>
+                                        </div>
+                                        <textarea rows="4" style="width: 100%;" id="grantsArea-${id}" disabled>${grants}</textarea>
+                                    </div>
+                                    <div class="spacer"></div>
+                                    <div style="width: 100%;">
+                                        <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
+                                            <label><b>Grant Keywords</b></label>
+                                            <i class="fa fa-clone" onclick="copyGrantKeywords(${id})"></i>
+                                        </div>
+                                        <textarea rows="5" style="width: 100%;" id="grantKeywordsArea-${id}" disabled>${grantKeywords}</textarea>
                                     </div>
                                 </div>
                                 <p><b>Reason for edit:</b> ${reasonCurrent}</p>
@@ -432,7 +490,6 @@
 
                         reasonCurrent = reasonNext
                         dateCurrent = dateNext
-                        userCurrent = userNext
                     }
 
                     document.getElementById("versionSpan").textContent = `Version ${parseInt(i)+2} (${dateCurrent})`

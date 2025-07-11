@@ -356,6 +356,20 @@ const dbgrantversion = async (req, res) => {
      res.send(result)
 }
 
+const dbresearcherversion = async (req, res) => {
+    result = [] // what to put in res.send()
+    if (req.isAuthenticated()) {
+        try {
+            result = await queryWithRetry(`SELECT "versionInformation" FROM researchers WHERE "email" = $1`, [id + '@sydney.edu.au']);
+            result = result.rows
+        } catch {
+
+        }
+    }
+
+     res.send(result)
+}
+
 const dbclusters = async (req, res) => {
     res.send(await queryAll('clusters', req))
 }
@@ -929,12 +943,12 @@ const researcherpageget = async (req, res)=>{
         researcher = result.rows
     } catch (err) {
         console.error(err);
-        res.status(500).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", clusters: "", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], versionInformation: []});
+        res.status(500).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", clusters: "", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: []});
         return
     }
 
     if (researcher.length == 0) {
-        res.status(404).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", clusters: "", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], versionInformation: []});
+        res.status(404).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", clusters: "", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: []});
         return
     } else {
         researcher = researcher[0]
@@ -1031,7 +1045,7 @@ const researcherpageget = async (req, res)=>{
         if (gender == 'U') { gender = 'Unknown' }
     }
 
-    res.render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'no', email: email, name: researcherName, gender: gender, school: school, cluster: clusters, activity: activity, careerStage: careerStage, profile: profile, keywords: keywords, grants: grants, grantKeywords: grantKeywords, publications: publications, publicationKeywords: publicationKeywords, versionInformation: versionInformation});
+    res.render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'no', email: email, name: researcherName, gender: gender, school: school, cluster: clusters, activity: activity, careerStage: careerStage, profile: profile, keywords: keywords, grants: grants, grantKeywords: grantKeywords, publications: publications, publicationKeywords: publicationKeywords});
   } else {
     urlinit = '/researcher/' + id // redirect them to the current url after they logged in
     res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
@@ -1054,12 +1068,12 @@ const editresearcherget = async (req, res)=>{
             researcher = result.rows
         } catch (err) {
             console.error(err);
-            res.status(500).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", cluster: "unknown", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], versionInformation: []});
+            res.status(500).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", cluster: "unknown", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: []});
             return
         }
 
         if (researcher.length == 0) {
-            res.status(404).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", cluster: "unknown", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: [], versionInformation: []});
+            res.status(404).render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', email: "unknown", name: "unknown", gender: "unknown", school: "unknown", cluster: "unknown", activity: "unknown", careerStage: "unknown", profile: '', keywords: [], grants: [], grantKeywords: [], publications: [], publicationKeywords: []});
             return
         } else {
             researcher = researcher[0]
@@ -1114,7 +1128,7 @@ const editresearcherget = async (req, res)=>{
         profile = researcher.profile
         versionInformation = researcher.versionInformation
 
-        res.render('editResearcher.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'no', email: email, name: researcherName, gender: gender, school: school, cluster: clusters, activity: activity, careerStage: careerStage, profile: profile, keywords: keywords, grants: grants, grantKeywords: grantKeywords, publications: publications, publicationKeywords: publicationKeywords, versionInformation: versionInformation});
+        res.render('editResearcher.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'no', email: email, name: researcherName, gender: gender, school: school, cluster: clusters, activity: activity, careerStage: careerStage, profile: profile, keywords: keywords, grants: grants, grantKeywords: grantKeywords, publications: publications, publicationKeywords: publicationKeywords});
     } else {
         urlinit = '/editresearcher/' + id // redirect them to the current url after they logged in
         res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, showAlert: 'no', urlinit: urlinit});
@@ -2503,6 +2517,7 @@ module.exports = {
     dbchangelog,
     dbclusters,
     dbgrantversion,
+    dbresearcherversion,
     dbusers,
     dbcodes,
 

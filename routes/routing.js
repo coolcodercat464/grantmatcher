@@ -21,6 +21,7 @@ router.get('/db/clusters', control.dbclusters)
 router.get('/db/changelog', control.dbchangelog)
 router.get('/db/codes', control.dbcodes)
 router.get('/db/grants/version/:id', control.dbgrantversion)
+router.get('/db/researchers/version/:id', control.dbresearcherversion)
 
 // nlp routes
 router.post('/clustermatch', control.nlpclustermatch)
