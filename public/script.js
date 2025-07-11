@@ -1466,6 +1466,109 @@ function resetChangeSearch(tableNumber) {
     modal.style.display = "none";
 }
 
+// filter through the codes table
+function searchCode(tableNumber, dbclick=null, idField=null) {
+    // get the relevant data
+    codeTable = tableData[tableNumber]
+    codeData = codeTable.dataSet
+
+    // get the text inputs
+    codeEmail = document.getElementById('email').value.trim()
+    codeCode = document.getElementById('code').value.trim()
+
+    // get the dropdown inputs
+    role = document.getElementById('role').value
+    claimed = document.getElementById('claimed').value
+
+    // get the date inputs
+    dateLower = document.getElementById('dateLower').value
+    dateHigher = document.getElementById('dateHigher').value
+
+    // max and min dates in case one of the inputs isnt provided
+    let maxDate = new Date(8640000000000000);
+    let minDate = new Date(-8640000000000000);
+
+    // deal with when one of the date inputs isn't provided
+    if (dateLower == '') { dateLower = minDate }
+    else { dateLower = new Date(dateLower) }
+
+    if (dateHigher == '') { dateHigher = maxDate }
+    else { dateHigher = new Date(dateHigher) }
+
+    // reset the visible row list
+    tableData[tableNumber].showRows = []
+
+    // loop through each data row
+    for (var i = 0; i < codeData.length; i++) {
+        // this is the particular data row
+        // we are checking to see if we should add it to the
+        // visible list (showRows)
+        code = codeData[i]
+
+        // ensure the text inputs match with the code
+        codeCorrect = code.code.trim().includes(codeCode)
+        emailCorrect = code.userEmail.trim().includes(codeEmail)
+
+        // if the dropdown is set to 'all', then its true. otherwise, the researcher
+        // should match that column (unless they actually dont have that column)
+        roleCorrect = (role == "all" || code.role == role || !code.role)
+        claimedCorrect = (claimed == "all" || code.claimed == claimed || !code.claimed)
+
+        // ensure the dates is within the set range
+        dateSplit = code.dateAdded.split("-")
+        dateDate = new Date(dateSplit[2], parseInt(dateSplit[1]) - 1, dateSplit[0]) // convert to a date object for comparison
+        dateCorrect = (dateDate >= dateLower && dateDate <= dateHigher)
+
+        // only make the row visible if it matches for all of the user inputs
+        if (codeCorrect && emailCorrect && roleCorrect && claimedCorrect && dateCorrect) {
+            tableData[tableNumber].showRows.push(code)
+            console.log(code)
+        }
+    }
+
+    // open error modal (modal 8) if no researchers are found
+    if (tableData[tableNumber].showRows.length == 0) {
+        openModal(8)
+    }
+
+    // reset the table
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
+
+    // close the modal
+    var modal = document.getElementById("modal2");
+    modal.style.display = "none";
+}
+
+// clear the codes form and reset the table
+function resetCodeSearch(tableNumber, dbclick=null, idField=null) {
+    // get the relevant data
+    codeTable = tableData[tableNumber]
+    codeData = codeTable.dataSet
+
+    // reset the text inputs
+    codeEmail = document.getElementById('email').value = ''
+    codeCode = document.getElementById('code').value = ''
+
+    // reset the dropdown inputs
+    document.getElementById('role').value = ''
+    document.getElementById('claimed').value = ''
+
+    // reset the date inputs
+    document.getElementById('dateLower').value = ''
+    document.getElementById('dateHigher').value = ''
+
+    // reset the visible row list
+    tableData[tableNumber].showRows = codeData
+
+    // reset the table
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
+
+    // close the modal
+    var modal = document.getElementById("modal2");
+    modal.style.display = "none";
+}
+
+
 // SERVER DATABASE CALLS
 // lots of try-catch stuff since there might be features that are present in some places but not others
 /*

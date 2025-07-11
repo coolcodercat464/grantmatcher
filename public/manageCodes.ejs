@@ -67,7 +67,7 @@
         </div>
     </div>
 
-    <!-- The modal the logout button in the navigation bar opens -->
+    <!-- The modal to search for codes -->
     <div id="modal2" class="modal">
         <div class="modal-content">
             <div class="together">
@@ -77,10 +77,61 @@
             </div>
             
             <!-- TODO: make form -->
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>EMAIL</b></label>
+                    <input type="text" id="email" class="form-control" name="email" placeholder="Enter the new user's email">
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>ROLE</b></label>
+                    <select name="role" class="form-control" id="role" style="width: 100%">
+                        <option value="all">All</option>
+                        <option value="user">Regular User</option>
+                        <option value="manager">Manager</option>
+                        <option value="developer">Developer</option>
+                    </select>
+                </div>
+            </div>
+            <br>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>CODE</b></label>
+                    <input type="text" id="code" class="form-control" name="code" placeholder="Enter the code">
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>CLAIMED?</b>
+                        <!-- TODO: add a tooltip explanation here -->
+                    </label>
+                    <select name="claimed" class="form-control" id="claimed" style="width: 100%">
+                        <option value="all">Any</option>
+                        <option value="yes">Claimed</option>
+                        <option value="no">Unclaimed</option>
+                    </select>
+                </div>
+            </div>
+            <br>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>DATE ADDED</b></label>
+                    <div class="together datetogether">
+                        <input type="date" id="dateLower" class="form-control" name="dateLower" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="date" class="form-control" id="dateHigher" name="dateHigher" style="width: 100%">
+                    </div>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetCodeSearch(9, dbclick=null, idField='code')">Reset Form</button><br>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchCode(9, dbclick=null, idField='code')">Search</button>
+                </div>
+            </div>
+            <br>
         </div>
     </div>
 
-    <!-- The modal the logout button in the navigation bar opens -->
+    <!-- The modal to add a code -->
     <div id="modal3" class="modal">
         <div class="modal-content">
             <div class="together">
@@ -88,8 +139,7 @@
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
                 <span class="close" id="close3">&times;</span>
             </div>
-            
-            <!-- TODO: make form -->
+
             <div class="together">
                 <div style="width: 100%;">
                     <label><b>EMAIL</b></label>
@@ -120,7 +170,7 @@
         </div>
     </div>
 
-    <!-- The modal the logout button in the navigation bar opens -->
+    <!-- The modal to remove a code -->
     <div id="modal4" class="modal">
         <div class="modal-content">
             <div class="together">
@@ -151,6 +201,32 @@
         </div>
     </div>
 
+    <!-- New code modal (instructions on how to proceed) -->
+    <div id="modal6" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>New Code Generated!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close6">&times;</span>
+            </div>
+            
+            <p id="newCodeAlert"></p>
+        </div>
+    </div>
+
+    <!-- The modal when the user tries to filter a table but nothing is found -->
+    <div id="modal8" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Nothing Found</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close8">&times;</span>
+            </div>
+            
+            <p>Nothing was found in this search :( Reset the form or try different parameters.</p>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section>
@@ -159,7 +235,8 @@
         <hr/>
 
         <section>
-            <h2>Researchers</h2>
+            <h2>Authentication Codes</h2>
+            <p>Here are a list of all authentication codes. These codes are used to verify the identity of new users when the sign in. Codes are unclaimed if the email they are assigned to hasn't made an account on Grant Matcher yet.</p>
             <div class="tableContainer" id="tableContainer1">
                 <div>
                     <div class="tableicons">
@@ -174,9 +251,11 @@
                         <label for="sortTable9">Sort By:</label>
 
                         <select name="sortTable9" id="sortTable9" onchange="sortTable(9, dbclick=null, idField='code')" style="margin-bottom: 5px;">
+                            <option value="blahblah" default>Select</option>
                             <option value="userEmail">User's Email</option>
                             <option value="dateReformatted">Date Created</option>
                             <option value="role">Role</option>
+                            <option value="claimed">Claimed</option>
                         </select>
                     </div>
                 </div>
@@ -336,13 +415,15 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(information)
             }).then(response => response.json()).then(result => {
+                document.getElementById("modal3").style.display = 'none'
                 if (result.status == "error") {
                     // open the error modal if there is an error
-                    document.getElementById("modal3").style.display = 'none'
                     document.getElementById('showAlert').textContent = result.alert
                     openModal(5)
                 } else {
-                    window.location.reload() // reload the page (new code should appear)
+                    // open the modal for instructions on how to proceed
+                    document.getElementById("newCodeAlert").textContent = `The new code has been successfully added! You can refresh the page to see the new code on the table. The 8-character code generated was "${code}". Send this code to ${email} so they can sign up to Grant Matcher. For security reasons, please don't share this code with anybody else!`
+                    openModal(6)
                 }
             })
         }
