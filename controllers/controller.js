@@ -880,9 +880,24 @@ const recalculateget = async (req, res) => {
 const managecodesget = async (req, res)=>{
     console.log("MANAGE CODES GET")
 
-    // TODO: ensure the role is correct
     // only allow them to manage codes if they havent been authenticated yet
     if (req.isAuthenticated()) {
+        try {
+            // ensure that they are a manager/developer
+            const result1 = await queryWithRetry('SELECT role FROM users WHERE email = $1', [req.session.useremail]);
+            userRole = result1.rows[0].role
+
+            // send error message if they have the incorrect roles
+            if (!['manager', 'developer'].includes(userRole)) {
+                res.send({alert: 'It looks like you aren\'t a manager/developer, so you aren\'t authorised to remove codes.'})
+                return
+            }
+        } catch (err) {
+            console.log(err)
+
+            res.send({alert: 'We are having some trouble confirming your identity. Please try again. This might be a server-side issue. If the issue persists, please let me know.'})
+            return
+        }
         res.render('manageCodes.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
     } else {
         urlinit = '/managecodes' // redirect them to the current url after they logged in
@@ -1386,7 +1401,7 @@ const deletegrantpost = async (req, res)=>{
         // calculate the next change ID
         nextChangeID = maxChangeID + 1
 
-        // add 'grant edited' change to changelog
+        // add 'grant deleted' change to changelog
         const mq4 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
         const result4 = await queryWithRetry(mq4, [nextChangeID, req.session.useremail, 'Grant Deleted', date, `The grant "${grantName}" has been deleted. The reason provided was "${x.reason}"`, '{}']);
 
@@ -1489,7 +1504,7 @@ const confirmmatchpost = async (req, res)=>{
         // calculate the next change ID
         nextChangeID = maxChangeID + 1
 
-        // add 'grant edited' change to changelog
+        // add 'grant matched' change to changelog
         const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
         const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Grant Matched', date, `The grant "${grantName}" has been matched. The researchers notified were ${researchers}.`, '{}']);
 
@@ -1836,7 +1851,7 @@ const confirmrecalculationpost = async (req, res)=>{
         // calculate the next change ID
         nextChangeID = maxChangeID + 1
 
-        // add 'grant edited' change to changelog
+        // add 'researcher recalculated' change to changelog
         const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
         const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Researcher Recalculated', date, `${researcherName}'s data has been recalculated.`, '{}']);
         
@@ -1852,10 +1867,26 @@ const confirmrecalculationpost = async (req, res)=>{
 const addcodepost = async (req, res)=>{
     console.log("ADD CODE POST")
 
-    // TODO: ensure the role is correct
     // only allow them to manage codes if they havent been authenticated yet
     if (!req.isAuthenticated()) {
         res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    try {
+        // ensure that they are a manager/developer
+        const result1 = await queryWithRetry('SELECT role FROM users WHERE email = $1', [req.session.useremail]);
+        userRole = result1.rows[0].role
+
+        // send error message if they have the incorrect roles
+        if (!['manager', 'developer'].includes(userRole)) {
+            res.send({alert: 'It looks like you aren\'t a manager/developer, so you aren\'t authorised to add codes.'})
+            return
+        }
+    } catch (err) {
+        console.log(err)
+
+        res.send({alert: 'We are having some trouble confirming your identity. Please try again. This might be a server-side issue. If the issue persists, please let me know.'})
         return
     }
 
@@ -1912,7 +1943,7 @@ const addcodepost = async (req, res)=>{
         // calculate the next change ID
         nextChangeID = maxChangeID + 1
 
-        // add 'grant edited' change to changelog
+        // add 'code added' change to changelog
         const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
         const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Code Added', date, `A new code has been added for a new user with the email ${x.email}.`, '{}']);
         
@@ -1928,10 +1959,26 @@ const addcodepost = async (req, res)=>{
 const removecodepost = async (req, res)=>{
     console.log("REMOVE CODE POST")
 
-    // TODO: ensure the role is correct
     // only allow them to manage codes if they havent been authenticated yet
     if (!req.isAuthenticated()) {
         res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    try {
+        // ensure that they are a manager/developer
+        const result1 = await queryWithRetry('SELECT role FROM users WHERE email = $1', [req.session.useremail]);
+        userRole = result1.rows[0].role
+
+        // send error message if they have the incorrect roles
+        if (!['manager', 'developer'].includes(userRole)) {
+            res.send({alert: 'It looks like you aren\'t a manager/developer, so you aren\'t authorised to remove codes.'})
+            return
+        }
+    } catch (err) {
+        console.log(err)
+
+        res.send({alert: 'We are having some trouble confirming your identity. Please try again. This might be a server-side issue. If the issue persists, please let me know.'})
         return
     }
 
@@ -1955,7 +2002,20 @@ const removecodepost = async (req, res)=>{
         // stringify it
         date = `${day}-${month}-${year}`
 
-        // add the researcher
+        // try find the code
+        const result2 = await queryWithRetry('SELECT "userEmail" FROM codes WHERE code = $1', [x.code]);
+        codeToDelete = result2.rows
+
+        // ensure that the code exists
+        if (codeToDelete.length == 0) {
+            res.send({alert: 'It looks like the code you want to delete doesn\'t exist. Please try again.'});
+            return
+        }
+
+        // get the user email
+        userEmail = codeToDelete.userEmail
+
+        // remove the code
         await queryWithRetry('DELETE FROM codes WHERE code = $1', [x.code]);
         
         // get all changes
@@ -1974,9 +2034,9 @@ const removecodepost = async (req, res)=>{
         // calculate the next change ID
         nextChangeID = maxChangeID + 1
 
-        // add 'grant edited' change to changelog
+        // add 'code deleted' change to changelog
         const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Code Deleted', date, `A code has been deleted`, '{}']); // TODO: get the user email
+        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Code Deleted', date, `The code for ${userEmail} has been deleted.`, '{}']); // TODO: get the user email
         
         res.send({success: 'success'})
     } catch (err) {
