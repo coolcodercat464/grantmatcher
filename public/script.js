@@ -1316,7 +1316,7 @@ async function searchCluster(tableNumber) {
     }
 
     // otherwise, filter for relevant clusters first
-    fetch('/clusterMatch', {
+    fetch('/clustermatch', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

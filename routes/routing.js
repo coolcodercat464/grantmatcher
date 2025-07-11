@@ -12,6 +12,22 @@ router.use(passport.initialize());
 router.use(passport.session());
 
 // Requests 
+
+// database routes
+router.get('/db/grants', control.dbgrants)
+router.get('/db/researchers', control.dbresearchers)
+router.get('/db/users', control.dbusers)
+router.get('/db/clusters', control.dbclusters)
+router.get('/db/changelog', control.dbchangelog)
+router.get('/db/codes', control.dbcodes)
+router.get('/db/grants/version/:id', control.dbgrantversion)
+
+// nlp routes
+router.post('/clustermatch', control.nlpclustermatch)
+router.post('/match', control.nlpmatch)
+router.post('/recalculate', control.nlprecalculate)
+
+// other routes
 router.get('/', control.indexget)
 router.post('/', control.indexpost)
 

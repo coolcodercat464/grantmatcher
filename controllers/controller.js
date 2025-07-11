@@ -11,6 +11,15 @@ var MD5 = require("crypto-js/md5");
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 
+// nlp stuff
+const natural = require('natural'); // nlp for js (faster than python)
+// link to python script
+const spawn = require('child_process').spawn;
+
+// Provide the path of the python executable, if python is available as 
+// environment variable then you can use only "python"
+var pythonExecutable = "python";
+
 // check if a string is an integer
 function isStringInteger(str) {
   const num = Number(str); 
@@ -301,6 +310,320 @@ passport.deserializeUser(async (email, done) => {
 });
 
 // Methods to be executed on routes 
+
+// DATABASE ROUTES
+// for code reuse
+async function queryAll(table, req) {
+    try {
+        // ensure the user is logged in before giving them the data
+        if (req.isAuthenticated()) {
+            // ensure that you don't get the users' passwords
+            if (table == 'users') {
+                result = await queryWithRetry(`SELECT name, email, role, "grantsMatched", xp, "versionInformation", "dateJoined", "colourTheme", "notificationPreferences" FROM ${table}`);
+            } else {
+                result = await queryWithRetry(`SELECT * FROM ${table}`);
+            }
+            
+            result = result.rows
+            return result
+        } else {
+            return []
+        }
+    } catch {
+        return []
+    }
+}
+
+const dbresearchers =  async (req, res) => {
+    res.send(await queryAll('researchers', req))
+}
+
+const dbgrants = async (req, res) => {
+    res.send(await queryAll('grants', req))
+}
+
+const dbgrantversion = async (req, res) => {
+    result = [] // what to put in res.send()
+    if (req.isAuthenticated()) {
+        try {
+            result = await queryWithRetry(`SELECT "versionInformation" FROM grants WHERE "grantID" = $1`, [id]);
+            result = result.rows
+        } catch {
+
+        }
+    }
+
+     res.send(result)
+}
+
+const dbclusters = async (req, res) => {
+    res.send(await queryAll('clusters', req))
+}
+
+const dbusers = async (req, res) => {
+    res.send(await queryAll('users', req))
+}
+
+const dbchangelog = async (req, res) => {
+    res.send(await queryAll('changelog', req))
+}
+
+const dbcodes = async (req, res) => {
+    res.send(await queryAll('codes', req))
+}
+
+// NLP ROUTES
+// js nlp routes (faster but might be less accurate)
+
+// when the user wants to match a word to the clusters
+const nlpclustermatch = async (req, res) => {
+  const receivedData = req.body;
+
+  // ensure that they are logged in first
+  if (!req.isAuthenticated()) {
+    res.send({"error": "Please log in first :)", "relevant": []})
+  }
+
+  try {
+    // get the clusters and the matchTo
+    clusters = receivedData.clusters
+    matchTo = receivedData.matchTo
+
+    // store the result
+    relevant = []
+    
+    for (x in clusters) {
+      // get the name
+      cluster = clusters[x].name
+
+      // get the similarity
+      distance = natural.JaroWinklerDistance(cluster, matchTo);
+
+      // only add it to the relevant list if its above the threshold
+      if (distance >= 0.5) {
+        relevant.push(clusters[x])
+      }
+      
+    }
+
+    res.send({'relevant':relevant})
+  } catch (err) {
+    console.log(err)
+    res.send({"error": "Something went wrong.", "relevant": []})
+  }
+}
+
+// python nlp routes
+
+// Match logic layer
+const nlpmatch = async (req, res) => {
+    console.log(req.session.useremail)
+
+    // ensure that they are logged in first
+    if (!req.isAuthenticated()) {
+        res.send({status: "error", alert: 'Please login first :)'});
+        return
+    }
+
+    // STEP 1 - preliminary filtering (get researcherPool)
+    try {
+      x = req.body
+      
+      // error out if the inputs are invalid
+      if (x == undefined || !x.matchKeywords || x.matchKeywords.length == 0) {
+        res.send({status: "error", alert: 'Your input is invalid. Please ensure that you have filled out the keywords entry.'})
+        return
+      }
+
+      // ensure that the method is valid
+      if (!x.matchMethod || ["cluster", "direct"].includes(x.matchMethod) == false) {
+        res.send({status: "error", alert: 'Something went wrong when processing whether you would like to match through clusters or directly. If this issue persists, please let me know.'})
+        return
+      }
+
+      // ensure that the cutoff method is valid
+      if (!x.cutOffMethod || !x.cutOff || ["number", "strictness"].includes(x.cutOffMethod) == false) {
+        res.send({status: "error", alert: 'Something went wrong when processing your cut-off parameters. If this issue persists, please let me know.'})
+        return
+      }
+
+      // if lower or higher activity range isnt provided, use the maximum/minimum values
+      if (x.lower == '') { x.lower = 0 }
+      if (x.higher == '') { x.higher = 1 }
+
+      // get the match keywords
+      keywords = x.matchKeywords
+
+      // get all the clusters
+      allClustersDict = await queryAll('clusters')
+      allClusters = []
+
+      // get all cluster names
+      for (i in allClustersDict) {
+        cluster = allClustersDict[i]
+        clusterName = cluster.name
+        allClusters.push(clusterName)
+      }
+
+      // get all the researchers
+      allResearchers = await queryAll('researchers')
+
+      // list of all researchers
+      researcherPool = []
+
+      for (i in allResearchers) {
+        researcher = allResearchers[i]
+
+        // ensure that these fields match the researcher's data
+        schoolCorrect = (x.school == "all" || researcher.school == x.school)
+        genderCorrect = (x.gender == "all" || researcher.gender == x.gender)
+        careerCorrect = (x.career == "all" || researcher.careerStage == x.career) 
+        activityCorrect = ((researcher.activity >= x.lower && researcher.activity <= x.higher))
+
+        // if the cluster list is empty, then set this to true
+        clusterCorrect = (x.clusters[0].length == 0)
+
+        // the names of the researcher's clusters
+        clustersNames = []
+
+        // loop through each of the researcher's clusters
+        for (j in researcher.clusters) {
+            cl = researcher.clusters[j] // this isn't a string, but an id
+
+            // get the name of that cluster and add it to clustersNames
+            for (k in allClustersDict) {
+              if (allClustersDict[k].clusterID == cl) {
+                clustersNames.push(allClustersDict[k].name)
+              }
+            }
+
+            // check if the cluster is in the selected clusters list
+            if (x.clusters[1].includes(cl)) {
+                // once such a pair found, it matches and no further searching is necessary
+                clusterCorrect = true
+                break
+            }
+        }
+
+        // only add the researchers to the list if they match all criteria
+        if (schoolCorrect && genderCorrect && careerCorrect && activityCorrect && clusterCorrect) {
+          researcherPool.push({clustersNames: clustersNames, email: researcher.email, keywords: researcher.keywords})
+        }
+      }
+
+      // error out if no researchers found in preliminary filtering
+      if (researcherPool.length == 0) {
+        res.send({status: "error", alert: "No researchers were found given your filtration specifications. Try again with different parameters!"})
+        return
+      }
+
+    } catch (err) {
+      console.log(err)
+      res.send({status: "error", alert: "Something wrong happened while processing your inputs and doing preliminary filtering. Please try again. If this problem persists, please open a ticket to let me know."})
+      return
+    }
+
+    // STEP 2 - use the python NLP program
+    try {
+      // store the output (its very long so the JSON will get processed over multiple .stdout.on() events)
+      output = '';
+
+      error = false;
+
+      // execute the python script
+      const scriptExecution = spawn(pythonExecutable, 
+        ["match.py", JSON.stringify(keywords), JSON.stringify(allClusters), JSON.stringify(researcherPool), x.cutOffMethod, x.cutOff, x.matchMethod]);
+
+      // Handle normal output
+      scriptExecution.stdout.on('data', async (data) => {
+          output += data.toString(); // Accumulate output
+          console.log(output)
+      });
+
+      // Handle error output
+      scriptExecution.stderr.on('data', (data) => {
+        // ensure that no errors occured
+        if (!error) {
+          error = true;
+
+          console.log(data.toString())
+          res.send({status: 'error', alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
+          return
+        }
+      });
+
+      // when the python script finished executing
+      scriptExecution.on('close', (code) => {
+        // ensure that no errors occured
+        if (!error) {
+          // only parse the JSON when it finished
+          result = JSON.parse(output);
+          res.send({'result': result})
+          return
+        } 
+      });
+    } catch (err) {
+      console.log(err)
+      res.send({status: "error", alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
+      return
+    }
+}
+
+// Recalculate logic layer
+const nlprecalculate = async (req, res) => {
+    console.log(req.session.useremail)
+
+    // ensure that they are logged in first
+    if (!req.isAuthenticated()) {
+        res.send({status: "error", alert: 'Please login first :)'});
+        return
+    }
+
+    x = req.body
+
+    try {
+      // store the output (its very long so the JSON will get processed over multiple .stdout.on() events)
+      output = '';
+
+      error = false; // whether an error occured or not (prevents multiple headers error)
+
+      // execute the python script
+      const scriptExecution = spawn(pythonExecutable, 
+        ["recalculate.py", JSON.stringify(x.fields), JSON.stringify(x.researchers), x.number, x.strictness, x.range, x.googleScholar]);
+
+      // Handle normal output
+      scriptExecution.stdout.on('data', async (data) => {
+          output += data.toString(); // Accumulate output
+      });
+
+      // Handle error output
+      scriptExecution.stderr.on('data', (data) => {
+        console.log(data.toString())
+        
+        // ensure that no errors occured already (otherwise a message would have already been sent)
+        if (!error) {
+          error = true; // set error to true
+
+          res.send({status: "error", alert: "Something wrong happened while recalculating researchers. Please try again. If this problem persists, please open a ticket to let me know."})
+        }
+      });
+
+      // when the python script finished executing
+      scriptExecution.on('close', (code) => {
+        // ensure that no errors occured
+        if (!error) {
+          // only parse the JSON when it finished
+          result = JSON.parse(output);
+          res.send({'result': result})
+          return
+        } 
+      });
+    } catch (err) {
+      console.log(err)
+      res.send({status: "error", alert: "Something wrong happened while recalculating researchers. Please try again. If this problem persists, please open a ticket to let me know."})
+      return
+    }
+}
 
 // GET
 // the home-page
@@ -1665,6 +1988,18 @@ const removecodepost = async (req, res)=>{
 
 // Export of all methods as object 
 module.exports = { 
+    dbgrants,
+    dbresearchers,
+    dbchangelog,
+    dbclusters,
+    dbgrantversion,
+    dbusers,
+    dbcodes,
+
+    nlpclustermatch,
+    nlpmatch,
+    nlprecalculate,
+
     indexget,
     loginget,
     signupget,
