@@ -377,12 +377,16 @@
     </script>
     <script>
         function initialise() {
-            clusters = "<%= clusters %>"
-            clusters = clusters.split(", ")
-            for (x in clusters) {
-                clusterId = clusters[x]
-                buttonId = '1U' + clusterId
-                selectCluster(buttonId)
+            try {
+                clusters = "<%= clusters %>"
+                clusters = clusters.split(", ")
+                for (x in clusters) {
+                    clusterId = clusters[x]
+                    buttonId = '1U' + clusterId
+                    selectCluster(buttonId)
+                }
+            } catch {
+                console.log("no clusters :(")
             }
 
             keywords = `<%= keywords %>`

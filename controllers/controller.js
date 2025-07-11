@@ -448,6 +448,8 @@ const nlpmatch = async (req, res) => {
       }
 
       // if lower or higher activity range isnt provided, use the maximum/minimum values
+      noActivityProvided = false;
+      if (x.lower == '' && x.higher == '') { noActivityProvided = true; }
       if (x.lower == '') { x.lower = 0 }
       if (x.higher == '') { x.higher = 1 }
 
@@ -455,7 +457,7 @@ const nlpmatch = async (req, res) => {
       keywords = x.matchKeywords
 
       // get all the clusters
-      allClustersDict = await queryAll('clusters')
+      allClustersDict = await queryAll('clusters', req)
       allClusters = []
 
       // get all cluster names
@@ -466,7 +468,7 @@ const nlpmatch = async (req, res) => {
       }
 
       // get all the researchers
-      allResearchers = await queryAll('researchers')
+      allResearchers = await queryAll('researchers', req)
 
       // list of all researchers
       researcherPool = []
@@ -479,6 +481,9 @@ const nlpmatch = async (req, res) => {
         genderCorrect = (x.gender == "all" || researcher.gender == x.gender)
         careerCorrect = (x.career == "all" || researcher.careerStage == x.career) 
         activityCorrect = ((researcher.activity >= x.lower && researcher.activity <= x.higher))
+
+        // activityCorrect is true if no activity is provided (useful if the researcher's activity is null)
+        if (noActivityProvided) { activityCorrect = true }
 
         // if the cluster list is empty, then set this to true
         clusterCorrect = (x.clusters[0].length == 0)
@@ -504,7 +509,7 @@ const nlpmatch = async (req, res) => {
                 break
             }
         }
-
+        
         // only add the researchers to the list if they match all criteria
         if (schoolCorrect && genderCorrect && careerCorrect && activityCorrect && clusterCorrect) {
           researcherPool.push({clustersNames: clustersNames, email: researcher.email, keywords: researcher.keywords})
