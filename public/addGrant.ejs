@@ -317,6 +317,7 @@
                     body: JSON.stringify(data)
                 }).then(response => response.json()).then(data => {
                     if (data.id == undefined) {
+                        document.getElementById("modal5").style.display = 'none'
                         document.getElementById('showAlert').textContent = data.alert
                         openModal(2)
                     } else {

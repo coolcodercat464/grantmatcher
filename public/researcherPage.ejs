@@ -425,7 +425,7 @@
                         clusters = clusterNames.join(", ")
 
                         // the reason and date for the next version
-                        reasonNext = version[13]
+                        reasonNext = JSON.parse(version[13])
                         dateNext = version[14]
 
                         // create the HTML to display the accordion item on the main page

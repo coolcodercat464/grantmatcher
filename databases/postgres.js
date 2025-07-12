@@ -1,7 +1,6 @@
 const { Pool } = require("pg");
 require('dotenv').config();
 
-// TODO: add actual names to .env
 const pool = new Pool({
   user: "postgres",
   host: "localhost",

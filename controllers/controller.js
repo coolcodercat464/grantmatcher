@@ -1502,7 +1502,7 @@ const editgrantpost = async (req, res)=>{
         grant = result1.rows[0]
 
         // get the previous version
-        previousVersion = [grant.grantName, grant.url, grant.deadline, grant.duration.toString(), grant.description, grant.clusters.join(", "), grant.keywords.join("\n"), grant.researchers.join("\n"), grant.matched.toString(), reason]
+        previousVersion = [JSON.stringify(grant.grantName), JSON.stringify(grant.url), JSON.stringify(grant.deadline), JSON.stringify(grant.duration), JSON.stringify(grant.description), JSON.stringify(grant.clusters), JSON.stringify(grant.keywords), JSON.stringify(grant.researchers), JSON.stringify(grant.matched), JSON.stringify(reason)]
 
         // get the current date (when this version stopped being the most recent version)
         now = new Date();
@@ -1690,7 +1690,7 @@ const confirmmatchpost = async (req, res)=>{
         grant = result1.rows[0]
 
         // get the previous version
-        previousVersion = [grant.grantName, grant.url, grant.deadline, grant.duration.toString(), grant.description, grant.clusters.join(", "), grant.keywords.join("\n"), grant.researchers.join("\n"), grant.matched.toString(), "This grant has been matched."]
+        previousVersion = [JSON.stringify(grant.grantName), JSON.stringify(grant.url), JSON.stringify(grant.deadline), JSON.stringify(grant.duration), JSON.stringify(grant.description), gJSON.stringify(rant.clusters), JSON.stringify(grant.keywords), JSON.stringify(grant.researchers), JSON.stringify(grant.matched), JSON.stringify("This grant has been matched.")]
 
         grantName = grant.grantName
 
@@ -1928,7 +1928,7 @@ const confirmrecalculationpost = async (req, res)=>{
             prevResearcher = allResearchers[researcherEmail]
             // get the previous version
             // JSON.stringify is better than .toString() because it doesnt crash from a null value and can also store lists
-            previousVersion = [JSON.stringify(researcher.name), JSON.stringify(researcher.email), JSON.stringify(researcher.school), JSON.stringify(researcher.gender), JSON.stringify(researcher.publications), JSON.stringify(researcher.publicationKeywords), JSON.stringify(researcher.grants), JSON.stringify(researcher.grantKeywords), JSON.stringify(researcher.keywords), JSON.stringify(researcher.clusters), JSON.stringify(researcher.profile), JSON.stringify(researcher.activity), JSON.stringify(researcher.careerStage), "This researcher's data has been recalculated."]
+            previousVersion = [JSON.stringify(researcher.name), JSON.stringify(researcher.email), JSON.stringify(researcher.school), JSON.stringify(researcher.gender), JSON.stringify(researcher.publications), JSON.stringify(researcher.publicationKeywords), JSON.stringify(researcher.grants), JSON.stringify(researcher.grantKeywords), JSON.stringify(researcher.keywords), JSON.stringify(researcher.clusters), JSON.stringify(researcher.profile), JSON.stringify(researcher.activity), JSON.stringify(researcher.careerStage), JSON.stringify("This researcher's data has been recalculated.")]
 
             // add the date to the previous version
             previousVersion.push(date)
@@ -2297,7 +2297,7 @@ const removecodepost = async (req, res)=>{
 
         // add 'code deleted' change to changelog
         const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Code Deleted', date, `The code for ${userEmail} has been deleted.`, '{}']); // TODO: get the user email
+        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Code Deleted', date, `The code for ${userEmail} has been deleted.`, '{}']);
         
         res.send({success: 'success'})
     } catch (err) {
@@ -2486,7 +2486,6 @@ const editresearcherpost = async (req, res)=>{
         researcher = result1.rows[0]
 
         // get the previous version
-        // TODO: turn the other previousVersions into JSON.stringify() instead of toString()
         previousVersion = [JSON.stringify(researcher.name), JSON.stringify(researcher.email), JSON.stringify(researcher.school), JSON.stringify(researcher.gender), JSON.stringify(researcher.publications), JSON.stringify(researcher.publicationKeywords), JSON.stringify(researcher.grants), JSON.stringify(researcher.grantKeywords), JSON.stringify(researcher.keywords), JSON.stringify(researcher.clusters), JSON.stringify(researcher.profile), JSON.stringify(researcher.activity), JSON.stringify(researcher.careerStage), JSON.stringify(reason)]
 
         // get the current date (when this version stopped being the most recent version)

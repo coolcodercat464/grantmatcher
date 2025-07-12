@@ -303,15 +303,15 @@
 
                         // get the information from the dictionary
                         id = parseInt(i)+1 // version number
-                        grantName = version[0]
-                        url = version[1]
-                        deadline = version[2]
-                        duration = version[3]
-                        description = version[4]
-                        clusters = version[5].split(', ')
-                        keywords = version[6]
-                        researchers = version[7]
-                        matched = version[8]
+                        grantName = JSON.parse(version[0])
+                        url = JSON.parse(version[1])
+                        deadline = JSON.parse(version[2])
+                        duration = JSON.parse(version[3])
+                        description = JSON.parse(version[4])
+                        clusters = JSON.parse(version[5])
+                        keywords = JSON.parse(version[6]).join('\n')
+                        researchers = JSON.parse(version[7]).join('\n')
+                        matched = JSON.parse(version[8])
 
                         // process cluster IDs
                         clusterNames = []
@@ -324,7 +324,7 @@
                         clusters = clusterNames.join(", ")
 
                         // the reason and date for the next version
-                        reasonNext = version[9]
+                        reasonNext = JSON.parse(version[9])
                         dateNext = version[10]
                         userNext = version[12] // user name, not email
 
@@ -339,6 +339,7 @@
                             <div class="accordion-body">
                                 <div class="together">
                                     <div style="width: 100%;">
+                                        <p><b>Name:</b> ${grantName}</p>
                                         <p><b>URL:</b> ${url}</p>
                                         <p><b>Deadline:</b> ${deadline}</p>
                                         <p><b>Duration:</b> ${duration} years</p>
