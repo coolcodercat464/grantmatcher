@@ -73,17 +73,15 @@ async function save_user(newUser, role) {
     // catch any errors
     try {
         // insert the user's data into the database
-        const mq1 = 'INSERT INTO users (name, email, password, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences", "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)'
-        const result1 = await queryWithRetry(mq1, [userName, email, password, role, 0, 0, date, "light", false, []]);
+        await queryWithRetry('INSERT INTO users (name, email, password, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences", "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [userName, email, password, role, 0, 0, date, "light", false, []]);
         
         // get all changes
-        const mq2 = 'SELECT "changeID" FROM changelog'
-        const result2 = await queryWithRetry(mq2);
+        result = await queryWithRetry('SELECT "changeID" FROM changelog');
 
         // calculate the maximum changeID
         maxChangeID = 0
-        for (x in result2.rows) {
-            rowID = result2.rows[x].changeID
+        for (x in result.rows) {
+            rowID = result.rows[x].changeID
             if (rowID > maxChangeID) {
                 maxChangeID = rowID
             }
@@ -93,8 +91,7 @@ async function save_user(newUser, role) {
         nextChangeID = maxChangeID + 1
 
         // add 'user joined' change to changelog
-        const mq3 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result3 = await queryWithRetry(mq3, [nextChangeID, email, 'User Joined', date, `${newUser.name} joined Grant Matcher! Please make them feel welcome!`, '{}']);
+        await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, email, 'User Joined', date, `${newUser.name} joined Grant Matcher! Please make them feel welcome!`, '{}']);
         
     } catch (err) {
         console.error(err);
@@ -700,7 +697,7 @@ const grantpageget = async (req, res)=>{
   id = req.params.id
   console.log(id);
 
-  // add validation - ensure id is an integer (id might be 'script.js' sometimes)
+  // validation - ensure id is an integer (id might be 'script.js' sometimes)
   if (!isStringInteger(id) || parseInt(id) <= 0) {
     res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
     return
@@ -710,18 +707,17 @@ const grantpageget = async (req, res)=>{
   if (req.isAuthenticated()) {
     // get the grant data
     try {
-        // get the grants data
-        const mq = 'SELECT * FROM grants WHERE "grantID" = $1'
-        const result = await queryWithRetry(mq, [id]);
+        result = await queryWithRetry('SELECT * FROM grants WHERE "grantID" = $1', [id]);
         grant = result.rows
     } catch (err) {
         console.error(err);
-        res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
+        res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "", user: "", date: "", url: "", deadline: "", duration: "", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
         return
     }
 
+    // ensure that grant exists
     if (grant.length == 0) {
-        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'This grant does not exist yet. Maybe you can help make it by adding a grant!'});
+        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "", user: "", date: "", url: "", deadline: "", duration: "", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'This grant does not exist yet. Maybe you can help make it by adding a grant!'});
         return
     } else {
         grant = grant[0]
@@ -747,6 +743,7 @@ const grantpageget = async (req, res)=>{
     if (user == undefined) { user = "deleted user"}
     else { user = user.name }
 
+    // render the page
     res.render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, title: title, user: user, matched: matched, date: dateAdded, url: url, deadline: deadline, duration: duration, clusters: clusters, id: id, keywords: keywords, description: description, researchers: researchers, showAlert: 'no'});
   } else {
     urlinit = '/grant/' + id // redirect them to the current url after they logged in
@@ -779,21 +776,21 @@ const editgrantget = async (req, res)=>{
         return
     }
 
-    // only allow them to signup if they havent been authenticated yet
+    // only allow them to signup if they have been authenticated
     if (req.isAuthenticated()) {
         id = parseInt(id)
 
+        // get the grants data
         try {
-            // get the grants data
-            const mq = 'SELECT * FROM grants WHERE "grantID" = $1'
-            const result = await queryWithRetry(mq, [id]);
+            result = await queryWithRetry('SELECT * FROM grants WHERE "grantID" = $1', [id]);
             grant = result.rows
         } catch (err) {
             console.error(err);
-            res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
+            res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "", user: "", date: "", url: "", deadline: "", duration: "", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
             return
         }
 
+        // 404 if the grant doesnt exist yet
         if (grant.length == 0) {
             res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'This grant does not exist yet. Maybe you can help make it by adding a grant!'});
             return
@@ -817,6 +814,7 @@ const editgrantget = async (req, res)=>{
         dateSplit = deadline.split('-')
         deadline = dateSplit[2] + '-' + dateSplit[1] + '-' + dateSplit[0]
 
+        // render the edit grant page
         res.render('editGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, title: title, url: url, deadline: deadline, duration: duration, clusters: clusters, description: description, keywords: keywords, researchers: researchers, showAlert: 'no'});
     } else {
         urlinit = '/editgrant/' + id // redirect them to the current url after they logged in
@@ -842,9 +840,7 @@ const matchget = async (req, res)=>{
     if (req.isAuthenticated()) {
         // get the grant data
         try {
-            // get the grants data
-            const mq = 'SELECT * FROM grants WHERE "grantID" = $1'
-            const result = await queryWithRetry(mq, [id]);
+            const result = await queryWithRetry('SELECT * FROM grants WHERE "grantID" = $1', [id]);
             grant = result.rows
         } catch (err) {
             console.error(err);
@@ -878,6 +874,7 @@ const matchget = async (req, res)=>{
         if (user == undefined) { user = "deleted user"}
         else { user = user.name }
 
+        // render the page
         res.render('match.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, title: title, user: user, date: dateAdded, url: url, deadline: deadline, duration: duration, clusters: clusters, id: id, keywords: keywords, description: description, researchers: researchers, showAlert: 'no'});
     } else {
         urlinit = '/grant/' + id // redirect them to the current url after they logged in
@@ -937,9 +934,7 @@ const researcherpageget = async (req, res)=>{
   if (req.isAuthenticated()) {
     // get the researcher data
     try {
-        // get the researchers data
-        const mq = 'SELECT * FROM researchers WHERE "email" = $1'
-        const result = await queryWithRetry(mq, [id + '@sydney.edu.au']);
+        const result = await queryWithRetry('SELECT * FROM researchers WHERE "email" = $1', [id + '@sydney.edu.au']);
         researcher = result.rows
     } catch (err) {
         console.error(err);
@@ -964,7 +959,6 @@ const researcherpageget = async (req, res)=>{
     dateAdded = researcher.dateAdded
 
     // prevents errors (check if the field is null before joining)
-    // TODO: do this validation for grant page as well (clean-up)
     if (researcher.publications == null || researcher.publications == undefined || researcher.publications.length == 0) {
         publications = "Unknown"
     } else {
@@ -1065,9 +1059,7 @@ const editresearcherget = async (req, res)=>{
     if (req.isAuthenticated()) {
         // get the researcher data
         try {
-            // get the researchers data
-            const mq = 'SELECT * FROM researchers WHERE "email" = $1'
-            const result = await queryWithRetry(mq, [id + '@sydney.edu.au']);
+            const result = await queryWithRetry('SELECT * FROM researchers WHERE "email" = $1', [id + '@sydney.edu.au']);
             researcher = result.rows
         } catch (err) {
             console.error(err);
@@ -1091,7 +1083,6 @@ const editresearcherget = async (req, res)=>{
         activity = researcher.activity
         
         // prevents errors (check if the field is null before joining)
-        // TODO: do this validation for edit grant page as well (clean-up)
         if (researcher.publications == null || researcher.publications == undefined || researcher.publications.length == 0) {
             publications = ""
         } else {
@@ -1319,6 +1310,7 @@ const addgrantpost = async (req, res)=>{
         keywords = x.keywords.map(item => item.replace(/<[^>]*>/g, ''));
         deadline = x.deadline.replace(/<[^>]*>/g, '')
 
+        // alert the user if any entries are missing
         if (grantName == undefined || url == undefined || description == undefined || keywords == undefined || deadline == undefined || new Date(deadline) == 'Invalid Date') {
             res.send({alert: 'Some entries appear to be missing. Please try again.'});
             return
@@ -1331,6 +1323,7 @@ const addgrantpost = async (req, res)=>{
         // parse the duration
         duration = parseFloat(x.duration)
 
+        // ensure duration is positive
         if (duration <= 0) {
             res.send({alert: 'Duration must be positive. Please try again.'});
             return
@@ -1360,13 +1353,12 @@ const addgrantpost = async (req, res)=>{
 
     try {
         // get all grant IDs
-        const mq1 = 'SELECT "grantID" FROM grants'
-        const result1 = await queryWithRetry(mq1);
+        const result = await queryWithRetry('SELECT "grantID" FROM grants');
 
         // calculate the maximum grantID
         maxGrantID = 0
-        for (x in result1.rows) {
-            rowID = result1.rows[x].grantID
+        for (x in result.rows) {
+            rowID = result.rows[x].grantID
             if (rowID > maxGrantID) {
                 maxGrantID = rowID
             }
@@ -1493,15 +1485,14 @@ const editgrantpost = async (req, res)=>{
 
     try {
         // get the grant information (to make versionInformation)
-        const mq1 = 'SELECT * FROM grants WHERE "grantID" = $1'
-        const result1 = await queryWithRetry(mq1, [id]);
+        const result = await queryWithRetry('SELECT * FROM grants WHERE "grantID" = $1', [id]);
 
         // ensure that the grant exists
-        if (result1.rows.length == 0) {
+        if (result.rows.length == 0) {
             res.send({alert: 'Something went wrong and we couldn\'t find the grant you were trying to edit. Please check that it exists. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
             return
         }
-        grant = result1.rows[0]
+        grant = result.rows[0]
 
         // get the previous version
         previousVersion = [JSON.stringify(grant.grantName), JSON.stringify(grant.url), JSON.stringify(grant.deadline), JSON.stringify(grant.duration), JSON.stringify(grant.description), JSON.stringify(grant.clusters), JSON.stringify(grant.keywords), JSON.stringify(grant.researchers), JSON.stringify(grant.matched), JSON.stringify(reason)]
@@ -1593,15 +1584,15 @@ const deletegrantpost = async (req, res)=>{
 
     try {
         // get the grants name
-        const mq1 =  'SELECT "grantName" FROM grants WHERE "grantID" = $1'
-        const result1 = await queryWithRetry(mq1, [id]);
+        const result = await queryWithRetry('SELECT "grantName" FROM grants WHERE "grantID" = $1', [id]);
 
-        if (result1.rows.length == 0) {
+        // ensure the grant exists
+        if (result.rows.length == 0) {
             res.send({alert: 'Looks like your grant doesn\'t exist in the first place! Please try again.'})
             return
         }
         
-        grantName = result1.rows[0].grantName
+        grantName = result.rows[0].grantName
 
         // remove the grant from the database
         const mq2 = 'DELETE FROM grants WHERE "grantID" = $1'
@@ -1681,15 +1672,15 @@ const confirmmatchpost = async (req, res)=>{
         researchersEmails = x.researchersEmails.map(item => item.replace(/<[^>]*>/g, ''));
 
         // get the grants name
-        const mq1 =  'SELECT * FROM grants WHERE "grantID" = $1'
-        const result1 = await queryWithRetry(mq1, [id]);
+        const result = await queryWithRetry('SELECT * FROM grants WHERE "grantID" = $1', [id]);
 
-        if (result1.rows.length == 0) {
+        // ensure the grant exists
+        if (result.rows.length == 0) {
             res.send({alert: 'Looks like your grant doesn\'t exist in the first place! Please try again.'})
             return
         }
 
-        grant = result1.rows[0]
+        grant = result.rows[0]
 
         // get the previous version
         previousVersion = [JSON.stringify(grant.grantName), JSON.stringify(grant.url), JSON.stringify(grant.deadline), JSON.stringify(grant.duration), JSON.stringify(grant.description), gJSON.stringify(rant.clusters), JSON.stringify(grant.keywords), JSON.stringify(grant.researchers), JSON.stringify(grant.matched), JSON.stringify("This grant has been matched.")]
@@ -1756,6 +1747,7 @@ const confirmmatchpost = async (req, res)=>{
         versionInformation.push(previousVersion)
         console.log(researchers)
 
+        // update the grants (due to matching)
         const mq6 =  'UPDATE grants SET matched = true, researchers = researchers || $1, "versionInformation" = $2 WHERE "grantID" = $3;'
         const result6 = await queryWithRetry(mq6, [researchersEmails, versionInformation, id]);
 
@@ -1787,8 +1779,7 @@ const addclusterspost = async (req, res)=>{
 
     try {
          // get all clusters
-        const mq = 'SELECT "clusterID" FROM clusters'
-        const result = await queryWithRetry(mq);
+        const result = await queryWithRetry('SELECT "clusterID" FROM clusters');
 
         // calculate the maximum clusterID
         maxClusterID = 0
@@ -1849,9 +1840,8 @@ const confirmrecalculationpost = async (req, res)=>{
         date = `${day}-${month}-${year}`
 
         // get all researcher data
-        const mq1 =  'SELECT * FROM researchers'
-        const result1 = await queryWithRetry(mq1);
-        rows = result1.rows
+        const result = await queryWithRetry('SELECT * FROM researchers');
+        rows = result.rows
 
         /* 
         DATA STRUCTURE JUSTIFICATION - Dictionary of Dictionaries:
@@ -1878,12 +1868,11 @@ const confirmrecalculationpost = async (req, res)=>{
         clusterDictionary = {} // maps cluster name to ID
 
         // get all clusters
-        const mq = 'SELECT * FROM clusters'
-        const result = await queryWithRetry(mq);
+        const result2 = await queryWithRetry('SELECT * FROM clusters');
 
         // map the cluster name to ID
-        for (i in result.rows) {
-            clusterDictionary[result.rows[i].name] = result.rows[i].clusterID
+        for (i in result2.rows) {
+            clusterDictionary[result2.rows[i].name] = result2.rows[i].clusterID
         }
 
         researcher = x.researcher
@@ -2095,7 +2084,7 @@ const concluderecalculationpost = async (req, res)=>{
 
         // otherwise, add 5 to the xp
         currentXp = result2.rows[0].xp
-        const mq3 = 'UPDATE users SET xp = $1 WHERE email = $2' // TODO: get rid of mq (put the fries in the bag lil bro)
+        const mq3 = 'UPDATE users SET xp = $1 WHERE email = $2'
         const result3 = await queryWithRetry(mq3, [currentXp + 5, req.session.useremail]);
 
         // get all changes
