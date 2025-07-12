@@ -351,7 +351,6 @@
                         gender = JSON.parse(version[3])
 
                         // ensure that they arent null
-                        console.log(JSON.parse(version[4]) != null)
                         if (JSON.parse(version[4]) != null) {
                             publications = JSON.parse(version[4]).join('\n')
                         } else {
@@ -389,18 +388,20 @@
 
                         // process the gender, school, and career stage
                         if (gender == 'F') { gender = 'Female' }
-                        if (gender == 'M') { gender = 'Male' }
-                        if (gender == 'N') { gender = 'Non-Binary' }
-                        if (gender == 'U') { gender = 'Unknown' }
+                        else if (gender == 'M') { gender = 'Male' }
+                        else if (gender == 'N') { gender = 'Non-Binary' }
+                        else if (gender == 'U') { gender = 'Unknown' }
+                        else { gender = "Unknown" }
 
                         if (school == 'chemistry') { school = 'School of Chemistry' }
-                        if (school == 'geoscience') { school = 'School of Geosciences' }
-                        if (school == 'biology') { school = 'School of Life and Environmental Sciences' }
-                        if (school == 'veterinary') { school = 'School of Veterinary Science' }
-                        if (school == 'mathematics') { school = 'School of Mathematics and Statistics' }
-                        if (school == 'physics') { school = 'School of Physics' }
-                        if (school == 'philosphy') { school = 'School of History and Philosophy of Science' }
-                        if (school == 'psychology') { school = 'School of Psychology' }
+                        else if (school == 'geoscience') { school = 'School of Geosciences' }
+                        else if (school == 'biology') { school = 'School of Life and Environmental Sciences' }
+                        else if (school == 'veterinary') { school = 'School of Veterinary Science' }
+                        else if (school == 'mathematics') { school = 'School of Mathematics and Statistics' }
+                        else if (school == 'physics') { school = 'School of Physics' }
+                        else if (school == 'philosphy') { school = 'School of History and Philosophy of Science' }
+                        else if (school == 'psychology') { school = 'School of Psychology' }
+                        else { school = "Unknown" }
 
                         if (careerStage == 1) {
                             careerStage = "Post-Doc"

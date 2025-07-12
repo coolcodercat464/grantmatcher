@@ -1027,13 +1027,14 @@ const researcherpageget = async (req, res)=>{
     } else {
         // parse the school value
         if (school == 'chemistry') { school = 'School of Chemistry' }
-        if (school == 'geoscience') { school = 'School of Geosciences' }
-        if (school == 'biology') { school = 'School of Life and Environmental Sciences' }
-        if (school == 'veterinary') { school = 'School of Veterinary Science' }
-        if (school == 'mathematics') { school = 'School of Mathematics and Statistics' }
-        if (school == 'physics') { school = 'School of Physics' }
-        if (school == 'philosphy') { school = 'School of History and Philosophy of Science' }
-        if (school == 'psychology') { school = 'School of Psychology' }
+        else if (school == 'geoscience') { school = 'School of Geosciences' }
+        else if (school == 'biology') { school = 'School of Life and Environmental Sciences' }
+        else if (school == 'veterinary') { school = 'School of Veterinary Science' }
+        else if (school == 'mathematics') { school = 'School of Mathematics and Statistics' }
+        else if (school == 'physics') { school = 'School of Physics' }
+        else if (school == 'philosphy') { school = 'School of History and Philosophy of Science' }
+        else if (school == 'psychology') { school = 'School of Psychology' }
+        else { school = "Unknown" }
     }
 
     if (gender == null || gender == undefined || gender == '') {
@@ -1041,9 +1042,10 @@ const researcherpageget = async (req, res)=>{
     } else {
         // parse the gender value
         if (gender == 'F') { gender = 'Female' }
-        if (gender == 'M') { gender = 'Male' }
-        if (gender == 'N') { gender = 'Non-Binary' }
-        if (gender == 'U') { gender = 'Unknown' }
+        else if (gender == 'M') { gender = 'Male' }
+        else if (gender == 'N') { gender = 'Non-Binary' }
+        else if (gender == 'U') { gender = 'Unknown' }
+        else { gender = "Unknown" }
     }
 
     res.render('researcherPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, id: id, showAlert: 'no', email: email, name: researcherName, gender: gender, school: school, cluster: clusters, activity: activity, careerStage: careerStage, profile: profile, keywords: keywords, grants: grants, grantKeywords: grantKeywords, publications: publications, publicationKeywords: publicationKeywords, dateAdded: dateAdded});
@@ -1311,11 +1313,11 @@ const addgrantpost = async (req, res)=>{
     // validation (will error out if the fields arent in the correct format, thus invalid inputs are handled in the catch part)
     try {
         // isolate each field
-        grantName = x.name
-        url = x.url
-        description = x.description
-        keywords = x.keywords
-        deadline = x.deadline
+        grantName = x.name.replace(/<[^>]*>/g, '')
+        url = x.url.replace(/<[^>]*>/g, '')
+        description = x.description.replace(/<[^>]*>/g, '')
+        keywords = x.keywords.map(item => item.replace(/<[^>]*>/g, ''));
+        deadline = x.deadline.replace(/<[^>]*>/g, '')
 
         if (grantName == undefined || url == undefined || description == undefined || keywords == undefined || deadline == undefined || new Date(deadline) == 'Invalid Date') {
             res.send({alert: 'Some entries appear to be missing. Please try again.'});
@@ -1442,13 +1444,13 @@ const editgrantpost = async (req, res)=>{
         x = req.body
 
         // isolate each field
-        grantName = x.name
-        url = x.url
-        description = x.description
-        deadline = x.deadline
-        keywords = x.keywords
-        researchers = x.researchers
-        reason = x.reason
+        grantName = x.name.replace(/<[^>]*>/g, '');
+        url = x.url.replace(/<[^>]*>/g, '');
+        description = x.description.replace(/<[^>]*>/g, '');
+        deadline = x.deadline.replace(/<[^>]*>/g, '');
+        keywords = x.keywords.map(item => item.replace(/<[^>]*>/g, ''));
+        researchers = x.researchers.map(item => item.replace(/<[^>]*>/g, ''));
+        reason = x.reason.replace(/<[^>]*>/g, '');
 
         if (grantName == undefined || url == undefined || description == undefined || keywords == undefined || deadline == undefined || new Date(deadline) == 'Invalid Date' || reason == undefined || reason.trim() == '') {
             res.send({alert: 'Some entries appear to be missing. Please try again.'});
@@ -1634,7 +1636,7 @@ const deletegrantpost = async (req, res)=>{
 
         // add 'grant deleted' change to changelog
         const mq4 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result4 = await queryWithRetry(mq4, [nextChangeID, req.session.useremail, 'Grant Deleted', date, `The grant "${grantName}" has been deleted. The reason provided was "${x.reason}"`, '{}']);
+        const result4 = await queryWithRetry(mq4, [nextChangeID, req.session.useremail, 'Grant Deleted', date, `The grant "${grantName}" has been deleted. The reason provided was "${x.reason.replace(/<[^>]*>/g, '')}"`, '{}']);
 
         res.send({success: 'success'})
     } catch (err) {
@@ -1675,8 +1677,8 @@ const confirmmatchpost = async (req, res)=>{
 
     try {
         // get the researchers
-        researchers = x.researchersNames.join(", ")
-        researchersEmails = x.researchersEmails
+        researchers = x.researchersNames.join(", ").replace(/<[^>]*>/g, '')
+        researchersEmails = x.researchersEmails.map(item => item.replace(/<[^>]*>/g, ''));
 
         // get the grants name
         const mq1 =  'SELECT * FROM grants WHERE "grantID" = $1'
@@ -1799,7 +1801,7 @@ const addclusterspost = async (req, res)=>{
 
         // add each cluster to the database
         for (i in x.generatedClusters) {
-            clusterName = x.generatedClusters[i]
+            clusterName = x.generatedClusters[i].replace(/<[^>]*>/g, '')
 
             // add the cluster to the database
             await queryWithRetry('INSERT INTO clusters ("clusterID", name, description) VALUES ($1, $2, $3)', [maxClusterID+1, clusterName, "No description for this cluster yet."]);
@@ -1887,19 +1889,19 @@ const confirmrecalculationpost = async (req, res)=>{
         researcher = x.researcher
     
         // get the researcher's details
-        researcherName = researcher.name
-        researcherEmail = researcher.email
+        researcherName = researcher.name.replace(/<[^>]*>/g, '')
+        researcherEmail = researcher.email.replace(/<[^>]*>/g, '')
         researcherSchool = researcher.school
         researcherGender = researcher.gender
         researcherCds = researcher.cds
-        researcherActivity = researcher.activity
-        researcherGrantKW = researcher.grant_keywords
-        researcherGrant = researcher.grants
-        researcherKW = researcher.keywords
-        researcherProfile = researcher.profile
-        researcherPub = researcher.pubs
-        researcherPubKW = researcher.pubs_keywords
-        researcherCluster = researcher.clusters
+        researcherActivity = researcher.activity.replace(/<[^>]*>/g, '')
+        researcherGrantKW = researcher.grant_keywords.map(item => item.replace(/<[^>]*>/g, ''));
+        researcherGrant = researcher.grants.map(item => item.replace(/<[^>]*>/g, ''));
+        researcherKW = researcher.keywords.map(item => item.replace(/<[^>]*>/g, ''));
+        researcherProfile = researcher.profile.replace(/<[^>]*>/g, '')
+        researcherPub = researcher.pubs.map(item => item.replace(/<[^>]*>/g, ''));
+        researcherPubKW = researcher.pubs_keywords.map(item => item.replace(/<[^>]*>/g, ''));
+        researcherCluster = researcher.clusters.map(item => item.replace(/<[^>]*>/g, ''));
 
         /* 
         DATA STRUCTURE JUSTIFICATION - Dictionary:
@@ -2069,7 +2071,7 @@ const concluderecalculationpost = async (req, res)=>{
 
     try {
         // get researcher names
-        researcherNames = x.researchers.join(", ")
+        researcherNames = x.researchers.join(", ").replace(/<[^>]*>/g, '')
 
         // get the current date
         now = new Date();
@@ -2172,7 +2174,7 @@ const addcodepost = async (req, res)=>{
         date = `${day}-${month}-${year}`
 
         // add the researcher
-        await queryWithRetry('INSERT INTO codes ("userEmail", code, "role", "dateAdded") VALUES ($1, $2, $3, $4)', [x.email, x.code, x.role, date]);
+        await queryWithRetry('INSERT INTO codes ("userEmail", code, "role", "dateAdded") VALUES ($1, $2, $3, $4)', [x.email.replace(/<[^>]*>/g, ''), x.code.replace(/<[^>]*>/g, ''), x.role.replace(/<[^>]*>/g, ''), date]);
         
         // get the current xp
         const mq2 = 'SELECT xp FROM users WHERE email = $1'
@@ -2206,7 +2208,7 @@ const addcodepost = async (req, res)=>{
 
         // add 'code added' change to changelog
         const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Code Added', date, `A new code has been added for a new user with the email ${x.email}.`, '{}']);
+        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Code Added', date, `A new code has been added for a new user with the email ${x.email.replace(/<[^>]*>/g, '')}.`, '{}']);
         
         res.send({success: 'success'})
     } catch (err) {
@@ -2264,7 +2266,7 @@ const removecodepost = async (req, res)=>{
         date = `${day}-${month}-${year}`
 
         // try find the code
-        const result2 = await queryWithRetry('SELECT "userEmail" FROM codes WHERE code = $1', [x.code]);
+        const result2 = await queryWithRetry('SELECT "userEmail" FROM codes WHERE code = $1', [x.code.replace(/<[^>]*>/g, '')]);
         codeToDelete = result2.rows
 
         // ensure that the code exists
@@ -2277,7 +2279,7 @@ const removecodepost = async (req, res)=>{
         userEmail = codeToDelete.userEmail
 
         // remove the code
-        await queryWithRetry('DELETE FROM codes WHERE code = $1', [x.code]);
+        await queryWithRetry('DELETE FROM codes WHERE code = $1', [x.code.replace(/<[^>]*>/g, '')]);
         
         // get all changes
         const mq4 = 'SELECT "changeID" FROM changelog'
@@ -2297,7 +2299,7 @@ const removecodepost = async (req, res)=>{
 
         // add 'code deleted' change to changelog
         const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Code Deleted', date, `The code for ${userEmail} has been deleted.`, '{}']);
+        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Code Deleted', date, `The code for ${userEmail.replace(/<[^>]*>/g, '')} has been deleted.`, '{}']);
         
         res.send({success: 'success'})
     } catch (err) {
@@ -2328,7 +2330,7 @@ const deleteresearcherpost = async (req, res)=>{
         res.send({alert: 'It looks like no reason for researcher deletion was provided. Please try again.'});
         return
     } else {
-        reason = x.reason
+        reason = x.reason.replace(/<[^>]*>/g, '')
     }
 
     try {
@@ -2406,20 +2408,20 @@ const editresearcherpost = async (req, res)=>{
         x = req.body
 
         // isolate each field
-        researcherName = x.name
-        email = x.email
+        researcherName = x.name.replace(/<[^>]*>/g, '')
+        email = x.email.replace(/<[^>]*>/g, '')
         school = x.school
         gender = x.gender
         careerStage = x.careerStage
-        activity = x.activity
+        activity = x.activity.replace(/<[^>]*>/g, '')
         clusters = x.clusters
-        profile = x.profile
-        keywords = x.keywords
-        publications = x.publications
-        publicationKeywords = x.publicationKeywords
-        grants = x.grants
-        grantKeywords = x.grantKeywords
-        reason = x.reason
+        profile = x.profile.replace(/<[^>]*>/g, '')
+        keywords = x.keywords.map(item => item.replace(/<[^>]*>/g, ''));
+        publications = x.publications.map(item => item.replace(/<[^>]*>/g, ''));
+        publicationKeywords = x.publicationKeywords.map(item => item.replace(/<[^>]*>/g, ''));
+        grants = x.grants.map(item => item.replace(/<[^>]*>/g, ''));
+        grantKeywords = x.grantKeywords.map(item => item.replace(/<[^>]*>/g, ''));
+        reason = x.reason.replace(/<[^>]*>/g, '')
 
         // parse the activity
         activity = parseFloat(activity)
