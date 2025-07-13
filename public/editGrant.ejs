@@ -345,6 +345,7 @@
 
             // validation for name, url, deadline, duration, and description
             if (grantName.trim() == '' || url.trim() == '' || deadline.trim() == '' || duration.trim() == '' || description.trim() == '') {
+                document.getElementById("modal3").style.display = 'none'
                 openModal(4)
             } else {
                 data = {

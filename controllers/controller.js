@@ -1129,6 +1129,19 @@ const editresearcherget = async (req, res)=>{
     }
 }
 
+// present the add researcher page
+const addresearcherget = async (req, res)=>{
+    console.log("ADD RESEARCHER GET")
+
+    // only allow them to add researchers if they havent been authenticated yet
+    if (req.isAuthenticated()) {
+        res.render('addResearcher.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
+    } else {
+        urlinit = '/addresearcher' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
 // POST
 // when user logs out
 const indexpost = (req, res, next) => {
@@ -1310,9 +1323,9 @@ const addgrantpost = async (req, res)=>{
         keywords = x.keywords.map(item => item.replace(/<[^>]*>/g, ''));
         deadline = x.deadline.replace(/<[^>]*>/g, '')
 
-        // alert the user if any entries are missing
-        if (grantName == undefined || url == undefined || description == undefined || keywords == undefined || deadline == undefined || new Date(deadline) == 'Invalid Date') {
-            res.send({alert: 'Some entries appear to be missing. Please try again.'});
+        // alert the user if the date is invalid
+        if (new Date(deadline) == 'Invalid Date') {
+            res.send({alert: 'The date is invalid. Please try again.'});
             return
         }
 
@@ -2552,6 +2565,121 @@ const editresearcherpost = async (req, res)=>{
     }
 }
 
+// add a new researcher
+const addresearcherpost = async (req, res)=>{
+    console.log("ADD RESEARCHER POST")
+
+    // get the user inputs
+    x = req.body
+    console.log(x)
+
+    /*
+        "name": researcherName,
+        "email": email,
+        "gender": gender,
+        "school": school,
+        "career": career,
+        "activity": activity,
+        "profile": profile,
+        "cluster": getSelectedClusterNames(1),
+        "keywords": getKeywords(1),
+        "publications": getKeywords(2),
+        "publicationKeywords": getKeywords(3),
+        "grants": getKeywords(4),
+        "grantKeywords": getKeywords(5),
+    */
+
+    // ensure that user is authenticated
+    if (req.isAuthenticated() == false) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    // validation (will error out if the fields arent in the correct format, thus invalid inputs are handled in the catch part)
+    try {
+        // isolate each field
+        researcherName = x.name.replace(/<[^>]*>/g, '')
+        email = x.email.replace(/<[^>]*>/g, '')
+        gender = x.gender.replace(/<[^>]*>/g, '')
+        school = x.school.replace(/<[^>]*>/g, '')
+        career = x.career.replace(/<[^>]*>/g, '')
+        activity = x.activity.replace(/<[^>]*>/g, '')
+        profile = x.profile.replace(/<[^>]*>/g, '')
+
+        keywords = x.keywords.map(item => item.replace(/<[^>]*>/g, ''));
+        publications = x.publications.map(item => item.replace(/<[^>]*>/g, ''));
+        publicationKeywords = x.publicationKeywords.map(item => item.replace(/<[^>]*>/g, ''));
+        grants = x.grants.map(item => item.replace(/<[^>]*>/g, ''));
+        grantKeywords = x.grantKeywords.map(item => item.replace(/<[^>]*>/g, ''));
+        
+        // the clusters list will contain two lists - one is a list of names and the
+        // other is a list of element IDs (from the DOM)
+        clustersElementId = x.clusters[1]
+        clustersId = []
+
+        // isolate the cluster IDs from the element ID list
+        for (i in clustersElementId) {
+            clusterID = clustersElementId[i].split('S')[1]
+            if (isStringInteger(clusterID) == false || parseInt(clusterID) < 0) {
+                res.send({alert: 'Your clusters are invalid. Please refresh the page and try again.'});
+                return
+            }
+            clustersId.push(parseInt(clusterID))
+        }
+    } catch (err) {
+        console.error(err);
+
+        // if an error occurs, tell the user
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+        return
+    }
+
+    try {
+        // get the current date
+        now = new Date();
+
+        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+        year = now.getFullYear()
+        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+        // stringify it
+        date = `${day}-${month}-${year}`
+
+        // add the researcher to researchers table
+        await queryWithRetry('INSERT INTO researchers (email, name, school, gender, publications, "publicationKeywords", grants, "grantKeywords", keywords, clusters, profile, activity, "careerStage", "versionInformation", "dateAdded") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)', [email, researcherName, school, gender, publications, publicationKeywords, grants, grantKeywords, keywords, clustersId, profile, activity, career, [], date]);
+        
+        // get all changes
+        const result = await queryWithRetry('SELECT "changeID" FROM changelog');
+
+        // calculate the maximum changeID
+        maxChangeID = 0
+        for (x in result.rows) {
+            rowID = result.rows[x].changeID
+            if (rowID > maxChangeID) {
+                maxChangeID = rowID
+            }
+        }
+
+        // calculate the next change ID
+        nextChangeID = maxChangeID + 1
+
+        // add 'researcher added' change to changelog
+        const mq2 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
+        await queryWithRetry(mq2, [nextChangeID, req.session.useremail, 'Researcher Added', date, `The researcher "${researcherName}" has been added. Check it out now!`, '{}']);
+
+        // redirect to the researcher page
+        uniqueId = email.split("@")[0]
+        res.send({"id": uniqueId})
+    } catch (err) {
+        console.error(err);
+
+        // if an error occurs, tell the user
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+    }
+} 
+
+
 // Export of all methods as object 
 module.exports = { 
     dbgrants,
@@ -2578,6 +2706,7 @@ module.exports = {
     managecodesget,
     researcherpageget,
     editresearcherget,
+    addresearcherget,
 
     indexpost,
     loginpost,
@@ -2593,4 +2722,5 @@ module.exports = {
     removecodepost,
     deleteresearcherpost,
     editresearcherpost,
+    addresearcherpost
 }

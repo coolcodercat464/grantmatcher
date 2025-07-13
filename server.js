@@ -44,8 +44,8 @@ const db = require('./databases/postgres.js')             // database stuff
 
 // get and post routing
 app.get(['/db/grants', '/db/researchers', '/db/users', '/db/clusters', '/db/changelog', '/db/grants/version/:id', '/db/codes', '/db/researchers/version/:id'], routes) // database stuff
-app.get(['/', '/login', '/signup', '/addgrant', '/grant/:id', '/editgrant/:id', '/match/:id', '/recalculate', '/managecodes', '/researcher/:id', '/editresearcher/:id'], routes)
-app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id', '/deletegrant/:id', '/deleteresearcher/:id','/confirmmatch/:id', '/confirmrecalculation', '/concluderecalculation', '/addclusters', '/addcode', '/removecode', '/editresearcher/:id'], routes)
+app.get(['/', '/login', '/signup', '/addgrant', '/grant/:id', '/editgrant/:id', '/match/:id', '/recalculate', '/managecodes', '/researcher/:id', '/editresearcher/:id', '/addresearcher'], routes)
+app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id', '/deletegrant/:id', '/deleteresearcher/:id','/confirmmatch/:id', '/confirmrecalculation', '/concluderecalculation', '/addclusters', '/addcode', '/removecode', '/editresearcher/:id', '/addresearcher'], routes)
 app.post(['/clustermatch', '/match', '/recalculate'], routes) // nlp routes
 
 // listen to port

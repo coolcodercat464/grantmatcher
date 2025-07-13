@@ -40,6 +40,9 @@ router.post('/removecode', control.removecodepost)
 router.get('/addgrant', control.addgrantget)
 router.post('/addgrant', control.addgrantpost)
 
+router.get('/addresearcher', control.addresearcherget)
+router.post('/addresearcher', control.addresearcherpost)
+
 router.get('/grant/:id', control.grantpageget)
 router.get('/researcher/:id', control.researcherpageget)
 
