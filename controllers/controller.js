@@ -1883,14 +1883,14 @@ const confirmrecalculationpost = async (req, res)=>{
         researcherSchool = researcher.school
         researcherGender = researcher.gender
         researcherCds = researcher.cds
-        researcherActivity = researcher.activity.replace(/<[^>]*>/g, '')
-        researcherGrantKW = researcher.grant_keywords.map(item => item.replace(/<[^>]*>/g, ''));
-        researcherGrant = researcher.grants.map(item => item.replace(/<[^>]*>/g, ''));
-        researcherKW = researcher.keywords.map(item => item.replace(/<[^>]*>/g, ''));
-        researcherProfile = researcher.profile.replace(/<[^>]*>/g, '')
-        researcherPub = researcher.pubs.map(item => item.replace(/<[^>]*>/g, ''));
-        researcherPubKW = researcher.pubs_keywords.map(item => item.replace(/<[^>]*>/g, ''));
-        researcherCluster = researcher.clusters.map(item => item.replace(/<[^>]*>/g, ''));
+        researcherActivity = researcher.activity
+        researcherGrantKW = researcher.grant_keywords
+        researcherGrant = researcher.grants
+        researcherKW = researcher.keywords
+        researcherProfile = researcher.profile
+        researcherPub = researcher.pubs
+        researcherPubKW = researcher.pubs_keywords
+        researcherCluster = researcher.clusters
 
         /* 
         DATA STRUCTURE JUSTIFICATION - Dictionary:
@@ -1976,6 +1976,17 @@ const confirmrecalculationpost = async (req, res)=>{
                             newValue = 'U'
                         }
                     }
+
+                    // remove html tags (prevent xss)
+                    if (Array.isArray(newValue)) {
+                        newValue = newValue.filter(function(item) {
+                            return item != undefined
+                        });
+                        newValue = newValue.map(item => item.replace(/<[^>]*>/g, ''));
+                    } else {
+                        newValue = newValue.replace(/<[^>]*>/g, '')
+                    }
+                    
                     // update that value
                     await queryWithRetry('UPDATE researchers SET "' + column + '" = $1 WHERE email = $2;', [newValue, researcherEmail]);
                 }
@@ -2024,6 +2035,16 @@ const confirmrecalculationpost = async (req, res)=>{
                         } else {
                             newValue = 'U'
                         }
+                    }
+
+                    // remove html tags (prevent xss)
+                    if (Array.isArray(newValue)) {
+                        newValue = newValue.filter(function(item) {
+                            return item != undefined
+                        });
+                        newValue = newValue.map(item => item.replace(/<[^>]*>/g, ''));
+                    } else {
+                        newValue = newValue.replace(/<[^>]*>/g, '')
                     }
 
                     // update that value
