@@ -210,6 +210,8 @@ function resetSelectedClusterSearch(selectorId) {
 }
 
 // KEYWORD SELECTOR STUFF
+maxSpanId = 0
+
 // get all keywords in a keyword selector
 function getKeywords(id) {
     // get the list based on the ID number
@@ -262,7 +264,7 @@ function addEditableKeyword(id) {
     keyword = input.value
 
     // add the keyword
-    addEditableKeywordManual(id, keyword)
+    addEditableKeywordManual(id, keyword, parseInt(maxSpanId)+1)
 }
 
 // add a keyword (from the function parameters) to a keyword selector
@@ -293,6 +295,10 @@ function addEditableKeywordManual(id, keyword, spanId) {
         keywordElement = `<li id='kw${id}-${numKeywords}' class='listboxliwhite'><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteEditableKeyword(${id}, ${numKeywords})"></i> <span contenteditable="true" id='${spanId}'>${keyword}</span></li>`
     } else {
         keywordElement = `<li id='kw${id}-${numKeywords}' class='listboxligray'><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteEditableKeyword(${id}, ${numKeywords})"></i> <span contenteditable="true" id='${spanId}'>${keyword}</span></li>`
+    }
+
+    if (maxSpanId < spanId) {
+        maxSpanId = spanId
     }
     
     // add the new keyword to the list

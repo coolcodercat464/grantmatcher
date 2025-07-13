@@ -603,9 +603,20 @@ const nlprecalculate = async (req, res) => {
 
       error = false; // whether an error occured or not (prevents multiple headers error)
 
+      // get the clusters
+      clusterNames = []
+      // if they don't want to add new clusters
+      if (x.addClusters == 'no') {
+        clusters = await queryWithRetry('SELECT name FROM clusters')
+        clusters = clusters.rows
+        for (i in clusters) {
+            clusterNames.push(clusters[i].name) // add the name to the list
+        }
+      }
+
       // execute the python script
       const scriptExecution = spawn(pythonExecutable, 
-        ["recalculate.py", JSON.stringify(x.fields), JSON.stringify(x.researchers), x.number, x.strictness, x.range, x.googleScholar]);
+        ["recalculate.py", JSON.stringify(x.fields), JSON.stringify(x.researchers), x.number, x.strictness, x.range, x.googleScholar, JSON.stringify(clusterNames)]);
 
       // Handle normal output
       scriptExecution.stdout.on('data', async (data) => {
@@ -636,7 +647,7 @@ const nlprecalculate = async (req, res) => {
       });
     } catch (err) {
       console.log(err)
-      res.send({status: "error", alert: "Something wrong happened while recalculating researchers. Please try again. If this problem persists, please open a ticket to let me know."})
+      res.send({status: "error", alert: "Something wrong happened while recalculating researchers. Please try again and make sure you fill in all fields. If this problem persists, please open a ticket to let me know."})
       return
     }
 }
@@ -1969,7 +1980,9 @@ const confirmrecalculationpost = async (req, res)=>{
             await queryWithRetry('UPDATE researchers SET "versionInformation" = $1 WHERE email = $2;', [versionInformation, researcherEmail]);
 
             // update each piece of information to the database
+            // TODO: make sure clusters arent entirely overwritten
             Object.entries(newResearcher).forEach(async ([column,newValue]) => {
+                console.log(column, newValue)
                 if (newValue == undefined || prevResearcher[column] == newValue) {
                     // that value hasnt been updated
                     // so dont have to do anything
@@ -2016,7 +2029,7 @@ const confirmrecalculationpost = async (req, res)=>{
                         newValue = newValue.filter(function(item) {
                             return item != undefined
                         });
-                        newValue = newValue.map(item => item.replace(/<[^>]*>/g, ''));
+                        newValue = newValue.map(item => item.toString().replace(/<[^>]*>/g, ''));
                     } else {
                         newValue = newValue.replace(/<[^>]*>/g, '')
                     }
@@ -2076,7 +2089,8 @@ const confirmrecalculationpost = async (req, res)=>{
                         newValue = newValue.filter(function(item) {
                             return item != undefined
                         });
-                        newValue = newValue.map(item => item.replace(/<[^>]*>/g, ''));
+                        console.log(newValue)
+                        newValue = newValue.map(item => item.toString().replace(/<[^>]*>/g, ''));
                     } else {
                         newValue = newValue.replace(/<[^>]*>/g, '')
                     }

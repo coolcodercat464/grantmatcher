@@ -155,7 +155,6 @@ def get_categories(texts, num_clusters=45):
 
 def get_top_keywords(model, feature_names, n_terms=2):
     '''Generates a suitable name for a cluster'''
-    cluster_dictionary = {}
     cluster_names = []
 
     for i, cluster_center in enumerate(model.cluster_centers_):
@@ -166,14 +165,10 @@ def get_top_keywords(model, feature_names, n_terms=2):
         
         top2_indices = sorted_indices[-2:]
         top2_indices = [feature_names[j] for j in reversed(top2_indices)]
+        
+        cluster_names.append(' and '.join(top2_indices))
 
-        top6_indices = sorted_indices[-6:]
-        top6_indices = [feature_names[j] for j in reversed(top6_indices)]
-
-        cluster_dictionary[i] = {'name': top2_indices, 'description': top6_indices}
-        cluster_names.append(', '.join(top2_indices))
-
-    return cluster_dictionary, cluster_names
+    return cluster_names
 
 def extract_keywords(text_en, num=10, maxlength=3):
     '''Gets keywords from a piece of text'''
@@ -238,7 +233,7 @@ def get_pubs(urlId):
 
     return (pubs, pubs_kw)
 
-def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, maxNumber, googlescholar=True, url="https://www.sydney.edu.au/AcademicProfiles/interfaces/rest/performSimpleAttributeSearch/+jobType:1%20+orgUnitCode:5000053020L0000%20+isMediaExpert:true/0/270/byRelevance/false"):
+def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, maxNumber, clusters, googlescholar=True, url="https://www.sydney.edu.au/AcademicProfiles/interfaces/rest/performSimpleAttributeSearch/+jobType:1%20+orgUnitCode:5000053020L0000%20+isMediaExpert:true/0/270/byRelevance/false"):
     # Important Lists (Internal Data Storage)
     texts = []         # list of all keywords (for cluster generation)
     researchers = {}   # where all the researcher's information will be stored in
@@ -470,11 +465,15 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
         # Initialise the sentence transformer model
         model = SentenceTransformer('all-MiniLM-L6-v2')
 
-        # Generate clusters
-        kmeans, clusters, vectorizer = get_categories(texts, num_clusters=maxNumber)
+        # generate clusters if they aren't already provided
+        if clusters == []:
+            # Generate clusters
+            kmeans, _, vectorizer = get_categories(texts, num_clusters=maxNumber)
 
-        # Generate names for clusters
-        clusters_dictionary, categories = get_top_keywords(kmeans, vectorizer.get_feature_names_out())
+            # Generate names for clusters
+            categories = get_top_keywords(kmeans, vectorizer.get_feature_names_out())
+        else:
+            categories = clusters
 
         # Check time
         toc = time.perf_counter()
@@ -492,10 +491,9 @@ def main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, m
         toc = time.perf_counter()
         #print(f"Build finished in {(toc - tic)/60:0.0f} minutes {(toc - tic)%60:0.0f} seconds")
         #print(f"Build finished in {toc - tic:0.4f} seconds")
-        return researchers, clusters_dictionary
-    
-    return researchers, None
-'''
+
+    return researchers
+
 # get the information from nodejs
 affectedFields = json.loads(sys.argv[1])
 affectedResearchers = json.loads(sys.argv[2])
@@ -503,6 +501,7 @@ maxNumber = int(sys.argv[3])
 strictness = float(sys.argv[4])
 clusterRangeSetting = float(sys.argv[5])
 googlescholar = sys.argv[6]
+clusters = json.loads(sys.argv[7])
 
 # process the information from nodejs
 if googlescholar == 'yes':
@@ -521,8 +520,8 @@ clusterRangeSetting = 0.15
 strictness = 0.25
 maxNumber = 50
 googlescholar = True
-# TODO: add option so that the user can choose to keep or make new clusters
+'''
 
 url = "https://www.sydney.edu.au/AcademicProfiles/interfaces/rest/performSimpleAttributeSearch/+jobType:1%20+orgUnitCode:5000053020L0000%20+isMediaExpert:true/0/270/byRelevance/false"
-researchers, clusters = main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, maxNumber, googlescholar, url)
+researchers = main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, maxNumber, clusters, googlescholar, url)
 sys.stdout.write(json.dumps(researchers)) # output

@@ -667,6 +667,21 @@
                         </label><br>
                         <input type="number" class="form-control" style="width: 100%" min="0" max="1" step="0.01" id="rangeCluster">
                     </div>
+                </div><br>
+                <p>Finally, would you like to recalculate the clusters or not? If no, then we will only match the researchers to existing clusters.
+                    If yes, then we will generate new clusters and match the researchers to those new clusters (but the researchers will still have
+                    their old clusters if they are already in the database).
+                </p>
+                <div class="together">
+                    <div>
+                        <input type="radio" id="yes" name="addClusters" value="yes">
+                        <label for="yes"> Yes</label>
+                    </div>
+                    <div class="spacer"></div>
+                    <div>
+                        <input type="radio" id="no" name="addClusters" value="no">
+                        <label for="no"> No</label>
+                    </div>
                 </div>
             </div>
             <div style="padding: 15px; border: 2px solid black; border-radius: 15px; display: none; margin-bottom: 15px;" id="keywordParameters">
@@ -771,6 +786,7 @@
 
         selectedNames = [] // stores the names of the selected researchers
         selectedIds = [] // stores the uniqueID of the selected researchers
+        // TODO: issue with selectedIds (out of sync with selectedEmails)
         selectedEmails = [] // stores the emails of the selected researchers
 
         confirmedNames = [] // stores the names of the confirmed researchers
@@ -852,10 +868,15 @@
 
                         // If the checkbox is checked, add it to the displayed list
                         if (checkbox.checked == true){
-                            // add to relevant lists
-                            selectedEmails.push(row.email)
-                            selectedIds.push(uniqueId)
-                            selectedNames.push(row.name)
+                            // add to array when it isnt in the array
+                            if (!selectedEmails.includes(row.email)) { 
+                                // add to relevant lists
+                                selectedEmails.push(row.email)
+                                selectedIds.push(uniqueId)
+                                selectedNames.push(row.name)
+                            } else {
+                                console.log("ERROR - Already exists")
+                            }
 
                             tableData[7].dataSet[tableIndex].selected = true // change the table data
                         } else {
@@ -874,16 +895,16 @@
                             if (index > -1) { 
                                 selectedNames.splice(index, 1); // remove the researcher from the list
                             } else {
-                                console.log("ERROR - Name does not exist in the list of emails")
+                                console.log("ERROR - Name does not exist in the list of names")
                             }
 
                             // remove from ids list
-                            index = selectedIds.indexOf(row.uniqueId);
+                            index = selectedIds.indexOf(uniqueId);
                             // only splice array when item is found
                             if (index > -1) { 
                                 selectedIds.splice(index, 1); // remove the researcher from the list
                             } else {
-                                console.log("ERROR - ID does not exist in the list of emails")
+                                console.log("ERROR - ID does not exist in the list of IDs")
                             }
 
                             tableData[7].dataSet[tableIndex].selected = false // change the table data
@@ -929,10 +950,15 @@
 
                     // If the checkbox is checked, add it to the displayed list
                     if (checkbox.checked == true){
-                        // add to relevant lists
-                        confirmedEmails.push(row.email)
-                        confirmedIds.push(row.uniqueId)
-                        confirmedNames.push(row.name)
+                        // add to array when it isnt in the array
+                        if (!confirmedEmails.includes(row.email)) { 
+                            // add to relevant lists
+                            confirmedEmails.push(row.email)
+                            confirmedIds.push(row.uniqueId)
+                            confirmedNames.push(row.name)
+                        } else {
+                            console.log("ERROR - Already exists")
+                        }          
 
                         tableData[8].dataSet[tableIndex].selected = true // change the table data
                     } else {
@@ -951,16 +977,16 @@
                         if (index > -1) { 
                             confirmedNames.splice(index, 1); // remove the researcher from the list
                         } else {
-                            console.log("ERROR - Name does not exist in the list of emails")
+                            console.log("ERROR - Name does not exist in the list of names")
                         }
 
                         // remove from ids list
-                        index = confirmedIds.indexOf(row.uniqueId);
+                        index = confirmedIds.indexOf(uniqueId);
                         // only splice array when item is found
                         if (index > -1) { 
                             confirmedIds.splice(index, 1); // remove the researcher from the list
                         } else {
-                            console.log("ERROR - ID does not exist in the list of emails")
+                            console.log("ERROR - ID does not exist in the list of IDs")
                         }
 
                         tableData[8].dataSet[tableIndex].selected = false // change the table data
@@ -974,18 +1000,19 @@
         }
         
         // confirm all researchers (saves time, improves efficiency)
+        // TODO: only confirm all on the page (showRows)
         function confirmAll() {
             // update the dataset for each researcher
-            for (x in tableData[8].dataSet) {
-                tableData[8].dataSet[x].selected = true
+            for (x in tableData[8].showRows) {
+                tableData[8].showRows[x].selected = true
 
                 // get the researcher's information
-                researcher = tableData[8].dataSet[x]
+                researcher = tableData[8].showRows[x]
                 email = researcher.email
                 name = researcher.name
                 uniqueId = email.split("@")[0]
 
-                if (!confirmedIds.includes(email)) {
+                if (!confirmedIds.includes(uniqueId)) {
                     confirmedIds.push(uniqueId)
                     confirmedEmails.push(email)
                     confirmedNames.push(name)
@@ -1000,16 +1027,16 @@
         // select all researchers (saves time, improves efficiency)
         function selectAll() {
             // update the dataset for each researcher
-            for (x in tableData[7].dataSet) {
-                tableData[7].dataSet[x].selected = true
+            for (x in tableData[7].showRows) {
+                tableData[7].showRows[x].selected = true
 
                 // get the researcher's information
-                researcher = tableData[7].dataSet[x]
+                researcher = tableData[7].showRows[x]
                 email = researcher.email
                 name = researcher.name
                 uniqueId = email.split("@")[0]
 
-                if (!selectedIds.includes(email)) {
+                if (!selectedIds.includes(uniqueId)) {
                     selectedIds.push(uniqueId)
                     selectedEmails.push(email)
                     selectedNames.push(name)
@@ -1062,6 +1089,8 @@
         recalculatedFieldNames = []
 
         generatedClusters = [] // will hold all cluster names
+        existingClusters = []
+        addClusters = false;
 
         // capitalise the first letter of a word (e.g., "paris" --> "Paris")
         function capitalizeFirstLetter(str) {
@@ -1118,9 +1147,10 @@
                     number = document.getElementById("numberCluster")
                     strictness = document.getElementById("strictnessCluster")
                     range = document.getElementById("rangeCluster")
+                    addClusters = document.querySelector('input[name="addClusters"]:checked');
 
                     // if one of those fields isnt provided
-                    if (number.value == '' || strictness.value == '' || range.value == '') {
+                    if (number.value == '' || strictness.value == '' || range.value == '' || !addClusters) {
                         // open error modal
                         document.getElementById('modal3').style.display = 'none'
                         document.getElementById("showAlert").textContent = 'Make sure the Cluster Parameters section is filled and valid.'
@@ -1131,6 +1161,9 @@
                         data['number'] = number.value
                         data['strictness'] = strictness.value
                         data['range'] = range.value
+                        data['addClusters'] = addClusters.value
+
+                        if (addClusters.value == 'yes') { addClusters = true; }
                     }
                 } else {
                     // if clusters isnt selected, use any value
@@ -1169,7 +1202,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
-                }).then(response => response.json()).then(result => {
+                }).then(response => response.json()).then(async result => {
                     // stop the spinner
                     document.getElementById("loadingSpinner").style.display = 'none'
 
@@ -1236,6 +1269,16 @@
                             }
                         })
 
+                        // get clusters (to make generatedClusters as it doesnt include those that are
+                        // already in the database)
+                        await fetch('/db/clusters').then(response => response.json()).then(data => {
+                            // iterate over the researchers
+                            for (var i = 0; i < data.length; i++) {
+                                cluster = data[i]
+                                existingClusters.push(cluster.name)
+                            }
+                        })
+
                         // iterate over the researchers
                         Object.entries(result).forEach(([uniqueId,researcher]) => {
                             // this will eventually be added to the table's dataset
@@ -1260,7 +1303,7 @@
                                     // iterate over clusters
                                     for (c in v) {
                                         clusterName = v[c]
-                                        if (!generatedClusters.includes(clusterName)) {
+                                        if (!generatedClusters.includes(clusterName) && !existingClusters.includes(clusterName)) {
                                             // add to generatedClusters if it isnt in there already
                                             generatedClusters.push(clusterName)
                                         }
@@ -1305,7 +1348,7 @@
             // only get the confirmed researchers
             const result = tableData[8].dataSet.filter(checkConfirmed);
 
-            if (data.fields.includes('clusters')) {
+            if (data.fields.includes('clusters') && addClusters) {
                 document.getElementById("loadingSpinner").style.display = 'block'
 
                 fetch('/addclusters', {
