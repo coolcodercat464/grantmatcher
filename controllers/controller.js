@@ -1174,6 +1174,19 @@ const manageclustersget = async (req, res)=>{
     }
 } 
 
+// present the tickets page
+const ticketsget = async (req, res)=>{
+    console.log("TICKETS GET")
+
+    // only allow them to see tickets if they have been authenticated
+    if (req.isAuthenticated()) {
+        res.render('tickets.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
+    } else {
+        urlinit = '/tickets' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
 // POST
 // when user logs out
 const indexpost = (req, res, next) => {
@@ -2827,6 +2840,22 @@ const manageclusterspost = async (req, res)=>{
     }
 } 
 
+// add a ticket
+const ticketspost = async (req, res)=>{
+    console.log("TICKETS POST")
+
+    x = req.body
+    console.log(x)
+
+    // only allow them to see tickets if they have been authenticated
+    if (req.isAuthenticated()) {
+        res.render('tickets.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
+    } else {
+        urlinit = '/tickets' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
 // Export of all methods as object 
 module.exports = { 
     dbgrants,
@@ -2855,6 +2884,7 @@ module.exports = {
     editresearcherget,
     addresearcherget,
     manageclustersget,
+    ticketsget,
 
     indexpost,
     loginpost,
@@ -2872,4 +2902,5 @@ module.exports = {
     editresearcherpost,
     addresearcherpost,
     manageclusterspost,
+    ticketspost,
 }
