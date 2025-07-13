@@ -2602,22 +2602,6 @@ const addresearcherpost = async (req, res)=>{
     x = req.body
     console.log(x)
 
-    /*
-        "name": researcherName,
-        "email": email,
-        "gender": gender,
-        "school": school,
-        "career": career,
-        "activity": activity,
-        "profile": profile,
-        "cluster": getSelectedClusterNames(1),
-        "keywords": getKeywords(1),
-        "publications": getKeywords(2),
-        "publicationKeywords": getKeywords(3),
-        "grants": getKeywords(4),
-        "grantKeywords": getKeywords(5),
-    */
-
     // ensure that user is authenticated
     if (req.isAuthenticated() == false) {
         res.send({alert: 'Please login first :)'});
@@ -2741,36 +2725,94 @@ const manageclusterspost = async (req, res)=>{
     }
 
     x = req.body
+    console.log(x)
 
     // ensure that clusters are provided
-    if (!x.generatedClusters || x.generatedClusters == []) {
+    if (!x.clusters) {
         res.send({alert: 'It looks like no clusters were selected. Please try again.'});
         return
     }
 
     try {
+        clusters = x.clusters.map(item => item.replace(/<[^>]*>/g, ''));
+
+        // get the current date
+        now = new Date();
+
+        // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+        year = now.getFullYear()
+        month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+        day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+        // stringify it
+        date = `${day}-${month}-${year}`
+
          // get all clusters
-        const result = await queryWithRetry('SELECT "clusterID" FROM clusters');
+        const result = await queryWithRetry('SELECT * FROM clusters');
+        allClusters = result.rows
+
+        // get all cluster names
+        allClusterNames = []
+        for (i in allClusters) {
+            allClusterNames.push(allClusters[i].name)
+        }
 
         // calculate the maximum clusterID
         maxClusterID = 0
-        for (i in result.rows) {
-            rowID = result.rows[i].clusterID
+        for (i in allClusters) {
+            rowID = allClusters[i].clusterID
             if (rowID > maxClusterID) {
                 maxClusterID = rowID
             }
         }
 
-        // add each cluster to the database
-        for (i in x.generatedClusters) {
-            clusterName = x.generatedClusters[i].replace(/<[^>]*>/g, '')
+        clustersAdded = 0
+        clustersDeleted = 0
 
-            // add the cluster to the database
-            await queryWithRetry('INSERT INTO clusters ("clusterID", name) VALUES ($1, $2)', [maxClusterID+1, clusterName]);
-            
-            // update cluster ID
-            maxClusterID += 1
+        // iterate over each inputted cluster
+        for (i in clusters) {
+            clusterName = clusters[i]
+            // deal with the case where a new cluster is added
+            if (!allClusterNames.includes(clusterName)) {
+                // add the cluster to the database
+                await queryWithRetry('INSERT INTO clusters ("clusterID", name) VALUES ($1, $2)', [maxClusterID+1, clusterName]);
+                maxClusterID ++;
+                clustersAdded ++;
+            }
         }
+
+        // iterate over each cluster
+        for (i in allClusters) {
+            cluster = allClusters[i]
+            // deal with the case where an old cluster is deleted
+            if (!clusters.includes(cluster.name)) {
+                // remove the cluster from the database
+                await queryWithRetry('DELETE FROM clusters WHERE "clusterID" = $1', [cluster.clusterID]);
+                // remove clusters from researchers and grants
+                await queryWithRetry('UPDATE researchers SET clusters = ARRAY_REMOVE(clusters, $1)', [cluster.clusterID]);
+                await queryWithRetry('UPDATE grants SET clusters = ARRAY_REMOVE(clusters, $1)', [cluster.clusterID]);
+                // increment counter
+                clustersDeleted ++;
+            }
+        }
+
+        // get all changes
+        const result2 = await queryWithRetry('SELECT "changeID" FROM changelog');
+
+        // calculate the maximum changeID
+        maxChangeID = 0
+        for (x in result2.rows) {
+            rowID = result2.rows[x].changeID
+            if (rowID > maxChangeID) {
+                maxChangeID = rowID
+            }
+        }
+
+        // calculate the next change ID
+        nextChangeID = maxChangeID + 1
+
+        //update changelog
+        await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Clusters Edited', date, `${clustersAdded} clusters were added and ${clustersDeleted} clusters were deleted.`, '{}']);
 
         res.send({success: 'success'})
     } catch (err) {

@@ -162,7 +162,7 @@
                     </div>
                 </div>
             </div><br><br>
-            <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(5)">Add Researcher</button>
+            <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(5)">Submit Changes</button>
             <br><br>
         </section>
     </main>
@@ -188,7 +188,19 @@
     </script>
     <script>
         function submit() {
-            // TODO
+            fetch('/manageclusters', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({"clusters": getKeywords(1)})
+            }).then(response => response.json()).then(data => {
+                if (data.success == undefined) {
+                    document.getElementById('showAlert').textContent = data.alert
+                    document.getElementById('modal5').style.display = 'none'
+                    openModal(2)
+                } else {
+                    window.location.reload()
+                }
+            });
         }
     </script>
     <script>
