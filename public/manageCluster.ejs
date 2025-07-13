@@ -183,7 +183,7 @@
     <script>
         // initialise clusters
         <% for (var i = 0 ; i < clusters.length ; i++) { %>
-            addEditableKeywordManual(1, '<%= clusters[i] %>') // add to the keywords list 
+            addEditableKeywordManual(1, '<%= clusters[i].name %>', '<%= clusters[i].clusterID %>') // add to the keywords list 
         <% } %>
     </script>
     <script>
@@ -191,7 +191,7 @@
             fetch('/manageclusters', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({"clusters": getKeywords(1)})
+                body: JSON.stringify({"clusters": getEditableKeywords(1)})
             }).then(response => response.json()).then(data => {
                 if (data.success == undefined) {
                     document.getElementById('showAlert').textContent = data.alert

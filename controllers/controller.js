@@ -1149,17 +1149,10 @@ const manageclustersget = async (req, res)=>{
     // only allow them to add researchers if they havent been authenticated yet
     if (req.isAuthenticated()) {
         try {
-            result = await queryWithRetry('SELECT name FROM clusters')
+            result = await queryWithRetry('SELECT * FROM clusters')
+            console.log(result.rows)
 
-            // cluster names stored here
-            clusters = []
-
-            // get the cluster names
-            for (i in result.rows) {
-                clusters.push(result.rows[i].name)
-            }
-
-            res.render('manageCluster.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: "no", clusters: clusters});
+            res.render('manageCluster.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: "no", clusters: result.rows});
         } catch (err) {
             console.log(err)
             res.render('manageCluster.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: "Something went wrong. Try refreshing the page. If this issue persists, please let me know.", clusters: []});
@@ -1169,7 +1162,6 @@ const manageclustersget = async (req, res)=>{
         res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
     }
 } 
-
 
 // POST
 // when user logs out
@@ -2728,13 +2720,15 @@ const manageclusterspost = async (req, res)=>{
     console.log(x)
 
     // ensure that clusters are provided
-    if (!x.clusters) {
-        res.send({alert: 'It looks like no clusters were selected. Please try again.'});
+    if (!x.clusters || x.clusters.length != 2) {
+        res.send({alert: 'It looks like no clusters were selected or they were invalid. Please try again.'});
         return
     }
 
     try {
-        clusters = x.clusters.map(item => item.replace(/<[^>]*>/g, ''));
+        // these two correspond with each other in a one-to-one relationship
+        inputClusterNames = x.clusters[0].map(item => item.replace(/<[^>]*>/g, ''));
+        inputClusterIds = x.clusters[1].map(item => parseInt(item));
 
         // get the current date
         now = new Date();
@@ -2751,33 +2745,30 @@ const manageclusterspost = async (req, res)=>{
         const result = await queryWithRetry('SELECT * FROM clusters');
         allClusters = result.rows
 
-        // get all cluster names
-        allClusterNames = []
+        // get all cluster IDs
+        allClusterIds = []
         for (i in allClusters) {
-            allClusterNames.push(allClusters[i].name)
-        }
-
-        // calculate the maximum clusterID
-        maxClusterID = 0
-        for (i in allClusters) {
-            rowID = allClusters[i].clusterID
-            if (rowID > maxClusterID) {
-                maxClusterID = rowID
-            }
+            allClusterIds.push(allClusters[i].clusterID)
         }
 
         clustersAdded = 0
         clustersDeleted = 0
+        clustersEdited = 0
 
         // iterate over each inputted cluster
-        for (i in clusters) {
-            clusterName = clusters[i]
+        for (i in inputClusterIds) {
+            clusterId = inputClusterIds[i]
+            clusterName = inputClusterNames[i]
             // deal with the case where a new cluster is added
-            if (!allClusterNames.includes(clusterName)) {
+            if (!allClusterIds.includes(clusterId)) {
                 // add the cluster to the database
-                await queryWithRetry('INSERT INTO clusters ("clusterID", name) VALUES ($1, $2)', [maxClusterID+1, clusterName]);
-                maxClusterID ++;
+                await queryWithRetry('INSERT INTO clusters ("clusterID", name) VALUES ($1, $2)', [clusterId, clusterName]);
                 clustersAdded ++;
+            // deal with the edit case
+            } else {
+                console.log(clusterId, clusterName)
+                await queryWithRetry('UPDATE clusters SET name = $1 WHERE "clusterID" = $2', [clusterName, clusterId]);
+                clustersEdited ++;
             }
         }
 
@@ -2785,7 +2776,7 @@ const manageclusterspost = async (req, res)=>{
         for (i in allClusters) {
             cluster = allClusters[i]
             // deal with the case where an old cluster is deleted
-            if (!clusters.includes(cluster.name)) {
+            if (!inputClusterIds.includes(cluster.clusterID)) {
                 // remove the cluster from the database
                 await queryWithRetry('DELETE FROM clusters WHERE "clusterID" = $1', [cluster.clusterID]);
                 // remove clusters from researchers and grants
@@ -2812,7 +2803,7 @@ const manageclusterspost = async (req, res)=>{
         nextChangeID = maxChangeID + 1
 
         //update changelog
-        await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Clusters Edited', date, `${clustersAdded} clusters were added and ${clustersDeleted} clusters were deleted.`, '{}']);
+        await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Clusters Edited', date, `${clustersAdded} clusters were added, ${clustersEdited} clusters were edited, and ${clustersDeleted} clusters were deleted.`, '{}']);
 
         res.send({success: 'success'})
     } catch (err) {
