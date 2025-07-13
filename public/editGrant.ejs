@@ -378,35 +378,26 @@
     </script>
     <script>
         function initialise() {
-            try {
-                clusters = "<%= clusters %>"
-                clusters = clusters.split(", ")
-                for (x in clusters) {
-                    clusterId = clusters[x]
-                    buttonId = '1U' + clusterId
-                    selectCluster(buttonId)
-                }
-            } catch {
-                console.log("no clusters :(")
-            }
+            // initialise clusters
+            <% for (var i = 0 ; i < clusters.length ; i++) { %>
+                selectCluster('1U' + '<%= clusters[i] %>') // add to the clusters selector 
+            <% } %>
 
-            keywords = `<%= keywords %>`
-            keywords = keywords.split("\n")
-            for (x in keywords) {
-                keyword = keywords[x]
+            // initialise keywords
+            <% for (var i = 0 ; i < keywords.length ; i++) { %>
+                keyword = '<%= keywords[i] %>'
                 if (keyword.trim() != '') {
-                    addKeywordManual(1, keyword)
+                    addKeywordManual(1, keyword) // add to the keywords list 
                 }
-            }
+            <% } %>
 
-            researchers = `<%= researchers %>`
-            researchers = researchers.split("\n")
-            for (x in researchers) {
-                researcher = researchers[x]
+            // initialise researchers
+            <% for (var i = 0 ; i < researchers.length ; i++) { %>
+                researcher = '<%= researchers[i] %>'
                 if (researcher.trim() != '') {
-                    addKeywordManual(2, researcher)
+                    addKeywordManual(2, researcher) // add to the keywords list 
                 }
-            }
+            <% } %>
         }
     </script>
     <script>

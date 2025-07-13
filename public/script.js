@@ -271,9 +271,9 @@ function addEditableKeywordManual(id, keyword) {
     // user the number of keywords to determine the background color of the next item in the list
     numKeywords = ul.querySelectorAll('li').length
     if (numKeywords % 2 == 0) {
-        keywordElement = `<li id='kw${id}-${numKeywords}' contenteditable="true" class='listboxliwhite'>${keyword}</li>`
+        keywordElement = `<li id='kw${id}-${numKeywords}' contenteditable="true" class='listboxliwhite'><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteEditableKeyword(${id}, ${numKeywords})"></i> ${keyword}</li>`
     } else {
-        keywordElement = `<li id='kw${id}-${numKeywords}' contenteditable="true" class='listboxligray'>${keyword}</li>`
+        keywordElement = `<li id='kw${id}-${numKeywords}' contenteditable="true" class='listboxligray'><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteEditableKeyword(${id}, ${numKeywords})"></i> ${keyword}</li>`
     }
     
     // add the new keyword to the list
@@ -303,6 +303,35 @@ function deleteKeyword(id, kwid) {
             keywordElement = `<li id='kw${id}-${i-1}' class='listboxliwhite'><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteKeyword(${id}, ${i-1})"></i>${keyword}</li>`
         } else {
             keywordElement = `<li id='kw${id}-${i-1}' class='listboxligray'><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteKeyword(${id}, ${i-1})"></i>${keyword}</li>`
+        }
+
+        ul.innerHTML += keywordElement
+    }
+}
+
+// remove a keyword from an editable keyword selector
+function deleteEditableKeyword(id, kwid) {
+    // find the element and remove it
+    element = document.getElementById('kw' + id + '-' + kwid)
+    element.remove()
+
+    // find the list based on the ID number
+    ul = document.getElementById('list' + id)
+
+    // recalculate all of the background colors of the elements
+    // after the keyword that was deleted
+    numKeywords = ul.querySelectorAll('li').length
+    for (let i = kwid+1; i <= numKeywords; i++) {
+        // get the element and remove it
+        element = document.getElementById('kw' + id + '-' + i)
+        keyword = element.textContent
+        element.remove()
+        
+        // replace it with an element that has a different background color
+        if ((i+1) % 2 == 0) {
+            keywordElement = `<li id='kw${id}-${i-1}' class='listboxliwhite' contenteditable="true"><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteKeyword(${id}, ${i-1})"></i>${keyword}</li>`
+        } else {
+            keywordElement = `<li id='kw${id}-${i-1}' class='listboxligray' contenteditable="true"><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteKeyword(${id}, ${i-1})"></i>${keyword}</li>`
         }
 
         ul.innerHTML += keywordElement

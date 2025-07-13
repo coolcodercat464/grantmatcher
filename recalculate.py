@@ -521,7 +521,7 @@ clusterRangeSetting = 0.15
 strictness = 0.25
 maxNumber = 50
 googlescholar = True
-
+# TODO: add option so that the user can choose to keep or make new clusters
 
 url = "https://www.sydney.edu.au/AcademicProfiles/interfaces/rest/performSimpleAttributeSearch/+jobType:1%20+orgUnitCode:5000053020L0000%20+isMediaExpert:true/0/270/byRelevance/false"
 researchers, clusters = main(affectedResearchers, affectedFields, clusterRangeSetting, strictness, maxNumber, googlescholar, url)

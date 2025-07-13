@@ -505,64 +505,44 @@
     </script>
     <script>
         function initialise() {
-            // add clusters to the cluster selector
-            try {
-                clusters = "<%= clusters %>"
-                clusters = clusters.split(", ")
-                for (x in clusters) {
-                    clusterId = clusters[x]
-                    buttonId = '1U' + clusterId
-                    selectCluster(buttonId)
-                }
-            } catch {
-                console.log("no clusters :(")
-            }
+            <% for (var i = 0 ; i < clusters.length ; i++) { %>
+                selectCluster('1U' + '<%= clusters[i] %>') // add to the clusters selector 
+            <% } %>
 
-            // add keywords, grants, grant keywords, ... to the keyword selectors
-            keywords = `<%= keywords %>`
-            keywords = keywords.split("\n")
-            for (x in keywords) {
-                keyword = keywords[x]
+            <% for (var i = 0 ; i < keywords.length ; i++) { %>
+                keyword = '<%= keywords[i] %>'
                 if (keyword.trim() != '') {
-                    addKeywordManual(1, keyword)
+                    addKeywordManual(1, keyword) // add to the keywords list 
                 }
-            }
+            <% } %>
 
-            publications = `<%= publications %>`
-            publications = publications.split("\n")
-            for (x in publications) {
-                publication = publications[x]
+            <% for (var i = 0 ; i < publications.length ; i++) { %>
+                publication = '<%= publications[i] %>'
                 if (publication.trim() != '') {
-                    addKeywordManual(2, publication)
+                    addKeywordManual(2, publication) // add to the keywords list 
                 }
-            }
+            <% } %>
 
-            publicationKeywords = `<%= publicationKeywords %>`
-            publicationKeywords = publicationKeywords.split("\n")
-            for (x in publicationKeywords) {
-                publicationKeyword = publicationKeywords[x]
+            <% for (var i = 0 ; i < publicationKeywords.length ; i++) { %>
+                publicationKeyword = '<%= publicationKeywords[i] %>'
                 if (publicationKeyword.trim() != '') {
-                    addKeywordManual(3, publicationKeyword)
+                    addKeywordManual(3, publicationKeyword) // add to the keywords list 
                 }
-            }
+            <% } %>
 
-            grants = `<%= grants %>`
-            grants = grants.split("\n")
-            for (x in grants) {
-                grant = grants[x]
+            <% for (var i = 0 ; i < grants.length ; i++) { %>
+                grant = '<%= grants[i] %>'
                 if (grant.trim() != '') {
-                    addKeywordManual(4, grant)
+                    addKeywordManual(4, grant) // add to the keywords list 
                 }
-            }
+            <% } %>
 
-            grantKeywords = `<%= grantKeywords %>`
-            grantKeywords = grantKeywords.split("\n")
-            for (x in grantKeywords) {
-                grantKeyword = grantKeywords[x]
+            <% for (var i = 0 ; i < grantKeywords.length ; i++) { %>
+                grantKeyword = '<%= grantKeywords[i] %>'
                 if (grantKeyword.trim() != '') {
-                    addKeywordManual(5, grantKeyword)
+                    addKeywordManual(5, grantKeyword) // add to the keywords list 
                 }
-            }
+            <% } %>
 
             // add default values for the dropdowns
             if (document.getElementById('gender<%= gender %>') != null) {

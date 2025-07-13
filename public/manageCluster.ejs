@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>GrantMatcher</title>
+    <%- head %>
+</head>
+<body>
+    <!-- Navigation (sticky header). Links and dropdown collapse into a hamburger menu when the screen size is small. -->
+    <nav class="navbar navbar-expand-lg navbar-dark px-3" id="navbar">
+        <!-- Brand on the left -->
+        <a class="navbar-brand bigBrand" href="/" id="navbar-brand">Grant Matcher</a>
+
+        <!-- Toggler (for mobile view) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" id="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links on the right -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Links here -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tickets">Tickets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tutorial">Tutorial</a>
+                </li>
+
+                <!-- Dropdown (user menu) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <!-- Logout button (opens a modal) -->
+                        <li><button class="dropdown-item" id="modalBtn1" onclick="openModal(1)">Logout</button></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- The modal the logout button in the navigation bar opens -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Log out</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close1">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to log out?</p>
+            <div class="together">
+                <form method="post" action="/">
+                    <input type="submit" value="Logout!" class="buttonStyle">
+                </form>
+                <button id='cancel1' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error modal -->
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Error!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close2">&times;</span>
+            </div>
+            <hr/>
+            
+            <p id="showAlert"><%= showAlert %></p>
+        </div>
+    </div>
+
+    <!-- Another error modal -->
+    <div id="modal3" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Woops!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close3">&times;</span>
+            </div>
+            <hr/>
+            
+            <p>Please ensure all areas have been filled in.</p>
+        </div>
+    </div>
+
+    <!-- Confirmation modal for going back to dashboard -->
+    <div id="modal4" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Go Back</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close4">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to go back the the dashboard?</p>
+            <div class="together">
+                <button class="buttonStyle" onclick="window.location.href = '/'">Go Back</button>
+                <button id='cancel4' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation modal before submitting the form -->
+    <div id="modal5" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Update Clusters</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close5">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to update the clusters?</p>
+            <div class="together">
+                <button class="buttonStyle" onclick="submit()">Confirm Changes</button>
+                <button id='cancel5' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The main content -->
+    <main>
+        <section>
+            <h1>Manage Clusters</h1>
+        </section>
+        <hr/>
+
+        <section>
+            <h2>Edit Clusters</h2>
+            <div class="listbox">
+                <div class="listboxdiv">
+                    <!-- Numbering the IDs so I can use many selectors (code reuse) -->
+                    <!-- All keywords displayed here -->
+                    <ul class="listboxul" id="list1">
+                    </ul>
+                </div>
+
+                <!-- The two elements in the div are on the same line -->
+                <div class="listboxinput">
+                    <!-- User enters keywords here -->
+                    <div class="listboxtextdiv">
+                        <input class="listboxtext" type="text" id="keyword1" name="keyword1" placeholder="Enter a keyword" required>
+                    </div>
+
+                    <!-- User presses this button to add the keyword to the list -->
+                    <div class="listboxsubmitdiv">
+                        <!-- This is an editable keyword (it has contenteditable attribute, allowing the user to change its contents) -->
+                        <button class="listboxsubmit" onclick="addEditableKeyword(1)"><i class="fa fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div><br><br>
+            <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(5)">Add Researcher</button>
+            <br><br>
+        </section>
+    </main>
+    
+    <!-- EJS partial (for code reuse and efficiency) -->
+    <%- footer %>
+
+    <!-- Bootstrap for JS -->
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <!-- This file allows for the user to interact with the elements on the site and for the site to give feedback to the user -->
+    <script src="script.js"></script>
+    <!-- JQuery for the tooltip -->
+    <script>
+        $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+    </script>
+    <script>
+        // initialise clusters
+        <% for (var i = 0 ; i < clusters.length ; i++) { %>
+            addEditableKeywordManual(1, '<%= clusters[i] %>') // add to the keywords list 
+        <% } %>
+    </script>
+    <script>
+        function submit() {
+            // TODO
+        }
+    </script>
+    <script>
+        // show alerts
+        if ("<%= showAlert %>" != "no") {
+            openModal(2);
+        }
+    </script>
+</body>
+</html>

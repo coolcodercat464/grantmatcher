@@ -805,9 +805,9 @@ const editgrantget = async (req, res)=>{
         description = grant.description
 
         // join the lists
-        clusters = grant.clusters.join(", ")
-        keywords = grant.keywords.join("\n")
-        researchers = grant.researchers.join("\n")
+        clusters = grant.clusters
+        keywords = grant.keywords
+        researchers = grant.researchers
 
         // reformat deadline
         deadline = grant.deadline
@@ -1084,39 +1084,39 @@ const editresearcherget = async (req, res)=>{
         
         // prevents errors (check if the field is null before joining)
         if (researcher.publications == null || researcher.publications == undefined || researcher.publications.length == 0) {
-            publications = ""
+            publications = []
         } else {
-            publications = researcher.publications.join("\n")
+            publications = researcher.publications
         }
 
         if (researcher.publicationKeywords == null || researcher.publicationKeywords == undefined || researcher.publicationKeywords.length == 0) {
-            publicationKeywords = ""
+            publicationKeywords = []
         } else {
-            publicationKeywords = researcher.publicationKeywords.join("\n")
+            publicationKeywords = researcher.publicationKeywords
         }
 
         if (researcher.grants == null || researcher.grants == undefined || researcher.grants.length == 0) {
-            grants = ""
+            grants = []
         } else {
-            grants = researcher.grants.join("\n")
+            grants = researcher.grants
         }
 
         if (researcher.grantKeywords == null || researcher.grantKeywords == undefined || researcher.grantKeywords.length == 0) {
-            grantKeywords = ""
+            grantKeywords = []
         } else {
-            grantKeywords = researcher.grantKeywords.join("\n")
+            grantKeywords = researcher.grantKeywords
         }
 
         if (researcher.keywords == null || researcher.keywords == undefined || researcher.keywords.length == 0) {
-            keywords = ""
+            keywords = []
         } else {
-            keywords = researcher.keywords.join("\n")
+            keywords = researcher.keywords
         }
         
         if (researcher.clusters == null || researcher.clusters == undefined || researcher.clusters.length == 0) {
-            clusters = ""
+            clusters = []
         } else {
-            clusters = researcher.clusters.join(", ")
+            clusters = researcher.clusters
         }
 
         profile = researcher.profile
@@ -1141,6 +1141,35 @@ const addresearcherget = async (req, res)=>{
         res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
     }
 } 
+
+// present the add researcher page
+const manageclustersget = async (req, res)=>{
+    console.log("MANAGE CLUSTERS GET")
+
+    // only allow them to add researchers if they havent been authenticated yet
+    if (req.isAuthenticated()) {
+        try {
+            result = await queryWithRetry('SELECT name FROM clusters')
+
+            // cluster names stored here
+            clusters = []
+
+            // get the cluster names
+            for (i in result.rows) {
+                clusters.push(result.rows[i].name)
+            }
+
+            res.render('manageCluster.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: "no", clusters: clusters});
+        } catch (err) {
+            console.log(err)
+            res.render('manageCluster.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: "Something went wrong. Try refreshing the page. If this issue persists, please let me know.", clusters: []});
+        }
+    } else {
+        urlinit = '/manageclusters' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
 
 // POST
 // when user logs out
@@ -1808,7 +1837,7 @@ const addclusterspost = async (req, res)=>{
             clusterName = x.generatedClusters[i].replace(/<[^>]*>/g, '')
 
             // add the cluster to the database
-            await queryWithRetry('INSERT INTO clusters ("clusterID", name, description) VALUES ($1, $2, $3)', [maxClusterID+1, clusterName, "No description for this cluster yet."]);
+            await queryWithRetry('INSERT INTO clusters ("clusterID", name) VALUES ($1, $2)', [maxClusterID+1, clusterName]);
             
             // update cluster ID
             maxClusterID += 1
@@ -2626,6 +2655,28 @@ const addresearcherpost = async (req, res)=>{
             }
             clustersId.push(parseInt(clusterID))
         }
+
+        // ensure the dropdown inputs are valid
+        if (!['F', 'M', 'U', 'N'].includes(gender)) {
+            res.send({alert: 'The gender field is invalid. Please try again.'});
+            return
+        }
+
+        if (!['1', '2', '3', '4'].includes(career)) {
+            res.send({alert: 'The career stage field is invalid. Please try again.'});
+            return
+        }
+
+        if (!['geoscience', 'philosophy', 'chemistry', 'biology', 'mathematics', 'physics', 'psychology', 'veterinary'].includes(school)) {
+            res.send({alert: 'The gender field is invalid. Please try again.'});
+            return
+        }
+
+        // ensure the email is the correct domain
+        if (email.split("@")[1] != 'sydney.edu.au') {
+            res.send({alert: 'Please ensure the email domain is a USYD one (i.e., @sydney.edu.au).'});
+            return
+        }
     } catch (err) {
         console.error(err);
 
@@ -2679,6 +2730,55 @@ const addresearcherpost = async (req, res)=>{
     }
 } 
 
+// update the clusters table
+const manageclusterspost = async (req, res)=>{
+    console.log("MANAGE CLUSTERS POST")
+
+    // ensure that user is authenticated
+    if (req.isAuthenticated() == false) {
+        res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    x = req.body
+
+    // ensure that clusters are provided
+    if (!x.generatedClusters || x.generatedClusters == []) {
+        res.send({alert: 'It looks like no clusters were selected. Please try again.'});
+        return
+    }
+
+    try {
+         // get all clusters
+        const result = await queryWithRetry('SELECT "clusterID" FROM clusters');
+
+        // calculate the maximum clusterID
+        maxClusterID = 0
+        for (i in result.rows) {
+            rowID = result.rows[i].clusterID
+            if (rowID > maxClusterID) {
+                maxClusterID = rowID
+            }
+        }
+
+        // add each cluster to the database
+        for (i in x.generatedClusters) {
+            clusterName = x.generatedClusters[i].replace(/<[^>]*>/g, '')
+
+            // add the cluster to the database
+            await queryWithRetry('INSERT INTO clusters ("clusterID", name) VALUES ($1, $2)', [maxClusterID+1, clusterName]);
+            
+            // update cluster ID
+            maxClusterID += 1
+        }
+
+        res.send({success: 'success'})
+    } catch (err) {
+        console.log(err)
+
+        res.send({alert: 'Something went wrong. Please ensure all of the inputs are valid. This might be a server-side issue. If this problem persists, please open a ticket and I will get this fixed ASAP.'});
+    }
+} 
 
 // Export of all methods as object 
 module.exports = { 
@@ -2707,6 +2807,7 @@ module.exports = {
     researcherpageget,
     editresearcherget,
     addresearcherget,
+    manageclustersget,
 
     indexpost,
     loginpost,
@@ -2722,5 +2823,6 @@ module.exports = {
     removecodepost,
     deleteresearcherpost,
     editresearcherpost,
-    addresearcherpost
+    addresearcherpost,
+    manageclusterspost,
 }

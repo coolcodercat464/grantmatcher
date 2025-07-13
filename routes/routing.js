@@ -57,6 +57,7 @@ router.post('/deleteresearcher/:id', control.deleteresearcherpost)
 
 router.post('/confirmmatch/:id', control.confirmmatchpost)
 
+router.get('/recalculate', control.recalculateget)
 router.post('/addclusters', control.addclusterspost)
 router.post('/confirmrecalculation', control.confirmrecalculationpost)
 router.post('/concluderecalculation', control.concluderecalculationpost)
@@ -69,7 +70,8 @@ router.post('/login', control.loginpost)
 router.get('/signup', control.signupget)
 router.post('/signup', control.signuppost)
 
-router.get('/recalculate', control.recalculateget)
+router.get('/manageclusters', control.manageclustersget)
+router.post('/manageclusters', control.manageclusterspost)
 
 module.exports = router;
 

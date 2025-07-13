@@ -43,10 +43,27 @@ app.use(bodyParser.urlencoded({extended: true}));         // use bodyparser
 const db = require('./databases/postgres.js')             // database stuff
 
 // get and post routing
-app.get(['/db/grants', '/db/researchers', '/db/users', '/db/clusters', '/db/changelog', '/db/grants/version/:id', '/db/codes', '/db/researchers/version/:id'], routes) // database stuff
-app.get(['/', '/login', '/signup', '/addgrant', '/grant/:id', '/editgrant/:id', '/match/:id', '/recalculate', '/managecodes', '/researcher/:id', '/editresearcher/:id', '/addresearcher'], routes)
-app.post(['/', '/login', '/signup', '/addgrant', '/editgrant/:id', '/deletegrant/:id', '/deleteresearcher/:id','/confirmmatch/:id', '/confirmrecalculation', '/concluderecalculation', '/addclusters', '/addcode', '/removecode', '/editresearcher/:id', '/addresearcher'], routes)
-app.post(['/clustermatch', '/match', '/recalculate'], routes) // nlp routes
+
+// database stuff
+app.get(['/db/grants', '/db/researchers', '/db/users', '/db/clusters', '/db/changelog', '/db/grants/version/:id', '/db/codes', '/db/researchers/version/:id'], routes) 
+// nlp routes
+app.post(['/clustermatch', '/match', '/recalculate'], routes) 
+
+// essentials
+app.get(['/', '/login', '/signup'], routes)
+app.post(['/', '/login', '/signup'], routes)
+
+// grants
+app.get(['/addgrant', '/grant/:id', '/editgrant/:id', '/match/:id'], routes)
+app.post(['/addgrant', '/editgrant/:id', '/deletegrant/:id', '/deleteresearcher/:id','/confirmmatch/:id'], routes)
+
+// researchers
+app.get(['/recalculate', '/researcher/:id', '/editresearcher/:id', '/addresearcher'], routes)
+app.post(['/addclusters', '/confirmrecalculation', '/concluderecalculation', '/editresearcher/:id', '/addresearcher'], routes)
+
+// codes and clusters
+app.get(['/managecodes', '/manageclusters'], routes)
+app.post(['/addcode', '/removecode', '/manageclusters'], routes)
 
 // listen to port
 app.listen(port, () => {
