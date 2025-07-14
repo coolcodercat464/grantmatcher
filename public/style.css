@@ -130,8 +130,6 @@ blockquote cite:before {
 }
 
 /* MEDIA ADAPTIVITY - IMPORTANT FOR RESPONSITIVITY */
-/* TODO */
-/* TODO: Modals */
 
 /* add more horizontal padding when the screen is large */
 @media (min-width: 768px) {
@@ -186,6 +184,13 @@ date inputs, which take up a lot of space in the modals */
 
   .landingLeft {
     width: 100% !important;
+  }
+}
+
+/* Expand the the modal when the screen is small */
+@media (max-width: 780px) {
+  .modal-body {
+    width: 90% !important;
   }
 }
 
@@ -334,14 +339,12 @@ date inputs, which take up a lot of space in the modals */
 }
 
 .unselectedClusterButton {
-  /* TODO: Lighter colours? */
   background-color: #3eaae3;
   /* Media responsivity */
   margin: 10px;
 }
 
 .selectedClusterButton {
-  /* TODO: Lighter colours? */
   background-color: #e02063;
   margin: 10px;
 }
@@ -374,7 +377,6 @@ input[type=radio] {
   appearance: none;
   -webkit-appearance: none;
   border-radius: 50%;
-  /* TODO: Change the colors */
   background-color: #e2bfcb; 
   border: 3px solid #FFF;
   box-shadow: 0 0 0 1px #d25782;
@@ -384,14 +386,12 @@ input[type=radio] {
 }
 
 input[type=radio]:hover {
-  /* TODO: Change the colors */
   background-color: #fe528e;
   border: 3px solid #fe528e;
   box-shadow: 0 0 0 1px #e02063;
 }
 
 input[type=radio]:checked {
-  /* TODO: Change the colors */
   background: #e02063;
   border: 3px solid white;
   box-shadow: 0 0 0 1px #e02063;
@@ -453,12 +453,12 @@ input[type=checkbox]:checked {
 }
 
 /* Modal Content/Box */
-.modal-content {
+.modal-body {
   background-color: #fefefe;
   margin: 15% auto;
   border: 1px solid #888;
   padding: 20px;
-  width: 60% !important; /* TODO: Add media query for this */
+  width: 60%;
   max-height: 60vh;
   overflow-y: scroll;
 }

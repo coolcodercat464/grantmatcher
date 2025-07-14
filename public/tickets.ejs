@@ -49,7 +49,7 @@
 
     <!-- The modal the logout button in the navigation bar opens -->
     <div id="modal1" class="modal">
-        <div class="modal-content">
+        <div class="modal-body">
             <div class="together">
                 <h2>Log out</h2>
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
@@ -69,7 +69,7 @@
 
     <!-- Error modal -->
     <div id="modal2" class="modal">
-        <div class="modal-content">
+        <div class="modal-body">
             <div class="together">
                 <h2>Error!</h2>
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
@@ -83,7 +83,7 @@
 
     <!-- The modal to search for tickets -->
     <div id="modal3" class="modal">
-        <div class="modal-content">
+        <div class="modal-body">
             <div class="together">
                 <h2>Search Tickets</h2>
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
@@ -108,7 +108,12 @@
 
             <div class="together">
                 <div style="width: 100%;">
-                    <label><b>MEMBERS</b></label> <!-- TODO: add tooltip here -->
+                    <label><b>MEMBERS</b>
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Select a user who is a member of the ticket (i.e., they are able to view the ticket and post replies).">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
+                    </label>
                     <!-- script.js will fill this with all the user names -->
                     <select name="ticketMember" id="ticketMember" style="width: 100%" class="form-control">
                         <option value="all">Any</option>
@@ -116,7 +121,12 @@
                 </div>
                 
                 <div style="width: 100%;">
-                    <label><b>TAGS</b></label> <!-- TODO: add tooltip here -->
+                    <label><b>TAGS</b>
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Select a tag to search in. These are broad categories about a ticket's topic.">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
+                    </label>
                     <select name="tags" id="tags" style="width: 100%" class="form-control">
                         <option value="all">Any</option>
                         <option value="bug">Bug Report</option>
@@ -140,7 +150,10 @@
                 
                 <div style="width: 100%;">
                     <label><b>RESOLVED?</b>
-                        <!-- TODO: add a tooltip explanation here -->
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Tickets are unresolved when the poster is still waiting for a solution or a resolution to their problem.">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
                     </label>
                     <select name="resolved" class="form-control" id="resolved" style="width: 100%">
                         <option value="all">Any</option>
@@ -166,7 +179,7 @@
 
     <!-- The modal when the user tries to filter a table but nothing is found -->
     <div id="modal8" class="modal">
-        <div class="modal-content">
+        <div class="modal-body">
             <div class="together">
                 <h2>Nothing Found</h2>
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->

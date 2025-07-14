@@ -49,7 +49,7 @@
 
     <!-- The modal the logout button in the navigation bar opens -->
     <div id="modal1" class="modal">
-        <div class="modal-content">
+        <div class="modal-body">
             <div class="together">
                 <h2>Log out</h2>
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
@@ -69,7 +69,7 @@
 
     <!-- The modal to search for codes -->
     <div id="modal2" class="modal">
-        <div class="modal-content">
+        <div class="modal-body">
             <div class="together">
                 <h2>Search Code</h2>
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
@@ -102,7 +102,10 @@
                 
                 <div style="width: 100%;">
                     <label><b>CLAIMED?</b>
-                        <!-- TODO: add a tooltip explanation here -->
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Codes are unclaimed if the email they are assigned to hasn't made an account on Grant Matcher yet.">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
                     </label>
                     <select name="claimed" class="form-control" id="claimed" style="width: 100%">
                         <option value="all">Any</option>
@@ -132,7 +135,7 @@
 
     <!-- The modal to add a code -->
     <div id="modal3" class="modal">
-        <div class="modal-content">
+        <div class="modal-body">
             <div class="together">
                 <h2>Add a Code</h2>
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
@@ -171,7 +174,7 @@
 
     <!-- The modal to remove a code -->
     <div id="modal4" class="modal">
-        <div class="modal-content">
+        <div class="modal-body">
             <div class="together">
                 <h2>Remove Code</h2>
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
@@ -189,7 +192,7 @@
 
     <!-- The error modal -->
     <div id="modal5" class="modal">
-        <div class="modal-content">
+        <div class="modal-body">
             <div class="together">
                 <h2>Error!</h2>
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
@@ -202,7 +205,7 @@
 
     <!-- New code modal (instructions on how to proceed) -->
     <div id="modal6" class="modal">
-        <div class="modal-content">
+        <div class="modal-body">
             <div class="together">
                 <h2>New Code Generated!</h2>
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
@@ -215,7 +218,7 @@
 
     <!-- The modal when the user tries to filter a table but nothing is found -->
     <div id="modal8" class="modal">
-        <div class="modal-content">
+        <div class="modal-body">
             <div class="together">
                 <h2>Nothing Found</h2>
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
