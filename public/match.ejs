@@ -144,7 +144,7 @@
                     <label><b>NAME</b></label><br>
                     <input type="text" class="form-control" id="researcherName" name="researcherName" placeholder="Enter their name">
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>SCHOOL</b></label><br>
                     <select name="school" class="form-control" id="school" style="width: 100%">
@@ -166,7 +166,7 @@
                     <label><b>EMAIL</b></label><br>
                     <input type="text" class="form-control" id="researcherEmail" name="researcherEmail" placeholder="Enter their email">
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>GENDER</b></label><br>
                     <select name="gender" class="form-control" id="gender" style="width: 100%">
@@ -186,7 +186,7 @@
                         <input type="number" class="form-control" id="lower" class="form-control" name="lower" min="0" max="1" step="0.01" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="higher" name="higher" min="0" max="1" style="width: 100%" step="0.01">
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>CAREER STAGE</b></label><br>
                     <select name="career" class="form-control" id="career" style="width: 100%">
@@ -214,7 +214,7 @@
                         <option value="no">Unselected</option>
                     </select>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>KEYWORDS</b>
                         <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Add keywords by pressing the add button. Remove keywords from the list by pressing the trash icon next to the keyword you want to remove.">
@@ -282,9 +282,6 @@
                     </div>
                 </div>
 
-                <!-- Adds space between the selected and unselected lists -->
-                <div class="spacer"></div>
-
                 <!-- Duplicate of the unselected list (for consistency and symmetrical balance) but with different names -->
                 <div class="selected">
                     <div class="listboxinput">
@@ -317,7 +314,7 @@
                 <div style="width: 100%;">
                     <button class="buttonStyle blue" style="width: 100%;" onclick="resetResearcherSearch(6, dbclick=null, idField='uniqueId'); document.getElementById('modal6').style.display = 'none';">Reset Form</button>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <button class="buttonStyle pink" style="width: 100%;" onclick="searchResearcher(6, dbclick=null, idField='uniqueId'); document.getElementById('modal6').style.display = 'none';">Search</button>
                 </div>
@@ -385,7 +382,7 @@
                         <option value="veterinary">Veterinary Science</option>
                     </select>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>CAREER STAGE</b></label><br>
                     <select name="careerMatch" class="form-control" id="careerMatch" style="width: 100%">
@@ -409,7 +406,7 @@
                         <option value="U">Unknown Gender</option>
                     </select>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>ACTIVITY RANGE</b></label><br>
                     <div class="together">
@@ -452,10 +449,7 @@
                             <option value="number"># of Researchers</option>
                         </select>
                     </div>
-                </div>
-
-                <!-- Adds space between the selected and unselected lists -->
-                <div class="spacer"></div>
+                </div>   
 
                 <!-- Duplicate of the unselected list (for consistency and symmetrical balance) but with different names -->
                 <div class="selected">
@@ -524,7 +518,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%">
                     <label for="number"><b>NUMBER</b>
                         <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Number of researchers to find. No need for number if you specified strictness!">
@@ -549,7 +543,7 @@
                     <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(3)">Direct Matching</button><br><br>
                     <p>Match the inputted keywords to the researcher's keywords directly. Tends to be more specific.</p>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%">
                     <button class="buttonStyle blue" style="width: 100%;" onclick="openModal(5)">Match Through Clusters</button><br><br>
                     <p>Match the inputted keywords to the clusters, then find all researchers with those clusters.</p>

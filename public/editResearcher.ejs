@@ -151,7 +151,7 @@
                     <label><b>NAME</b></label>
                     <input type="text" id="name" class="form-control" name="name" value="<%= name %>" required>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>EMAIL</b></label>
                     <input type="email" id="email" class="form-control" name="email" value="<%= email %>" required>
@@ -174,7 +174,7 @@
                         <option value="veterinary" id="schoolveterinary">Veterinary Science</option>
                     </select>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>GENDER</b></label>
                     <select name="gender" class="form-control" id="gender" style="width: 100%" required>
@@ -198,7 +198,7 @@
                         <option value=4 id="cds4">Senior Researcher</option>
                     </select>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>ACTIVITY</b></label>
                     <input type="number" min=0 max="1" id="activity" step="0.1" class="form-control" value="<%= activity %>" name="activity" required>
@@ -241,9 +241,6 @@
                     </div>
                 </div>
 
-                <!-- Adds space between the selected and unselected lists -->
-                <div class="spacer"></div>
-
                 <!-- Duplicate of the unselected list (for consistency and symmetrical balance) but with different names -->
                 <div class="selected">
                     <div class="listboxinput">
@@ -277,7 +274,7 @@
                     <label><b>PROFILE</b></label><br>
                     <textarea rows="4" style="width: 100%;" id="profile" class="form-control" name="profile" required><%= profile %></textarea>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>KEYWORDS</b></label><br>
                     <div style="width: 100%;">
@@ -334,7 +331,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>PUBLICATION KEYWORDS</b></label><br>
                     <div style="width: 100%;">
@@ -391,7 +388,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>GRANT KEYWORDS</b></label><br>
                     <div style="width: 100%;">
@@ -431,7 +428,7 @@
                 <div style="width: 100%;">
                     <textarea id="reason" class="form-control" name="reason" required></textarea><br>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(3)">Confirm Changes</button>
                 </div>

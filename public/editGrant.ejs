@@ -151,7 +151,7 @@
                     <label><b>NAME</b></label>
                     <input type="text" id="grantName" class="form-control" name="grantName" value="<%= title %>" required>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>URL</b></label>
                     <input type="url" id="url" class="form-control" name="url" value="<%= url %>" required>
@@ -164,7 +164,7 @@
                     <label><b>DEADLINE</b></label>
                     <input type="date" id="deadline" class="form-control" name="deadline" value="<%= deadline %>" required>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>DURATION</b></label>
                     <input type="number" min=0 id="duration" step="0.1" class="form-control" value="<%= duration %>" name="duration" required>
@@ -206,10 +206,7 @@
                         </select>
                     </div>
                 </div>
-
-                <!-- Adds space between the selected and unselected lists -->
-                <div class="spacer"></div>
-
+                
                 <!-- Duplicate of the unselected list (for consistency and symmetrical balance) but with different names -->
                 <div class="selected">
                     <div class="listboxinput">
@@ -243,7 +240,7 @@
                     <label><b>DESCRIPTION</b></label><br>
                     <textarea rows="4" style="width: 100%;" id="description" class="form-control" name="description" required><%= description %></textarea>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>KEYWORDS</b></label><br>
                         <div style="width: 100%;">
@@ -305,7 +302,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>REASON</b>
                         <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Briefly explain why you edited this grant and what changes you made.">

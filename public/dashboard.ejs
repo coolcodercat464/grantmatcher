@@ -81,7 +81,7 @@
                     <label><b>NAME</b></label><br>
                     <input type="text" class="form-control" id="researcherName" name="researcherName" placeholder="Enter their name">
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>SCHOOL</b></label><br>
                     <select name="school" class="form-control" id="school" style="width: 100%">
@@ -103,7 +103,7 @@
                     <label><b>EMAIL</b></label><br>
                     <input type="text" class="form-control" id="researcherEmail" name="researcherEmail" placeholder="Enter their email">
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>GENDER</b></label><br>
                     <select name="gender" class="form-control" id="gender" style="width: 100%">
@@ -123,7 +123,7 @@
                         <input type="number" class="form-control" id="lower" class="form-control" name="lower" min="0" max="1" step="0.01" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="higher" name="higher" min="0" max="1" style="width: 100%" step="0.01">
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>CAREER STAGE</b></label><br>
                     <select name="career" class="form-control" id="career" style="width: 100%">
@@ -171,9 +171,6 @@
                         </select>
                     </div>
                 </div>
-
-                <!-- Adds space between the selected and unselected lists -->
-                <div class="spacer"></div>
 
                 <!-- Duplicate of the unselected list (for consistency and symmetrical balance) but with different names -->
                 <div class="selected">
@@ -236,7 +233,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <button class="buttonStyle pink" style="width: 100%;" onclick="searchResearcher(1)">Search</button>
                     <button class="buttonStyle blue" style="width: 100%;" onclick="resetResearcherSearch(1)">Reset Form</button>
@@ -260,7 +257,7 @@
                     <label><b>NAME OR URL</b></label><br>
                     <input type="text" id="grantName" class="form-control" name="grantName" placeholder="Enter the grant's name or its URL">
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>USER</b>
                         <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="The user who added the grant to the database.">
@@ -293,7 +290,7 @@
                         <option data-value="all" value="Any">
                     </datalist>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>MATCHED?</b></label><br>
                     <select name="matched" id="matched" style="width: 100%" class="form-control">
@@ -311,7 +308,7 @@
                         <input type="date" id="deadlineLower" class="form-control" name="deadlineLower" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="date" class="form-control" id="deadlineHigher" name="deadlineHigher" style="width: 100%">
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>DURATION RANGE</b>
                         <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="How long the funding will last">
@@ -360,9 +357,6 @@
                         </select>
                     </div>
                 </div>
-
-                <!-- Adds space between the selected and unselected lists -->
-                <div class="spacer"></div>
 
                 <!-- Duplicate of the unselected list (for consistency and symmetrical balance) but with different names -->
                 <div class="selected">
@@ -422,7 +416,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <button class="buttonStyle pink" style="width: 100%;" onclick="searchGrant(2)">Search</button>
                     <button class="buttonStyle blue" style="width: 100%;" onclick="resetGrantSearch(2)">Reset Form</button>
@@ -445,7 +439,7 @@
                     <label><b>NAME</b></label><br>
                     <input type="text" id="clusterName" class="form-control" name="clusterName" placeholder="Enter the cluster's name">
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>MATCH TO</b>
                         <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Enter something relevant to the clusters you want to find.">
@@ -465,7 +459,7 @@
                         <input type="number" id="researchersLower" class="form-control" name="researchersLower" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="researchersHigher" name="researchersHigher" style="width: 100%">
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <button class="buttonStyle blue" style="width: 100%;" onclick="resetClusterSearch(3)">Reset Form</button><br>
                     <button class="buttonStyle pink" style="width: 100%;" onclick="searchCluster(3)">Search</button>
@@ -488,7 +482,7 @@
                     <label><b>NAME</b></label><br>
                     <input type="text" id="userName" class="form-control" name="userName" placeholder="Enter the user's name">
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>EMAIL</b></label><br>
                     <input type="text" id="userEmail" class="form-control" name="userEmail" placeholder="Enter the user's email">
@@ -505,7 +499,7 @@
                         <option value="developer">Developer</option>
                     </select>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>XP RANGE</b></label><br>
                     <div class="together">
@@ -521,7 +515,7 @@
                         <input type="date" id="dateJoinedLower" class="form-control" name="dateJoinedLower" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="date" class="form-control" id="dateJoinedHigher" name="dateJoinedHigher" style="width: 100%">
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>GRANTS MATCHED</b>
                         <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="How many grants this user matched">
@@ -540,7 +534,7 @@
                 <div style="width: 100%;">
                     <button class="buttonStyle blue" style="width: 100%;" onclick="resetUserSearch(4)">Reset Form</button>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <button class="buttonStyle pink" style="width: 100%;" onclick="searchUser(4)">Search</button>
                 </div>
@@ -564,7 +558,7 @@
                         <option value="all">Any</option>
                     </select>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>TYPE</b></label><br>
                     <select name="changeType" id="changeType" style="width: 100%" class="form-control">
@@ -600,7 +594,7 @@
                         <input type="date" id="dateLower" class="form-control" name="dateLower" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="date" class="form-control" id="dateHigher" name="dateHigher" style="width: 100%">
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <button class="buttonStyle blue" style="width: 100%;" onclick="resetChangeSearch(5)">Reset Form</button><br>
                     <button class="buttonStyle pink" style="width: 100%;" onclick="searchChange(5)">Search</button>
@@ -881,10 +875,12 @@
                         <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Filter Users">
                             <i onclick="openModal(5)" class="fa fa-search"></i>
                         </button>
-                        <!-- TODO: make this only visible to managers/developers -->
-                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Manage Codes">
-                            <i onclick="window.location.href = '/managecodes'" class="fa fa-users"></i>
-                        </button>
+                        <!-- makes this only visible to managers/developers -->
+                        <% if (['manager', 'developer'].includes(role)) { %>
+                            <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Manage Codes">
+                                <i onclick="window.location.href = '/managecodes'" class="fa fa-users"></i>
+                            </button>
+                        <% } %>
                     </div>
                     <div class="tablesort">
                         <label for="sortTable4">Sort By:</label>

@@ -37,7 +37,7 @@ async function users_list() {
 
     try {
         // get all user credentials
-        res = await queryWithRetry('SELECT name, email, password FROM users');
+        res = await queryWithRetry('SELECT name, role, email, password FROM users');
 
         // res is a list of dictionaries
         res = res.rows
@@ -183,16 +183,12 @@ const partialfooterLoggedOut = `
     <section>
         <div class="together">
             <h2><a href="/">GrantMatcher</a></h2>
-            <div class="spacer"></div>
             <p>"If we knew what we were doing, it would not be called research, would it?" - Albert Einstein</p>
         </div>
         <div class="together" style="justify-content: center;">
             <div><a href="/login">Login</a></div> 
-            <div class="spacer"></div>
             <div><a href="/signup">Signup</a></div> 
-            <div class="spacer"></div>
             <div><a href="/tutorial">Tutorial</a></div> 
-            <div class="spacer"></div>
             <div><a onclick="window.location.href = 'mailto:flyingbutter213@gmail.com?subject=Hello&body=Message'">Contact</a></div> 
         </div>
     </section>
@@ -205,16 +201,12 @@ const partialfooterLoggedIn = `
     <section>
         <div class="together">
             <h2><a href="/">GrantMatcher</a></h2>
-            <div class="spacer"></div>
             <p>"If we knew what we were doing, it would not be called research, would it?" - Albert Einstein</p>
         </div>
         <div class="together" style="justify-content: center;">
             <div><a href="/tickets">Tickets</a></div> 
-            <div class="spacer"></div>
             <div><a href="/profile">Profile</a></div> 
-            <div class="spacer"></div>
             <div><a href="/tutorial">Tutorial</a></div> 
-            <div class="spacer"></div>
             <div><a onclick="window.location.href = 'mailto:flyingbutter213@gmail.com?subject=Hello&body=Message'">Contact</a></div> 
         </div>
     </section>
@@ -666,7 +658,7 @@ const indexget = async (req, res)=>{
         if (theuser != undefined) {
             tempShow = showAlertDashboard // temporarily store the showAlertDashboard (as we need to set it to no)
             showAlertDashboard = "no"
-            res.render('dashboard.ejs', {root: path.join(__dirname, '../public'), head: headpartial, user: theuser.name, footer: partialfooterLoggedIn, showAlert: tempShow});
+            res.render('dashboard.ejs', {root: path.join(__dirname, '../public'), head: headpartial, user: theuser.name, role: theuser.role, footer: partialfooterLoggedIn, showAlert: tempShow});
         } else {
             req.session.destroy()
             res.redirect('/')
@@ -1284,7 +1276,7 @@ const signuppost = async (req, res, next) => {
         } 
 
         // add validation to password - password must be at least 5 characters
-        if (x.password.replace(/<[^>]*>/g, '').length < 5) {
+        if (x.password.length < 5) {
             // give them an error pop-up
             res.send({alert: 'Your password must be at least 5 characters long. Please try again!'});
             return
@@ -1326,7 +1318,7 @@ const signuppost = async (req, res, next) => {
         }
 
         // new user object
-        var newUser = {email: x.email, name: x.name.replace(/<[^>]*>/g, ''), password: x.password.replace(/<[^>]*>/g, '')};
+        var newUser = {email: x.email, name: x.name.replace(/<[^>]*>/g, ''), password: x.password};
 
         // add the user to the database
         await save_user(newUser, role);

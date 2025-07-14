@@ -149,7 +149,7 @@ blockquote cite:before {
 }
 
 /* horizontal alignment should collapse when the screen is too small */
-@media (max-width: 550px) {
+@media (max-width: 880px) {
   .together {
     display: block !important;
     align-items: normal !important;
@@ -171,10 +171,10 @@ date inputs, which take up a lot of space in the modals */
 }
 
 
-/* Reduce the size of the spacer when the screen is small */
-@media (max-width: 650px) {
-  .spacer {
-    width: 5% !important;
+/* Reduce the size of the gap between columns that are horizontally aligned when the screen is small */
+@media (max-width: 900px) {
+  .together {
+    gap: 5% !important;
   }
 }
 
@@ -208,12 +208,8 @@ date inputs, which take up a lot of space in the modals */
 /* On one line */
 .together {
   display: flex;
+  gap: 10%;
   align-items: center;
-}
-
-.spacer {
-  /* Media responsivity */
-  width: 10%;
 }
 
 /* Hidden Elements */

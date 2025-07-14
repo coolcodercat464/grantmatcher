@@ -138,22 +138,19 @@
             <p>Added by <%= user %></p><br>
 
             <div class="together">
-                <div style="width: 100%;">
+                <div style="width: 100%; flex: 1;">
                     <p><b>URL:</b> <%= url %></p>
                     <p><b>Deadline:</b> <%= deadline %></p>
                     <p><b>Duration:</b> <%= duration %> years</p>
                     <p><b>Clusters:</b> <span id="clusterText"><%= clusters %></span></p>
                     <p><b>Matched:</b> <%= matched %></p>
                 </div>
-                <div class="spacer"></div>
-                <div style="width: 100%;">
+                <div style="width: 100%; flex: 1;">
                     <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                         <label><b>Description</b></label>
                         <i class="fa fa-clone" id="descriptionCopy"></i>
                     </div>
-                    
-                    <!-- TODO: Make this the same height as the other div -->
-                    <textarea rows="5" style="width: 100%;" id="descriptionArea" disabled><%= description %></textarea>
+                    <textarea rows="5" style="width: 100%; width: 100%; height: 100%; box-sizing: border-box;" id="descriptionArea" disabled><%= description %></textarea>
                 </div>
             </div>
 
@@ -165,7 +162,6 @@
                     </div>
                     <textarea rows="4" style="width: 100%;" id="keywordsArea" disabled><%= keywords %></textarea>
                 </div>
-                <div class="spacer"></div>
                 <div style="width: 100%;">
                     <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                         <label><b>Researchers</b>
@@ -347,7 +343,7 @@
                                         <p><b>Matched:</b> ${matched}</span></p>
                                         <p><b>User Responsible:</b> ${userCurrent}</span></p>
                                     </div>
-                                    <div class="spacer"></div>
+                                    
                                     <div style="width: 100%;">
                                         <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                                             <label><b>Description</b></label>
@@ -366,7 +362,7 @@
                                         </div>
                                         <textarea rows="4" style="width: 100%;" id="keywordsArea-${id}" disabled>${keywords}</textarea>
                                     </div>
-                                    <div class="spacer"></div>
+                                    
                                     <div style="width: 100%;">
                                         <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                                             <label><b>Researchers</b>

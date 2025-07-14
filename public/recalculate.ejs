@@ -81,7 +81,7 @@
                     <label><b>NAME</b></label><br>
                     <input type="text" class="form-control" id="researcherName" name="researcherName" placeholder="Enter their name">
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>SCHOOL</b></label><br>
                     <select name="school" class="form-control" id="school" style="width: 100%">
@@ -103,7 +103,7 @@
                     <label><b>EMAIL</b></label><br>
                     <input type="text" class="form-control" id="researcherEmail" name="researcherEmail" placeholder="Enter their email">
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>GENDER</b></label><br>
                     <select name="gender" class="form-control" id="gender" style="width: 100%">
@@ -123,7 +123,7 @@
                         <input type="number" class="form-control" id="lower" class="form-control" name="lower" min="0" max="1" step="0.01" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="higher" name="higher" min="0" max="1" style="width: 100%" step="0.01">
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>CAREER STAGE</b></label><br>
                     <select name="career" class="form-control" id="career" style="width: 100%">
@@ -170,10 +170,7 @@
                             <option value="number"># of Researchers</option>
                         </select>
                     </div>
-                </div>
-
-                <!-- Adds space between the selected and unselected lists -->
-                <div class="spacer"></div>
+                </div>  
 
                 <!-- Duplicate of the unselected list (for consistency and symmetrical balance) but with different names -->
                 <div class="selected">
@@ -236,7 +233,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <button class="buttonStyle pink" style="width: 100%;" onclick="searchResearcher(7, dbclick=null, idField='uniqueId');">Search</button>
                     <button class="buttonStyle blue" style="width: 100%;" onclick="resetResearcherSearch(7, dbclick=null, idField='uniqueId')">Reset Form</button>
@@ -291,7 +288,7 @@
                     <label><b>NAME</b></label><br>
                     <input type="text" class="form-control" id="researcherName2" name="researcherName2" placeholder="Enter their name">
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>SCHOOL</b></label><br>
                     <select name="school2" class="form-control" id="school2" style="width: 100%">
@@ -313,7 +310,7 @@
                     <label><b>EMAIL</b></label><br>
                     <input type="text" class="form-control" id="researcherEmail2" name="researcherEmail2" placeholder="Enter their email">
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>GENDER</b></label><br>
                     <select name="gender2" class="form-control" id="gender2" style="width: 100%">
@@ -334,7 +331,7 @@
                         <input type="number" class="form-control" id="lower2" class="form-control" name="lower2" min="0" max="1" step="0.01" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="number" class="form-control" id="higher2" name="higher2" min="0" max="1" style="width: 100%" step="0.01">
                     </div>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>CAREER STAGE</b></label><br>
                     <select name="career2" class="form-control" id="career2" style="width: 100%">
@@ -362,7 +359,7 @@
                         <option value="no">Unselected</option>
                     </select>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <label><b>KEYWORDS</b>
                         <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Add keywords by pressing the add button. Remove keywords from the list by pressing the trash icon next to the keyword you want to remove.">
@@ -429,10 +426,7 @@
                         </select>
                     </div>
                 </div>
-
-                <!-- Adds space between the selected and unselected lists -->
-                <div class="spacer"></div>
-
+                
                 <!-- Duplicate of the unselected list (for consistency and symmetrical balance) but with different names -->
                 <div class="selected">
                     <div class="listboxinput">
@@ -465,7 +459,7 @@
                 <div style="width: 100%;">
                     <button class="buttonStyle blue" style="width: 100%;" onclick="resetResearcherSearch(8, dbclick=null, idField='uniqueId', searchId=2); document.getElementById('modal6').style.display = 'none';">Reset Form</button>
                 </div>
-                <div class="spacer"></div>
+                
                 <div style="width: 100%;">
                     <button class="buttonStyle pink" style="width: 100%;" onclick="searchResearcher(8, dbclick=null, idField='uniqueId', searchId=2); document.getElementById('modal6').style.display = 'none';">Search</button>
                 </div>
@@ -647,7 +641,7 @@
                         </label><br>
                         <input type="number" class="form-control" style="width: 100%" min="0" max="200" step="1" id="numberCluster">
                     </div>
-                    <div class="spacer"></div>
+                    
                     <div>
                         <label><b>STRICTNESS</b>
                             <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="The minimum score for a cluster to be added to the researcher's list. A higher strictness would result in less but more relevant clusters. Strictness around 0.25 work best (otherwise your researchers won't have any clusters!).">
@@ -657,7 +651,7 @@
                         </label><br>
                         <input type="number" class="form-control" style="width: 100%" min="0" max="1" step="0.01" id="strictnessCluster">
                     </div>
-                    <div class="spacer"></div>
+                    
                     <div>
                         <label><b>RANGE</b>
                             <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="How many points below the best-scoring cluster for another cluster to be considered.">
@@ -677,7 +671,7 @@
                         <input type="radio" id="yes" name="addClusters" value="yes">
                         <label for="yes"> Yes</label>
                     </div>
-                    <div class="spacer"></div>
+                    
                     <div>
                         <input type="radio" id="no" name="addClusters" value="no">
                         <label for="no"> No</label>
@@ -694,7 +688,7 @@
                         <input type="radio" id="yes" name="googleScholar" value="yes">
                         <label for="yes"> Yes</label>
                     </div>
-                    <div class="spacer"></div>
+                    
                     <div>
                         <input type="radio" id="no" name="googleScholar" value="no">
                         <label for="no"> No</label>
