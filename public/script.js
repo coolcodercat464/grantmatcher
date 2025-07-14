@@ -669,7 +669,7 @@ function renderTable(tableNumber, dbclick=null, idField=null) {
         // get the row information
         item = pageItems[i]
 
-         if (dbclick != null) {
+        if (dbclick != null) {
             // make the HTML for the row (with id)
             id = item[idField]
 
@@ -796,9 +796,8 @@ function sortTable(tableNumber, dbclick=null, idField=null) {
 }
 
 // SEARCHING
-// TODO: make all these search and reset things more consistent and tidy (clean-up)
 // filter through the researchers table
-function searchResearcher(tableNumber, dbclick=null, idField=null, searchId='') {
+function searchResearcher(tableNumber, modalNumber, dbclick=null, idField=null, searchId='') {
     // NOTE: searchId allows for multiple researcher search modals in one page (useful for recalculation page)
 
     // get the relevant data
@@ -807,24 +806,24 @@ function searchResearcher(tableNumber, dbclick=null, idField=null, searchId='') 
 
     // get the text inputs
     // trim and lowercase all user inputs
-    researcherName = document.getElementById('researcherName' + searchId).value.trim().toLowerCase()
-    researcherEmail = document.getElementById('researcherEmail' + searchId).value.trim().toLowerCase()
+    inputName = document.getElementById('researcherName' + searchId).value.trim().toLowerCase()
+    inputEmail = document.getElementById('researcherEmail' + searchId).value.trim().toLowerCase()
 
     // get the dropdown inputs
-    school = document.getElementById('school' + searchId).value
-    gender = document.getElementById('gender' + searchId).value
-    career = document.getElementById('career' + searchId).value
+    inputSchool = document.getElementById('school' + searchId).value
+    inputGender = document.getElementById('gender' + searchId).value
+    inputCareer = document.getElementById('career' + searchId).value
 
     // get the numeric inputs
-    lower = document.getElementById('lower' + searchId).value
+    inputLowerActivity = document.getElementById('lower' + searchId).value
 
     // if not given, then the lower bound is 0
-    if (lower == '') { lower = 0 }
+    if (inputLowerActivity == '') { inputLowerActivity = 0 }
 
-    higher = document.getElementById('higher' + searchId).value
+    inputHigherActivity = document.getElementById('higher' + searchId).value
 
     // if not given, then the higher bound is 1
-    if (higher == '') { higher = 1 }
+    if (inputHigherActivity == '') { inputHigherActivity = 1 }
 
     // get the selected clusters
     selectedClusters = document.getElementById('selectedClusters1' + searchId)
@@ -833,19 +832,20 @@ function searchResearcher(tableNumber, dbclick=null, idField=null, searchId='') 
     // get a list of all the clusters
     selectedClustersText = [] // list of each cluster (text)
     for (var i = 0; i < selectedClusters.length; i++) {
+        // add each cluster to the list of clusters
         selectedCluster = selectedClusters[i]
         selectedClustersText.push(selectedCluster.textContent)
     }
 
     // get the inputted keywords
-    keywords = document.getElementById('list1' + searchId)
-    keywords = keywords.getElementsByTagName('li') // list of each keyword (element)
+    inputKeywords = document.getElementById('list1' + searchId)
+    inputKeywords = inputKeywords.getElementsByTagName('li') // list of each keyword (element)
 
     // get a list of all the keywords
-    keywordsText = [] // list of each keyword (text)
-    for (var i = 0; i < keywords.length; i++) {
-        keyword = keywords[i].textContent.trim().toLowerCase() // ensure that its trimmed and lower-cased
-        keywordsText.push(keyword)
+    inputKeywordsText = [] // list of each keyword (text)
+    for (var i = 0; i < inputKeywords.length; i++) {
+        keyword = inputKeywords[i].textContent.trim().toLowerCase() // ensure that its trimmed and lower-cased
+        inputKeywordsText.push(keyword) // add each keyword to the list of keywords
     }
 
     // reset the visible row list
@@ -859,25 +859,25 @@ function searchResearcher(tableNumber, dbclick=null, idField=null, searchId='') 
         researcher = researcherData[i]
 
         // if the resarcher's name contains the inputted name, then they are included
-        nameCorrect = researcher.name.trim().toLowerCase().includes(researcherName)
-        emailCorrect = researcher.email.trim().toLowerCase().includes(researcherEmail)
+        nameCorrect = researcher.name.trim().toLowerCase().includes(inputName)
+        emailCorrect = researcher.email.trim().toLowerCase().includes(inputEmail)
 
         // if the dropdown is set to 'all', then its true. otherwise, the researcher
-        // should match that column (unless they actually dont have that column)
-        schoolCorrect = (school == "all" || researcher.school == school || !researcher.school)
-        genderCorrect = (gender == "all" || researcher.gender == gender || !researcher.gender)
+        // should match that column (unless they actually don't have that column)
+        schoolCorrect = (inputSchool == "all" || researcher.school == inputSchool || !researcher.school)
+        genderCorrect = (inputGender == "all" || researcher.gender == inputGender || !researcher.gender)
 
         // note that career stage is either 1, 2, 3, or 4. 1 is post-doc, 2 is ecr,
         // 3 is mcr, and 4 is senior researcher. this is to make sorting easier. it will
         // be converted between the number and text form throughout the app
-        careerCorrect = (career == "all" || researcher.careerStage == career || researcher.cds == career || !researcher.cds) 
+        careerCorrect = (inputCareer == "all" || researcher.careerStage == inputCareer || researcher.cds == inputCareer || (!researcher.cds && !researcher.careerStage))
 
         // ensure the activity is within the set range
-        activityCorrect = ((researcher.activity >= lower && researcher.activity <= higher) || !researcher.activity)
+        activityCorrect = ((researcher.activity >= inputLowerActivity && researcher.activity <= inputHigherActivity) || !researcher.activity)
 
         // if the cluster list is empty, then set this to true
         clusterCorrect = (selectedClustersText.length == 0)
-        console.log(selectedClustersText)
+
         // loop through each of the researcher's clusters
         for (x in researcher.clusters) {
             cl = researcher.clusters[x] // this isn't a string, but an id
@@ -893,13 +893,13 @@ function searchResearcher(tableNumber, dbclick=null, idField=null, searchId='') 
         }
 
         // if the keywords list is empty, then set this to true
-        keywordCorrect = (keywordsText.length == 0)
+        keywordCorrect = (inputKeywordsText.length == 0)
         // loop through each of the researcher's keywords
         for (x in researcher.keywords) {
             kw = researcher.keywords[x].toLowerCase()
             // loop through each of the inputted keywords
-            for (y in keywordsText) {
-                skw = keywordsText[y]
+            for (y in inputKeywordsText) {
+                skw = inputKeywordsText[y]
                 // either the inputted one must include the researcher's one
                 // or the researcher's one includes the inputted one
                 if (skw.includes(kw) || kw.includes(skw)) {
@@ -942,12 +942,12 @@ function searchResearcher(tableNumber, dbclick=null, idField=null, searchId='') 
     renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
-    var modal = document.getElementById("modal2");
+    var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
 // clear the researcher form and reset the table
-function resetResearcherSearch(tableNumber, dbclick=null, idField=null) {
+function resetResearcherSearch(tableNumber, modalNumber, dbclick=null, idField=null) {
     // get the relevant data
     researcherTable = tableData[tableNumber]
     researcherData = researcherTable.dataSet
@@ -987,22 +987,22 @@ function resetResearcherSearch(tableNumber, dbclick=null, idField=null) {
     renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
-    var modal = document.getElementById("modal2");
+    var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
 // filter through the grant table
-function searchGrant(tableNumber) {
+function searchGrant(tableNumber, modalNumber, dbclick=null, idField=null) {
     // get the relevant data
     grantTable = tableData[tableNumber]
     grantData = grantTable.dataSet
 
     // get the text inputs
-    grantName = document.getElementById('grantName').value.trim().toLowerCase()
+    inputName = document.getElementById('grantName').value.trim().toLowerCase()
 
     // get the dropdown inputs
-    user = document.getElementById('grantUser').value
-    researcher = document.getElementById('grantResearcher').value
+    inputUser = document.getElementById('grantUser').value
+    inputResearcher = document.getElementById('grantResearcher').value
 
     // get the researcher email based on name
     const list = document.getElementById("grantResearcherOptions");
@@ -1011,45 +1011,45 @@ function searchGrant(tableNumber) {
     // iterate over each researcher option
     for (let option of options) {
         // get the option that is selected
-        if (option.value === researcher) {
+        if (option.value === inputResearcher) {
             // get their email
-            researcher = option.getAttribute("data-value");
+            inputResearcher = option.getAttribute("data-value");
             break
         }
     }
 
     // get the matched dropdown input
-    matched = document.getElementById('matched').value
+    inputMatched = document.getElementById('matched').value
 
     // turn the input into boolean
-    if (matched == "yes") {
-        matched = true
-    } else if (matched == "no") {
-        matched = false
+    if (inputMatched == "yes") {
+        inputMatched = true
+    } else if (inputMatched == "no") {
+        inputMatched = false
     }
 
     // get the date inputs
-    deadlineLower = document.getElementById('deadlineLower').value
-    deadlineHigher = document.getElementById('deadlineHigher').value
+    inputDeadlineLower = document.getElementById('deadlineLower').value
+    inputDeadlineHigher = document.getElementById('deadlineHigher').value
 
     // get the numeric inputs
-    durationLower = document.getElementById('durationLower').value
-    durationHigher = document.getElementById('durationHigher').value
+    inputDurationLower = document.getElementById('durationLower').value
+    inputDurationHigher = document.getElementById('durationHigher').value
 
     // max and min dates in case one of the inputs isnt provided
     let maxDate = new Date(8640000000000000);
     let minDate = new Date(-8640000000000000);
 
     // deal with when one of the date inputs isn't provided
-    if (deadlineLower == '') { deadlineLower = minDate }
-    else { deadlineLower = new Date(deadlineLower) }
+    if (inputDeadlineLower == '') { inputDeadlineLower = minDate }
+    else { inputDeadlineLower = new Date(inputDeadlineLower) }
 
-    if (deadlineHigher == '') { deadlineHigher = maxDate }
-    else { deadlineHigher = new Date(deadlineHigher) }
+    if (inputDeadlineHigher == '') { inputDeadlineHigher = maxDate }
+    else { inputDeadlineHigher = new Date(inputDeadlineHigher) }
 
     // deal with when duration isn't given
-    if (durationLower == '') { durationLower = 0 }
-    if (durationHigher == '') { durationHigher = Number.MAX_SAFE_INTEGER }
+    if (inputDurationLower == '') { inputDurationLower = 0 }
+    if (inputDurationHigher == '') { inputDurationHigher = Number.MAX_SAFE_INTEGER }
 
     // get the selected clusters
     selectedClusters = document.getElementById('selectedClusters2')
@@ -1063,14 +1063,14 @@ function searchGrant(tableNumber) {
     }
 
     // get the inputted keywords
-    keywords = document.getElementById('list2')
-    keywords = keywords.getElementsByTagName('li') // list of each keyword (element)
+    inputKeywords = document.getElementById('list2')
+    inputKeywords = inputKeywords.getElementsByTagName('li') // list of each keyword (element)
 
     // get a list of all the keywords
-    keywordsText = [] // list of each keyword (text)
-    for (var i = 0; i < keywords.length; i++) {
-        keyword = keywords[i].textContent.trim().toLowerCase() // ensure that its trimmed and lower-cased
-        keywordsText.push(keyword)
+    inputKeywordsText = [] // list of each keyword (text)
+    for (var i = 0; i < inputKeywords.length; i++) {
+        keyword = inputKeywords[i].textContent.trim().toLowerCase() // ensure that its trimmed and lower-cased
+        inputKeywordsText.push(keyword)
     }
 
     // reset the visible row list
@@ -1081,27 +1081,22 @@ function searchGrant(tableNumber) {
         grant = grantData[i]
 
         // if the grants's name or url contains the inputted name/url, then it is included
-        nameCorrect = (grant.grantName.trim().toLowerCase().includes(grantName) || grant.url.trim().toLowerCase().includes(grantName))
-        //console.log(grant.grantName, grantName, nameCorrect)
+        nameCorrect = (grant.grantName.trim().toLowerCase().includes(inputName) || grant.url.trim().toLowerCase().includes(inputName))
 
         // if the dropdown is set to 'all', then its true. otherwise, the grant
         // should match that column
-        userCorrect = (user == "all" || grant.userEmail == user)
-        researcherCorrect = (researcher == "" || researcher == "all" || grant.researchers.includes(researcher))
-        matchCorrect = (matched == "all" || grant.matched == matched) 
-
-        //console.log(grant.userEmail, user, userCorrect)
-        //console.log(grant.researchers, grant.researchers.includes(researcher), researcher,researcherCorrect)
-        //console.log(grant.matched, matched, matchCorrect)
+        userCorrect = (inputUser == "all" || grant.userEmail == inputUser)
+        researcherCorrect = (inputResearcher == "" || inputResearcher == "all" || grant.researchers.includes(inputResearcher))
+        matchCorrect = (inputMatched == "all" || grant.matched == inputMatched) 
 
         // ensure the dates is within the set range
         deadlineSplit = grant.deadline.split("-")
         deadlineDate = new Date(deadlineSplit[2], deadlineSplit[1], deadlineSplit[0])
-        deadlineCorrect = (deadlineDate >= deadlineLower && deadlineDate <= deadlineHigher)
+        deadlineCorrect = (deadlineDate >= inputDeadlineLower && deadlineDate <= inputDeadlineHigher)
         //console.log(grant.deadline, deadlineDate, deadlineCorrect)
 
         // ensure the duration is within the set range
-        durationCorrect = (grant.duration >= durationLower && grant.duration <= durationHigher)
+        durationCorrect = (grant.duration >= inputDurationLower && grant.duration <= inputDurationHigher)
         //console.log(grant.duration, durationLower, durationHigher, durationCorrect)
 
         // if the cluster list is empty, then set this to true
@@ -1121,13 +1116,13 @@ function searchGrant(tableNumber) {
         }
 
         // if the keywords list is empty, then set this to true
-        keywordCorrect = (keywordsText.length == 0)
+        keywordCorrect = (inputKeywordsText.length == 0)
         // loop through each of the grant's keywords
         for (x in grant.keywords) {
             kw = grant.keywords[x].toLowerCase()
             // loop through each of the inputted keywords
-            for (y in keywordsText) {
-                skw = keywordsText[y]
+            for (y in inputKeywordsText) {
+                skw = inputKeywordsText[y]
                 // either the inputted one must include the grant's one
                 // or the grant's one includes the inputted one
                 if (skw.includes(kw) || kw.includes(skw)) {
@@ -1150,15 +1145,15 @@ function searchGrant(tableNumber) {
     }
 
     // reset the table
-    renderTable(tableNumber)
+    renderTable(tableNumber, dbclick=null, idField=null)
 
     // close the modal
-    var modal = document.getElementById("modal3");
+    var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
 // clear the grant form and reset the table
-function resetGrantSearch(tableNumber) {
+function resetGrantSearch(tableNumber, modalNumber, dbclick=null, idField=null) {
     // get the relevant data
     grantTable = tableData[tableNumber]
     grantData = grantTable.dataSet
@@ -1198,13 +1193,14 @@ function resetGrantSearch(tableNumber) {
     }
 
     // reset the table
-    renderTable(tableNumber)
+    renderTable(tableNumber, dbclick=null, idField=null)
 
     // close the modal
-    var modal = document.getElementById("modal3");
+    var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
+// TODO: make all these search and reset things more consistent and tidy (clean-up)
 // filter through the user table
 function searchUser(tableNumber) {
     // get the relevant data
