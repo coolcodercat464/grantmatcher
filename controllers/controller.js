@@ -1262,7 +1262,6 @@ const loginpost = async (req, res, next) => {
 }
 
 // when the user signs up
-// TODO: remove html tags from input
 const signuppost = async (req, res, next) => {
     console.log('SIGNUP POST')
 
@@ -1278,14 +1277,14 @@ const signuppost = async (req, res, next) => {
         }
 
         // add validation to name - name cannot just be spaced
-        if (x.name.trim() === '') {
+        if (x.name.replace(/<[^>]*>/g, '').trim() === '') {
             // give them an error pop-up
             res.send({alert: 'Please ensure your name isn\'t empty!'});
             return
         } 
 
         // add validation to password - password must be at least 5 characters
-        if (x.password.length < 5) {
+        if (x.password.replace(/<[^>]*>/g, '').length < 5) {
             // give them an error pop-up
             res.send({alert: 'Your password must be at least 5 characters long. Please try again!'});
             return
@@ -1327,7 +1326,7 @@ const signuppost = async (req, res, next) => {
         }
 
         // new user object
-        var newUser = {email: x.email, name: x.name, password: x.password};
+        var newUser = {email: x.email, name: x.name.replace(/<[^>]*>/g, ''), password: x.password.replace(/<[^>]*>/g, '')};
 
         // add the user to the database
         await save_user(newUser, role);
@@ -2012,7 +2011,6 @@ const confirmrecalculationpost = async (req, res)=>{
             await queryWithRetry('UPDATE researchers SET "versionInformation" = $1 WHERE email = $2;', [versionInformation, researcherEmail]);
 
             // update each piece of information to the database
-            // TODO: make sure clusters arent entirely overwritten
             Object.entries(newResearcher).forEach(async ([column,newValue]) => {
                 console.log(column, newValue)
                 if (newValue == undefined || prevResearcher[column] == newValue) {
@@ -2066,8 +2064,13 @@ const confirmrecalculationpost = async (req, res)=>{
                         newValue = newValue.replace(/<[^>]*>/g, '')
                     }
                     
-                    // update that value
-                    await queryWithRetry('UPDATE researchers SET "' + column + '" = $1 WHERE email = $2;', [newValue, researcherEmail]);
+                    if (column == 'clusters') {
+                        // make sure clusters arent entirely overwritten
+                        await queryWithRetry('UPDATE researchers SET clusters = clusters || $1 WHERE email = $2;', [newValue, researcherEmail]);
+                    } else {
+                        // update that value
+                        await queryWithRetry('UPDATE researchers SET "' + column + '" = $1 WHERE email = $2;', [newValue, researcherEmail]);
+                    }
                 }
             })
         } else {
