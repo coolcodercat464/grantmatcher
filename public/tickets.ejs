@@ -81,6 +81,102 @@
         </div>
     </div>
 
+    <!-- The modal to search for tickets -->
+    <div id="modal3" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Search Tickets</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close3">&times;</span>
+            </div>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>TITLE</b></label>
+                    <input type="text" id="title" class="form-control" name="title" placeholder="Enter a part of the ticket's title">
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>POSTER</b></label>
+                    <!-- script.js will fill this with all the user names -->
+                    <select name="ticketPoster" id="ticketPoster" style="width: 100%" class="form-control">
+                        <option value="all">Any</option>
+                    </select>
+                </div>
+            </div>
+            <br>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>MEMBERS</b></label> <!-- TODO: add tooltip here -->
+                    <!-- script.js will fill this with all the user names -->
+                    <select name="ticketMember" id="ticketMember" style="width: 100%" class="form-control">
+                        <option value="all">Any</option>
+                    </select>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>TAGS</b></label> <!-- TODO: add tooltip here -->
+                    <select name="tags" id="tags" style="width: 100%" class="form-control">
+                        <option value="all">Any</option>
+                        <option value="bug">Bug Report</option>
+                        <option value="feedback">Feedback</option>
+                        <option value="inquiry">Inquiry</option>
+                        <option value="report">User Report</option>
+                        <option value="help">Tech Help</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <br>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>DATE ADDED</b></label>
+                    <div class="together datetogether">
+                        <input type="date" id="dateLower" class="form-control" name="dateLower" style="width: 100%"><p style="margin-left: 5px; margin-right: 5px;">to</p><input type="date" class="form-control" id="dateHigher" name="dateHigher" style="width: 100%">
+                    </div>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <label><b>RESOLVED?</b>
+                        <!-- TODO: add a tooltip explanation here -->
+                    </label>
+                    <select name="resolved" class="form-control" id="resolved" style="width: 100%">
+                        <option value="all">Any</option>
+                        <option value="yes">Resolved</option>
+                        <option value="no">Unresolved</option>
+                    </select>
+                </div>
+            </div>
+            <br>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetTicketSearch(10)">Reset Form</button><br>
+                </div>
+                <div class="spacer"></div>
+                <div style="width: 100%;">
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchTicket(10)">Search</button>
+                </div>
+            </div>
+            <br>
+        </div>
+    </div>
+
+    <!-- The modal when the user tries to filter a table but nothing is found -->
+    <div id="modal8" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Nothing Found</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close8">&times;</span>
+            </div>
+            
+            <p>Nothing was found in this search :( Reset the form or try different parameters.</p>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section>
@@ -186,8 +282,10 @@
                 // add ticket link
                 ticketString += '<p><a href="ticket/<%= tickets[i].ticketID %>">'
                 // get resolution status
+                resolved = 'yes'
                 <% if (tickets[i].resolutionDetails.length == 0) { %>
                     ticketString += '<i class="fa fa-circle-o"></i> '
+                    resolved = 'no'
                 <% } else { %>
                     ticketString += '<i class="fa fa-check-circle"></i> '
                 <% } %>
@@ -197,27 +295,34 @@
 
                 // add information for the tags
                 ticketTags = []
+                ticketTagsPresent = []
                 <% if (tickets[i].tags.includes('other')) { %>
-                    ticketTags.push('Other')
+                    ticketTags.push('other')
+                    ticketTagsPresent.push('Other')
                 <% } %>
                 <% if (tickets[i].tags.includes('bug')) { %>
-                    ticketTags.push('Bug Report')
+                    ticketTags.push('bug')
+                    ticketTagsPresent.push('Bug Report')
                 <% } %>
                 <%  if (tickets[i].tags.includes('feedback')) { %>
-                    ticketTags.push('Feedback')
+                    ticketTags.push('feedback')
+                    ticketTagsPresent.push('Feedback')
                 <% } %>
                 <%  if (tickets[i].tags.includes('inquiry')) { %>
-                    ticketTags.push('Inquiry')
+                    ticketTags.push('inquiry')
+                    ticketTagsPresent.push('Inquiry')
                 <% } %>
                 <%  if (tickets[i].tags.includes('report')) { %>
-                    ticketTags.push('User Report')
+                    ticketTags.push('report')
+                    ticketTagsPresent.push('User Report')
                 <% } %>
                 <% if (tickets[i].tags.includes('help')) { %>
-                    ticketTags.push('Tech Help')
+                    ticketTags.push('help')
+                    ticketTagsPresent.push('Tech Help')
                 <% } %>
 
-                if (ticketTags.length > 0) {
-                    ticketString += ' (' + ticketTags.join(', ') + ')'
+                if (ticketTagsPresent.length > 0) {
+                    ticketString += ' (' + ticketTagsPresent.join(', ') + ')'
                 }
 
                 // ticket member information
@@ -233,11 +338,23 @@
                 // add to data
                 ticketData.ticketString = ticketString
                 ticketData.username = '<%= tickets[i].username %>'
+                ticketData.email = '<%= tickets[i].userEmail %>'
                 ticketData.ticketDate = "<%= tickets[i].ticketDate.split('-').reverse().join('/') %>"
                 ticketData.memberNumber = "<%= tickets[i].members.length %>"
                 ticketData.replyNumber = "<%= tickets[i].replies.length %>"
                 ticketData.title = "<%= tickets[i].title %>"
                 ticketData.content = "<%= tickets[i].content %>"
+                ticketData.tags = ticketTags
+                ticketData.resolved = resolved
+                ticketData.date = '<%= tickets[i].ticketDate %>'
+
+                // get members
+                members = []
+                <% for (x in tickets[i].members) { %>
+                    members.push('<%= tickets[i].members[x] %>')
+                <% } %>
+
+                ticketData.members = members
 
                 tableData[10].dataSet.push(ticketData)
                 tableData[10].showRows.push(ticketData)

@@ -1262,6 +1262,7 @@ const loginpost = async (req, res, next) => {
 }
 
 // when the user signs up
+// TODO: remove html tags from input
 const signuppost = async (req, res, next) => {
     console.log('SIGNUP POST')
 

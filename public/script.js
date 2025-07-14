@@ -1632,6 +1632,107 @@ function resetCodeSearch(tableNumber, dbclick=null, idField=null) {
     modal.style.display = "none";
 }
 
+// filter through the ticket table
+function searchTicket(tableNumber) {
+    // get the relevant data
+    ticketTable = tableData[tableNumber]
+    ticketData = ticketTable.dataSet
+
+    // get the text inputs
+    title = document.getElementById('title').value.trim()
+
+    // get the dropdown inputs
+    poster = document.getElementById('ticketPoster').value
+    member = document.getElementById('ticketMember').value
+    tag = document.getElementById('tags').value
+    resolved = document.getElementById('resolved').value
+
+    // get the date inputs
+    dateLower = document.getElementById('dateLower').value
+    dateHigher = document.getElementById('dateHigher').value
+
+    // max and min dates in case one of the inputs isnt provided
+    let maxDate = new Date(8640000000000000);
+    let minDate = new Date(-8640000000000000);
+
+    // deal with when one of the date inputs isn't provided
+    if (dateLower == '') { dateLower = minDate }
+    else { dateLower = new Date(dateLower) }
+
+    if (dateHigher == '') { dateHigher = maxDate }
+    else { dateHigher = new Date(dateHigher) }
+
+    // reset the visible row list
+    tableData[tableNumber].showRows = []
+
+    // loop through each data row
+    for (var i = 0; i < ticketData.length; i++) {
+        ticket = ticketData[i]
+
+        // ensure the titles match
+        titleCorrect = ticket.title.trim().includes(title)
+
+        // if the dropdown is set to 'all', then its true. otherwise, the user
+        // should match that column
+        posterCorrect = (poster == "all" || ticket.email == poster)
+        console.log(ticket.email, poster)
+        memberCorrect = (member == "all" || ticket.members.includes(member))
+        tagCorrect = (tag == "all" || ticket.tags.includes(tag))
+        resolvedCorrect = (resolved == "all" || ticket.resolved == resolved)
+
+        // ensure the dates is within the set range
+        dateSplit = ticket.date.split("-")
+        dateDate = new Date(dateSplit[2], parseInt(dateSplit[1]) - 1, dateSplit[0]) // convert to a date object for comparison
+        dateCorrect = (dateDate >= dateLower && dateDate <= dateHigher)
+
+        // only make the row visible if it matches for all of the user inputs
+        if (titleCorrect && posterCorrect && memberCorrect && tagCorrect && resolvedCorrect && dateCorrect) {
+            tableData[tableNumber].showRows.push(ticket)
+        }
+    }
+
+    // open error modal (modal 8) if no researchers are found
+    if (tableData[tableNumber].showRows.length == 0) {
+        openModal(8)
+    }
+
+    // reset the table
+    renderTable(tableNumber)
+
+    // close the modal
+    var modal = document.getElementById("modal3");
+    modal.style.display = "none";
+}
+
+// clear the ticket form and reset the table
+function resetTicketSearch(tableNumber) {
+    // get the relevant data
+    ticketTable = tableData[tableNumber]
+    ticketData = ticketTable.dataSet
+
+    // reset the text inputs
+    document.getElementById('title').value = ''
+
+    // reset the dropdown inputs
+    document.getElementById('ticketPoster').value = 'all'
+    document.getElementById('ticketMember').value = 'all'
+    document.getElementById('tags').value = 'all'
+    document.getElementById('resolved').value = 'all'
+
+    // reset the date inputs
+    document.getElementById('dateLower').value = ''
+    document.getElementById('dateHigher').value = ''
+
+    // reset the visible row list
+    tableData[tableNumber].showRows = ticketData
+
+    // reset the table
+    renderTable(tableNumber)
+
+    // close the modal
+    var modal = document.getElementById("modal3");
+    modal.style.display = "none";
+}
 
 // SERVER DATABASE CALLS
 // lots of try-catch stuff since there might be features that are present in some places but not others
@@ -1841,6 +1942,18 @@ fetch('/db/users').then(response => response.json()).then(async data => {
         try {
             // next in the change search modal
             document.getElementById('changeUser').innerHTML += `
+            <option value="${row.email}">${row.name}</option>
+            `
+        } catch {
+            
+        }
+        
+        try {
+            // next in the ticket search modal
+            document.getElementById('ticketPoster').innerHTML += `
+            <option value="${row.email}">${row.name}</option>
+            `
+            document.getElementById('ticketMember').innerHTML += `
             <option value="${row.email}">${row.name}</option>
             `
         } catch {
