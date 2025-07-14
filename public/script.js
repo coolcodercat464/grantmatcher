@@ -612,6 +612,14 @@ tableData = {
         "showFields": [],
         "showRows": []
     },
+    // tickets
+    10 : {
+        "dataSet": [],
+        "currentPage": 1,
+        "totalPages": 1,
+        "showFields": ['ticketString'],
+        "showRows": []
+    },
 }
 
 function dbclickRow(tableNumber, id, idField, dbclick) {

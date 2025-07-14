@@ -67,13 +67,94 @@
         </div>
     </div>
 
+    <!-- Error modal -->
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <div class="together">
+                <h2>Error!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close2">&times;</span>
+            </div>
+            <hr/>
+            
+            <p id="showAlert"><%= showAlert %></p>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section>
             <h1>Tickets</h1>
         </section>
-
         <hr/>
+
+        <section>
+            <h2>All Tickets</h2>
+            <div class="tableContainer" id="tableContainer2">
+                <div>
+                    <div class="tableicons">
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Filter Tickets">
+                            <i onclick="openModal(3)" class="fa fa-search"></i>
+                        </button>
+                        <button type="button" class="btn" style="padding-left: 0" data-toggle="tooltip" data-placement="top" title="Add a Ticket">
+                            <i onclick="openModal(4)" class="fa fa-plus-square-o"></i>
+                        </button>
+                    </div>
+                    <div class="tablesort">
+                        <label for="sortTable10">Sort By:</label>
+
+                        <select name="sortTable10" id="sortTable10" onchange="sortTable(10)" style="margin-bottom: 5px;">
+                            <option value="blahblah" default>Select</option>
+                            <option value="username">Poster's Name</option>
+                            <option value="ticketDate">Date</option>
+                            <option value="memberNumber"># of Members</option>
+                            <option value="replyNumber"># of Replies</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="scrollTableContainer">
+                    <table class="table table-bordered" style="margin-bottom: 0; border-top: 1px solid black; border-right: 1px solid black; border-left: 1px solid black;">
+                        <thead>
+                            <!-- Column names -->
+                            <tr>
+                            <th>Information</th>
+                            </tr>
+                        </thead>
+                        <!-- Table items -->
+                        <tbody id="tableBody10"></tbody>
+                    </table>
+                </div>
+
+                <!-- Table footer (with pagination controls and download button) -->
+                <div class="pagination-controls" style="border: 1px solid black; margin-top: 0;">
+                    <!-- The download button should be left-aligned while the rest is right-aligned -->
+                    <!-- align-items-center ensures that the text and icons are aligned properly (otherwise the text sticks out vertically and its distracting) -->
+                    <div class="d-flex align-items-center gap-2 d-flex w-100 px-3 py-2">
+                        <div>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-download"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#">XML</a></li>
+                                    <li><a class="dropdown-item" href="#">CSV</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="ms-auto">
+                            <!-- Numbering the IDs so I can use many tables (code reuse) -->
+                            <button class="btn" id="firstNav10" onclick="goToFirst(10)"><i class="fa fa-angle-double-left"></i></button>
+                            <button class="btn" id="prevNav10" onclick="goToPrev(10)"><i class="fa fa-angle-left"></i></button>
+                            <!-- Tells the user what page they are on -->
+                            <span id="pageStats10"></span>
+                            <button class="btn" id="nextNav10" onclick="goToNext(10)"><i class="fa fa-angle-right"></i></button>
+                            <button class="btn" id="lastNav10" onclick="goToLast(10)"><i class="fa fa-angle-double-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
     
     <!-- EJS partial (for code reuse and efficiency) -->
@@ -88,6 +169,82 @@
         $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
+    </script>
+    <script>
+        // show alerts
+        if ("<%= showAlert %>" != "no") {
+            openModal(2);
+        }
+    </script>
+    <script>
+        // get all the ticket information to be presented in the table
+        <% for (var i = 0 ; i < tickets.length ; i++) { %>
+            <% if (tickets[i].members.includes(currentuser)) { %>
+                ticketString = ''
+                ticketData = {}
+
+                // add ticket link
+                ticketString += '<p><a href="ticket/<%= tickets[i].ticketID %>">'
+                // get resolution status
+                <% if (tickets[i].resolutionDetails.length == 0) { %>
+                    ticketString += '<i class="fa fa-circle-o"></i> '
+                <% } else { %>
+                    ticketString += '<i class="fa fa-check-circle"></i> '
+                <% } %>
+
+                // ticket title
+                ticketString += '<b><%= tickets[i].title %>'
+
+                // add information for the tags
+                ticketTags = []
+                <% if (tickets[i].tags.includes('other')) { %>
+                    ticketTags.push('Other')
+                <% } %>
+                <% if (tickets[i].tags.includes('bug')) { %>
+                    ticketTags.push('Bug Report')
+                <% } %>
+                <%  if (tickets[i].tags.includes('feedback')) { %>
+                    ticketTags.push('Feedback')
+                <% } %>
+                <%  if (tickets[i].tags.includes('inquiry')) { %>
+                    ticketTags.push('Inquiry')
+                <% } %>
+                <%  if (tickets[i].tags.includes('report')) { %>
+                    ticketTags.push('User Report')
+                <% } %>
+                <% if (tickets[i].tags.includes('help')) { %>
+                    ticketTags.push('Tech Help')
+                <% } %>
+
+                if (ticketTags.length > 0) {
+                    ticketString += ' (' + ticketTags.join(', ') + ')'
+                }
+
+                // ticket member information
+                ticketString += ' - </b><%= tickets[i].username %>'
+
+                <% if (tickets[i].members.length > 1) { %>
+                    ticketString += ' + <%= tickets[i].members.length - 1 %> others'
+                <% } %>
+                
+                // add preview for content
+                ticketString += '</a></p><p><b><%= tickets[i].ticketDate %></b> <%= tickets[i].content.slice(0, 50) %></p>'
+
+                // add to data
+                ticketData.ticketString = ticketString
+                ticketData.username = '<%= tickets[i].username %>'
+                ticketData.ticketDate = "<%= tickets[i].ticketDate.split('-').reverse().join('/') %>"
+                ticketData.memberNumber = "<%= tickets[i].members.length %>"
+                ticketData.replyNumber = "<%= tickets[i].replies.length %>"
+                ticketData.title = "<%= tickets[i].title %>"
+                ticketData.content = "<%= tickets[i].content %>"
+
+                tableData[10].dataSet.push(ticketData)
+                tableData[10].showRows.push(ticketData)
+            <% } %>
+        <% } %>
+
+        renderTable(10)
     </script>
 </body>
 </html>

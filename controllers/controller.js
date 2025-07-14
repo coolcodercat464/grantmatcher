@@ -1180,7 +1180,25 @@ const ticketsget = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
-        res.render('tickets.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
+        try {
+            tickets = await queryWithRetry('SELECT * FROM tickets')
+            tickets = tickets.rows
+
+            for (t in tickets) {
+                // calculate the user name from the poster's email
+                user = await get_user_by_email(tickets[t].userEmail)
+                if (user == undefined) {
+                    // then the user must have been deleted
+                    tickets[t].username = 'deleted user'
+                } else {
+                    tickets[t].username = user.name
+                }
+            }
+            
+            res.render('tickets.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no', tickets: tickets, currentuser: req.session.useremail});
+        } catch (err) {
+            res.render('tickets.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong. Please try again. Email me at flyingbutter213@gmail.com if this issue persists.', tickets: [], currentuser: req.session.useremail});
+        }
     } else {
         urlinit = '/tickets' // redirect them to the current url after they logged in
         res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
