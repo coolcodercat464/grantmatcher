@@ -132,7 +132,7 @@
                 </div>
             </div>
 
-            <div class="together">
+            <div class="together" style="align-items: flex-start;">
                 <div style="width: 100%;">
                     <p><b>Email:</b> <%= email %></p>
                     <p><b>School:</b> <%= school %></p>
@@ -146,60 +146,60 @@
                 </div>
             </div><br>
 
-            <div class="together" style="align-items: flex-start">
-                <div style="width: 100%;">
+            <div class="together">
+                <div style="width: 100%; flex: 1">
                     <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                         <label><b>Keywords</b></label>
                         <i class="fa fa-clone" id="keywordsCopy"></i>
                     </div>
-                    <textarea rows="4" style="width: 100%;" id="keywordsArea" disabled><%= keywords %></textarea>
+                    <textarea rows="4" style="width: 100%; height: 100%;" id="keywordsArea" disabled><%= keywords %></textarea>
                 </div>
                 
-                <div style="width: 100%;">
+                <div style="width: 100%; flex: 1">
                     <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                         <label><b>Profile</b></label>
                         <i class="fa fa-clone" id="profileCopy"></i>
                     </div>
 
-                    <textarea rows="5" style="width: 100%;" id="profileArea" disabled><%= profile %></textarea>
+                    <textarea rows="5" style="width: 100%; height: 100%;" id="profileArea" disabled><%= profile %></textarea>
                 </div>
             </div><br>
 
-            <div class="together" style="align-items: flex-start">
-                <div style="width: 100%;">
+            <div class="together">
+                <div style="width: 100%; flex: 1">
                     <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                         <label><b>Publications</b></label>
                         <i class="fa fa-clone" id="publicationsCopy"></i>
                     </div>
-                    <textarea rows="4" style="width: 100%;" id="publicationsArea" disabled><%= publications %></textarea>
+                    <textarea rows="4" style="width: 100%; height: 100%;" id="publicationsArea" disabled><%= publications %></textarea>
                 </div>
                 
-                <div style="width: 100%;">
+                <div style="width: 100%; flex: 1">
                     <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                         <label><b>Publication Keywords</b></label>
                         <i class="fa fa-clone" id="publicationKeywordsCopy"></i>
                     </div>
 
-                    <textarea rows="5" style="width: 100%;" id="publicationKeywordsArea" disabled><%= publicationKeywords %></textarea>
+                    <textarea rows="5" style="width: 100%; height: 100%;" id="publicationKeywordsArea" disabled><%= publicationKeywords %></textarea>
                 </div>
             </div><br>
 
-            <div class="together" style="align-items: flex-start">
-                <div style="width: 100%;">
+            <div class="together">
+                <div style="width: 100%; flex: 1">
                     <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                         <label><b>Grants</b></label>
                         <i class="fa fa-clone" id="grantsCopy"></i>
                     </div>
-                    <textarea rows="4" style="width: 100%;" id="grantsArea" disabled><%= grants %></textarea>
+                    <textarea rows="4" style="width: 100%; height: 100%;" id="grantsArea" disabled><%= grants %></textarea>
                 </div>
                 
-                <div style="width: 100%;">
+                <div style="width: 100%; flex: 1">
                     <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                         <label><b>Grant Keywords</b></label>
                         <i class="fa fa-clone" id="grantKeywordsCopy"></i>
                     </div>
 
-                    <textarea rows="5" style="width: 100%;" id="grantKeywordsArea" disabled><%= grantKeywords %></textarea>
+                    <textarea rows="5" style="width: 100%; height: 100%;" id="grantKeywordsArea" disabled><%= grantKeywords %></textarea>
                 </div>
             </div><br>
         </section>
@@ -438,7 +438,7 @@
                             </h2>
                             <div id="collapse1-${id}" class="accordion-collapse collapse" aria-labelledby="heading1-${id}" data-bs-parent="#accordionExample">
                             <div class="accordion-body">
-                                <div class="together">
+                                <div class="together" style="align-items: flex-start;">
                                     <div style="width: 100%;">
                                         <p><b>Name:</b> ${researcherName}</p>
                                         <p><b>Email:</b> ${email}</p>
@@ -453,59 +453,59 @@
                                     </div>
                                 </div><br>
 
-                                <div class="together" style="align-items: flex-start">
-                                    <div style="width: 100%;">
+                                <div class="together">
+                                    <div style="width: 100%; flex: 1">
                                         <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                                             <label><b>Keywords</b></label>
                                             <i class="fa fa-clone" onclick="copyKeywords(${id})"></i>
                                         </div>
-                                        <textarea rows="4" style="width: 100%;" id="keywordsArea-${id}" disabled>${keywords}</textarea>
+                                        <textarea rows="4" style="width: 100%; height: 100%;" id="keywordsArea-${id}" disabled>${keywords}</textarea>
                                     </div>
                                     
-                                    <div style="width: 100%;">
+                                    <div style="width: 100%; flex: 1">
                                         <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                                             <label><b>Profile</b></label>
                                             <i class="fa fa-clone" onclick="copyProfile(${id})"></i>
                                         </div>
 
-                                        <textarea rows="5" style="width: 100%;" id="profileArea-${id}" disabled>${profile}</textarea>
+                                        <textarea rows="5" style="width: 100%; height: 100%;" id="profileArea-${id}" disabled>${profile}</textarea>
                                     </div>
                                 </div><br>
 
-                                <div class="together" style="align-items: flex-start">
-                                    <div style="width: 100%;">
+                                <div class="together">
+                                    <div style="width: 100%; flex: 1">
                                         <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                                             <label><b>Publications</b></label>
                                             <i class="fa fa-clone" onclick="copyPublications(${id})"></i>
                                         </div>
-                                        <textarea rows="4" style="width: 100%;" id="publicationsArea-${id}" disabled>${publications}</textarea>
+                                        <textarea rows="4" style="width: 100%; height: 100%;" id="publicationsArea-${id}" disabled>${publications}</textarea>
                                     </div>
                                     
-                                    <div style="width: 100%;">
+                                    <div style="width: 100%; flex: 1">
                                         <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                                             <label><b>Publication Keywords</b></label>
                                             <i class="fa fa-clone" onclick="copyPublicationKeywords(${id})"></i>
                                         </div>
 
-                                        <textarea rows="5" style="width: 100%;" id="publicationKeywordsArea-${id}" disabled>${publicationKeywords}</textarea>
+                                        <textarea rows="5" style="width: 100%; height: 100%;" id="publicationKeywordsArea-${id}" disabled>${publicationKeywords}</textarea>
                                     </div>
                                 </div><br>
 
-                                <div class="together" style="align-items: flex-start">
-                                    <div style="width: 100%;">
+                                <div class="together">
+                                    <div style="width: 100%; flex: 1">
                                         <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                                             <label><b>Grants</b></label>
                                             <i class="fa fa-clone" onclick="copyGrants(${id})"></i>
                                         </div>
-                                        <textarea rows="4" style="width: 100%;" id="grantsArea-${id}" disabled>${grants}</textarea>
+                                        <textarea rows="4" style="width: 100%; height: 100%;" id="grantsArea-${id}" disabled>${grants}</textarea>
                                     </div>
                                     
-                                    <div style="width: 100%;">
+                                    <div style="width: 100%; flex: 1">
                                         <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                                             <label><b>Grant Keywords</b></label>
                                             <i class="fa fa-clone" onclick="copyGrantKeywords(${id})"></i>
                                         </div>
-                                        <textarea rows="5" style="width: 100%;" id="grantKeywordsArea-${id}" disabled>${grantKeywords}</textarea>
+                                        <textarea rows="5" style="width: 100%; height: 100%;" id="grantKeywordsArea-${id}" disabled>${grantKeywords}</textarea>
                                     </div>
                                 </div>
                                 <p><b>Reason for edit:</b> ${reasonCurrent}</p>

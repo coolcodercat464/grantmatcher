@@ -150,19 +150,19 @@
                         <label><b>Description</b></label>
                         <i class="fa fa-clone" id="descriptionCopy"></i>
                     </div>
-                    <textarea rows="5" style="width: 100%; width: 100%; height: 100%; box-sizing: border-box;" id="descriptionArea" disabled><%= description %></textarea>
+                    <textarea rows="5" style="width: 100%; height: 100%;" id="descriptionArea" disabled><%= description %></textarea>
                 </div>
             </div>
 
             <div class="together">
-                <div style="width: 100%;">
+                <div style="width: 100%; flex: 1;">
                     <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                         <label><b>Keywords</b></label>
                         <i class="fa fa-clone" id="keywordsCopy"></i>
                     </div>
-                    <textarea rows="4" style="width: 100%;" id="keywordsArea" disabled><%= keywords %></textarea>
+                    <textarea rows="4" style="width: 100%; height: 100%;" id="keywordsArea" disabled><%= keywords %></textarea>
                 </div>
-                <div style="width: 100%;">
+                <div style="width: 100%; flex: 1;">
                     <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                         <label><b>Researchers</b>
                             <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Researchers who have been matched to the grant.">
@@ -172,7 +172,7 @@
                         </label>
                         <i class="fa fa-clone" id="researchersCopy"></i>
                     </div>
-                    <textarea rows="4" style="width: 100%;" id="researchersArea" disabled><%= researchers %></textarea>
+                    <textarea rows="4" style="width: 100%; height: 100%;" id="researchersArea" disabled><%= researchers %></textarea>
                 </div>
             </div>
             <br>
@@ -334,7 +334,7 @@
                             <div id="collapse1-${id}" class="accordion-collapse collapse" aria-labelledby="heading1-${id}" data-bs-parent="#accordionExample">
                             <div class="accordion-body">
                                 <div class="together">
-                                    <div style="width: 100%;">
+                                    <div style="width: 100%; flex: 1;">
                                         <p><b>Name:</b> ${grantName}</p>
                                         <p><b>URL:</b> ${url}</p>
                                         <p><b>Deadline:</b> ${deadline}</p>
@@ -344,36 +344,31 @@
                                         <p><b>User Responsible:</b> ${userCurrent}</span></p>
                                     </div>
                                     
-                                    <div style="width: 100%;">
+                                    <div style="width: 100%; flex: 1;">
                                         <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                                             <label><b>Description</b></label>
                                             <i class="fa fa-clone" onclick="copyDescription(${id})"></i>
                                         </div>
                                         
-                                        <textarea rows="5" style="width: 100%;" id="descriptionArea-${id}" disabled>${description}</textarea>
+                                        <textarea rows="5" style="width: 100%; height: 100%;" id="descriptionArea-${id}" disabled>${description}</textarea>
                                     </div>
                                 </div>
 
                                 <div class="together">
-                                    <div style="width: 100%;">
+                                    <div style="width: 100%; flex: 1;">
                                         <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
                                             <label><b>Keywords</b></label>
                                             <i class="fa fa-clone" onclick="copyKeywords(${id})"></i>
                                         </div>
-                                        <textarea rows="4" style="width: 100%;" id="keywordsArea-${id}" disabled>${keywords}</textarea>
+                                        <textarea rows="4" style="width: 100%; height: 100%;" id="keywordsArea-${id}" disabled>${keywords}</textarea>
                                     </div>
                                     
-                                    <div style="width: 100%;">
+                                    <div style="width: 100%; flex: 1;">
                                         <div style="display: flex; align-items: baseline; gap: 0.5rem; justify-content: space-between; ">
-                                            <label><b>Researchers</b>
-                                                <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Researchers who have been matched to the grant.">
-                                                    <!-- Makes the tooltip circular -->
-                                                    <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
-                                                </button>
-                                            </label>
+                                            <label><b>Researchers</b></label>
                                             <i class="fa fa-clone" onclick="copyResearchers(${id})"></i>
                                         </div>
-                                        <textarea rows="4" style="width: 100%;" id="researchersArea-${id}" disabled>${researchers}</textarea>
+                                        <textarea rows="4" style="width: 100%; height: 100%;" id="researchersArea-${id}" disabled>${researchers}</textarea>
                                     </div>
                                 </div>
                                 <p><b>Reason for edit:</b> ${reasonCurrent}</p>
