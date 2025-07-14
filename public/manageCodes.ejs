@@ -125,8 +125,8 @@
                 </div>
                 
                 <div style="width: 100%;">
-                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetCodeSearch(9, dbclick=null, idField='code')">Reset Form</button><br>
-                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchCode(9, dbclick=null, idField='code')">Search</button>
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetCodeSearch(9, 2, dbclick=null, idField='code')">Reset Form</button><br>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchCode(9, 2, dbclick=null, idField='code')">Search</button>
                 </div>
             </div>
             <br>
@@ -358,7 +358,7 @@
             characters = 'abcdefghijklmnopqrstuvwxyz';
             characters += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             characters += '0123456789';
-            characters += '!@#$%^&*()_+[]{}|;:,.<>?';
+            characters += '!@#$%^&*_-+,.?';
 
             let code = '';
             for (let i = 0; i < 8; i++) {

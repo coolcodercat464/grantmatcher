@@ -1145,7 +1145,7 @@ function searchGrant(tableNumber, modalNumber, dbclick=null, idField=null) {
     }
 
     // reset the table
-    renderTable(tableNumber, dbclick=null, idField=null)
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
     var modal = document.getElementById("modal" + modalNumber);
@@ -1193,56 +1193,55 @@ function resetGrantSearch(tableNumber, modalNumber, dbclick=null, idField=null) 
     }
 
     // reset the table
-    renderTable(tableNumber, dbclick=null, idField=null)
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
     var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
-// TODO: make all these search and reset things more consistent and tidy (clean-up)
 // filter through the user table
-function searchUser(tableNumber) {
+function searchUser(tableNumber, modalNumber, dbclick=null, idField=null) {
     // get the relevant data
     userTable = tableData[tableNumber]
     userData = userTable.dataSet
 
     // get the text inputs
-    userName = document.getElementById('userName').value.trim().toLowerCase()
-    email = document.getElementById('userEmail').value.trim().toLowerCase()
+    inputName = document.getElementById('userName').value.trim().toLowerCase()
+    inputEmail = document.getElementById('userEmail').value.trim().toLowerCase()
 
     // get the dropdown inputs
-    role = document.getElementById('role').value
+    inputRole = document.getElementById('role').value
 
     // get the date inputs
-    dateLower = document.getElementById('dateJoinedLower').value
-    dateHigher = document.getElementById('dateJoinedHigher').value
+    inputDateLower = document.getElementById('dateJoinedLower').value
+    inputDateHigher = document.getElementById('dateJoinedHigher').value
 
     // get the numeric inputs
-    xpLower = document.getElementById('xpLower').value
-    xpHigher = document.getElementById('xpHigher').value
+    inputXpLower = document.getElementById('xpLower').value
+    inputXpHigher = document.getElementById('xpHigher').value
 
-    grantsLower = document.getElementById('grantsLower').value
-    grantsHigher = document.getElementById('grantsHigher').value
+    inputGrantsLower = document.getElementById('grantsLower').value
+    inputGrantsHigher = document.getElementById('grantsHigher').value
 
     // max and min dates in case one of the inputs isnt provided
     let maxDate = new Date(8640000000000000);
     let minDate = new Date(-8640000000000000);
 
     // deal with when one of the date inputs isn't provided
-    if (dateLower == '') { dateLower = minDate }
-    else { dateLower = new Date(dateLower) }
+    if (inputDateLower == '') { inputDateLower = minDate }
+    else { inputDateLower = new Date(inputDateLower) }
 
-    if (dateHigher == '') { dateHigher = maxDate }
-    else { dateHigher = new Date(dateHigher) }
-
-    // deal with when xp isn't given
-    if (xpLower == '') { xpLower = 0 }
-    if (xpHigher == '') { xpHigher = Number.MAX_SAFE_INTEGER }
+    if (inputDateHigher == '') { inputDateHigher = maxDate }
+    else { inputDateHigher = new Date(inputDateHigher) }
 
     // deal with when xp isn't given
-    if (grantsLower == '') { grantsLower = 0 }
-    if (grantsHigher == '') { grantsHigher = Number.MAX_SAFE_INTEGER }
+    if (inputXpLower == '') { inputXpLower = 0 }
+    if (inputXpHigher == '') { inputXpHigher = Number.MAX_SAFE_INTEGER }
+
+    // deal with when xp isn't given
+    if (inputGrantsLower == '') { inputGrantsLower = 0 }
+    if (inputGrantsHigher == '') { inputGrantsHigher = Number.MAX_SAFE_INTEGER }
 
     // reset the visible row list
     tableData[tableNumber].showRows = []
@@ -1252,21 +1251,21 @@ function searchUser(tableNumber) {
         user = userData[i]
 
         // check the text input matches
-        nameCorrect = (user.name.trim().toLowerCase().includes(userName))
-        emailCorrect = (user.email.trim().toLowerCase().includes(email))
+        nameCorrect = (user.name.trim().toLowerCase().includes(inputName))
+        emailCorrect = (user.email.trim().toLowerCase().includes(inputEmail))
 
         // if the dropdown is set to 'all', then its true. otherwise, the user
         // should match that column
-        roleCorrect = (role == "all" || user.role == role)
+        roleCorrect = (inputRole == "all" || user.role == inputRole)
 
         // ensure the dates is within the set range
         dateSplit = user.dateJoined.split("-")
         joinDate = new Date(dateSplit[2], parseInt(dateSplit[1]) - 1, dateSplit[0]) // convert to a date object for comparison
-        dateCorrect = (joinDate >= dateLower && joinDate <= dateHigher)
+        dateCorrect = (joinDate >= inputDateLower && joinDate <= inputDateHigher)
 
         // ensure the numeric values are within the set range
-        xpCorrect = (user.xp >= xpLower && user.xp <= xpHigher)
-        grantsCorrect = (user.grantsMatched >= grantsLower && user.grantsMatched <= grantsHigher)
+        xpCorrect = (user.xp >= inputXpLower && user.xp <= inputXpHigher)
+        grantsCorrect = (user.grantsMatched >= inputGrantsLower && user.grantsMatched <= inputGrantsHigher)
 
         // only make the row visible if it matches for all of the user inputs
         if (nameCorrect && emailCorrect && roleCorrect && dateCorrect && xpCorrect && grantsCorrect) {
@@ -1280,15 +1279,15 @@ function searchUser(tableNumber) {
     }
 
     // reset the table
-    renderTable(tableNumber)
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
-    var modal = document.getElementById("modal5");
+    var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
 // clear the user form and reset the table
-function resetUserSearch(tableNumber) {
+function resetUserSearch(tableNumber, modalNumber, dbclick=null, idField=null) {
     // get the relevant data
     userTable = tableData[tableNumber]
     userData = userTable.dataSet
@@ -1314,45 +1313,45 @@ function resetUserSearch(tableNumber) {
     tableData[tableNumber].showRows = userData
 
     // reset the table
-    renderTable(tableNumber)
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
-    var modal = document.getElementById("modal5");
+    var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
 // filter through the clusters table
-async function searchCluster(tableNumber) {
+async function searchCluster(tableNumber, dbclick=null, idField=null) {
     // get the relevant data
     clusterTable = tableData[tableNumber]
     clusterTableData = clusterTable.dataSet
 
     // get the text inputs
-    clusterName = document.getElementById('clusterName').value.trim().toLowerCase()
-    matchTo = document.getElementById('matchTo').value.trim().toLowerCase()
+    inputName = document.getElementById('clusterName').value.trim().toLowerCase()
+    inputMatch = document.getElementById('matchTo').value.trim().toLowerCase()
 
     // get the numeric inputs
-    researchersLower = document.getElementById('researchersLower').value
-    researchersHigher = document.getElementById('researchersHigher').value
+    inputResearchersLower = document.getElementById('researchersLower').value
+    inputResearchersHigher = document.getElementById('researchersHigher').value
 
     // deal with when researchers number isn't given
-    if (researchersLower == '') { researchersLower = 0 }
-    if (researchersHigher == '') { researchersHigher = Number.MAX_SAFE_INTEGER }
+    if (inputResearchersLower == '') { inputResearchersLower = 0 }
+    if (inputResearchersHigher == '') { inputResearchersHigher = Number.MAX_SAFE_INTEGER }
 
     // reset the visible row list
     tableData[tableNumber].showRows = []
 
     // if matchTo isn't provided ...
-    if (matchTo.trim() == '') {
+    if (inputMatch.trim() == '') {
         // loop through each data row
         for (var i = 0; i < clusterTableData.length; i++) {
             cluster = clusterTableData[i]
 
             // check the text input matches
-            nameCorrect = (cluster.name.trim().toLowerCase().includes(clusterName))
+            nameCorrect = (cluster.name.trim().toLowerCase().includes(inputName))
 
             // ensure the numeric values are within the set range
-            researchersCorrect = (cluster.numberResearchers >= researchersLower && cluster.numberResearchers <= researchersHigher)
+            researchersCorrect = (cluster.numberResearchers >= inputResearchersLower && cluster.numberResearchers <= inputResearchersHigher)
 
             // only make the row visible if it matches for all of the user inputs
             if (nameCorrect && researchersCorrect) {
@@ -1366,10 +1365,10 @@ async function searchCluster(tableNumber) {
         }
 
         // reset the table
-        renderTable(tableNumber)
+        renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
         // close the modal
-        var modal = document.getElementById("modal4");
+        var modal = document.getElementById("modal" + modalNumber);
         modal.style.display = "none";
 
         return
@@ -1390,10 +1389,10 @@ async function searchCluster(tableNumber) {
             cluster = clusterTableData[i]
 
             // check the text input matches
-            nameCorrect = (cluster.name.trim().toLowerCase().includes(clusterName))
+            nameCorrect = (cluster.name.trim().toLowerCase().includes(inputName))
 
             // ensure the numeric values are within the set range
-            researchersCorrect = (cluster.numberResearchers >= researchersLower && cluster.numberResearchers <= researchersHigher)
+            researchersCorrect = (cluster.numberResearchers >= inputResearchersLower && cluster.numberResearchers <= inputResearchersHigher)
 
             // only make the row visible if it matches for all of the user inputs
             if (nameCorrect && researchersCorrect) {
@@ -1407,16 +1406,16 @@ async function searchCluster(tableNumber) {
         }
 
         // reset the table
-        renderTable(tableNumber)
+        renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
         // close the modal
-        var modal = document.getElementById("modal4");
+        var modal = document.getElementById("modal" + modalNumber);
         modal.style.display = "none";
     })
 }
 
 // clear the cluster form and reset the table
-function resetClusterSearch(tableNumber) {
+function resetClusterSearch(tableNumber, dbclick=null, idField=null) {
     // get the relevant data
     clusterTable = tableData[tableNumber]
     clusterTableData = clusterTable.dataSet
@@ -1433,37 +1432,37 @@ function resetClusterSearch(tableNumber) {
     tableData[tableNumber].showRows = clusterTableData
 
     // reset the table
-    renderTable(tableNumber)
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
-    var modal = document.getElementById("modal4");
+    var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
 // filter through the changelog table
-function searchChange(tableNumber) {
+function searchChange(tableNumber, modalNumber, dbclick=null, idField=null) {
     // get the relevant data
     changeTable = tableData[tableNumber]
     changeData = changeTable.dataSet
 
     // get the dropdown inputs
-    changeUser = document.getElementById('changeUser').value
-    changeType = document.getElementById('changeType').value
+    inputUser = document.getElementById('changeUser').value
+    inputType = document.getElementById('changeType').value
 
     // get the date inputs
-    dateLower = document.getElementById('dateLower').value
-    dateHigher = document.getElementById('dateHigher').value
+    inputDateLower = document.getElementById('dateLower').value
+    inputDateHigher = document.getElementById('dateHigher').value
 
     // max and min dates in case one of the inputs isnt provided
     let maxDate = new Date(8640000000000000);
     let minDate = new Date(-8640000000000000);
 
     // deal with when one of the date inputs isn't provided
-    if (dateLower == '') { dateLower = minDate }
-    else { dateLower = new Date(dateLower) }
+    if (inputDateLower == '') { inputDateLower = minDate }
+    else { inputDateLower = new Date(inputDateLower) }
 
-    if (dateHigher == '') { dateHigher = maxDate }
-    else { dateHigher = new Date(dateHigher) }
+    if (inputDateHigher == '') { inputDateHigher = maxDate }
+    else { inputDateHigher = new Date(inputDateHigher) }
 
     // reset the visible row list
     tableData[tableNumber].showRows = []
@@ -1474,13 +1473,13 @@ function searchChange(tableNumber) {
 
         // if the dropdown is set to 'all', then its true. otherwise, the user
         // should match that column
-        userCorrect = (changeUser == "all" || change.userEmail == changeUser)
-        typeCorrect = (changeType == "all" || change.type == changeType)
+        userCorrect = (inputUser == "all" || change.userEmail == inputUser)
+        typeCorrect = (inputType == "all" || change.type == inputType)
 
         // ensure the dates is within the set range
         dateSplit = change.date.split("-")
         dateDate = new Date(dateSplit[2], parseInt(dateSplit[1]) - 1, dateSplit[0]) // convert to a date object for comparison
-        dateCorrect = (dateDate >= dateLower && dateDate <= dateHigher)
+        dateCorrect = (dateDate >= inputDateLower && dateDate <= inputDateHigher)
 
         // only make the row visible if it matches for all of the user inputs
         if (userCorrect && typeCorrect && dateCorrect) {
@@ -1494,15 +1493,15 @@ function searchChange(tableNumber) {
     }
 
     // reset the table
-    renderTable(tableNumber, dbclick="description", idField="changeID")
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
-    var modal = document.getElementById("modal6");
+    var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
 // clear the changelog form and reset the table
-function resetChangeSearch(tableNumber) {
+function resetChangeSearch(tableNumber, modalNumber, dbclick=null, idField=null) {
     // get the relevant data
     changeTable = tableData[tableNumber]
     changeData = changeTable.dataSet
@@ -1519,41 +1518,41 @@ function resetChangeSearch(tableNumber) {
     tableData[tableNumber].showRows = changeData
 
     // reset the table
-    renderTable(tableNumber)
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
-    var modal = document.getElementById("modal6");
+    var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
 // filter through the codes table
-function searchCode(tableNumber, dbclick=null, idField=null) {
+function searchCode(tableNumber, modalNumber, dbclick=null, idField=null) {
     // get the relevant data
     codeTable = tableData[tableNumber]
     codeData = codeTable.dataSet
 
     // get the text inputs
-    codeEmail = document.getElementById('email').value.trim()
-    codeCode = document.getElementById('code').value.trim()
+    inputEmail = document.getElementById('email').value.trim()
+    inputCode = document.getElementById('code').value.trim()
 
     // get the dropdown inputs
-    role = document.getElementById('role').value
-    claimed = document.getElementById('claimed').value
+    inputRole = document.getElementById('role').value
+    inputClaimed = document.getElementById('claimed').value
 
     // get the date inputs
-    dateLower = document.getElementById('dateLower').value
-    dateHigher = document.getElementById('dateHigher').value
+    inputDateLower = document.getElementById('dateLower').value
+    inputDateHigher = document.getElementById('dateHigher').value
 
     // max and min dates in case one of the inputs isnt provided
     let maxDate = new Date(8640000000000000);
     let minDate = new Date(-8640000000000000);
 
     // deal with when one of the date inputs isn't provided
-    if (dateLower == '') { dateLower = minDate }
-    else { dateLower = new Date(dateLower) }
+    if (inputDateLower == '') { inputDateLower = minDate }
+    else { inputDateLower = new Date(inputDateLower) }
 
-    if (dateHigher == '') { dateHigher = maxDate }
-    else { dateHigher = new Date(dateHigher) }
+    if (inputDateHigher == '') { inputDateHigher = maxDate }
+    else { inputDateHigher = new Date(inputDateHigher) }
 
     // reset the visible row list
     tableData[tableNumber].showRows = []
@@ -1566,18 +1565,18 @@ function searchCode(tableNumber, dbclick=null, idField=null) {
         code = codeData[i]
 
         // ensure the text inputs match with the code
-        codeCorrect = code.code.trim().includes(codeCode)
-        emailCorrect = code.userEmail.trim().includes(codeEmail)
+        codeCorrect = code.code.trim().includes(inputCode)
+        emailCorrect = code.userEmail.trim().includes(inputEmail)
 
         // if the dropdown is set to 'all', then its true. otherwise, the researcher
         // should match that column (unless they actually dont have that column)
-        roleCorrect = (role == "all" || code.role == role || !code.role)
-        claimedCorrect = (claimed == "all" || code.claimed == claimed || !code.claimed)
+        roleCorrect = (inputRole == "all" || code.role == inputRole || !code.role)
+        claimedCorrect = (inputClaimed == "all" || code.claimed == inputClaimed || !code.claimed)
 
         // ensure the dates is within the set range
         dateSplit = code.dateAdded.split("-")
         dateDate = new Date(dateSplit[2], parseInt(dateSplit[1]) - 1, dateSplit[0]) // convert to a date object for comparison
-        dateCorrect = (dateDate >= dateLower && dateDate <= dateHigher)
+        dateCorrect = (dateDate >= inputDateLower && dateDate <= inputDateHigher)
 
         // only make the row visible if it matches for all of the user inputs
         if (codeCorrect && emailCorrect && roleCorrect && claimedCorrect && dateCorrect) {
@@ -1595,12 +1594,12 @@ function searchCode(tableNumber, dbclick=null, idField=null) {
     renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
-    var modal = document.getElementById("modal2");
+    var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
 // clear the codes form and reset the table
-function resetCodeSearch(tableNumber, dbclick=null, idField=null) {
+function resetCodeSearch(tableNumber, modalNumber, dbclick=null, idField=null) {
     // get the relevant data
     codeTable = tableData[tableNumber]
     codeData = codeTable.dataSet
@@ -1624,39 +1623,39 @@ function resetCodeSearch(tableNumber, dbclick=null, idField=null) {
     renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
-    var modal = document.getElementById("modal2");
+    var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
 // filter through the ticket table
-function searchTicket(tableNumber) {
+function searchTicket(tableNumber, modalNumber, dbclick=null, idField=null) {
     // get the relevant data
     ticketTable = tableData[tableNumber]
     ticketData = ticketTable.dataSet
 
     // get the text inputs
-    title = document.getElementById('title').value.trim()
+    inputTitle = document.getElementById('title').value.trim()
 
     // get the dropdown inputs
-    poster = document.getElementById('ticketPoster').value
-    member = document.getElementById('ticketMember').value
-    tag = document.getElementById('tags').value
-    resolved = document.getElementById('resolved').value
+    inputPoster = document.getElementById('ticketPoster').value
+    inputMember = document.getElementById('ticketMember').value
+    inputTag = document.getElementById('tags').value
+    inputResolved = document.getElementById('resolved').value
 
     // get the date inputs
-    dateLower = document.getElementById('dateLower').value
-    dateHigher = document.getElementById('dateHigher').value
+    inputDateLower = document.getElementById('dateLower').value
+    inputDateHigher = document.getElementById('dateHigher').value
 
     // max and min dates in case one of the inputs isnt provided
     let maxDate = new Date(8640000000000000);
     let minDate = new Date(-8640000000000000);
 
     // deal with when one of the date inputs isn't provided
-    if (dateLower == '') { dateLower = minDate }
-    else { dateLower = new Date(dateLower) }
+    if (inputDateLower == '') { inputDateLower = minDate }
+    else { inputDateLower = new Date(inputDateLower) }
 
-    if (dateHigher == '') { dateHigher = maxDate }
-    else { dateHigher = new Date(dateHigher) }
+    if (inputDateHigher == '') { inputDateHigher = maxDate }
+    else { inputDateHigher = new Date(inputDateHigher) }
 
     // reset the visible row list
     tableData[tableNumber].showRows = []
@@ -1666,20 +1665,19 @@ function searchTicket(tableNumber) {
         ticket = ticketData[i]
 
         // ensure the titles match
-        titleCorrect = ticket.title.trim().includes(title)
+        titleCorrect = ticket.title.trim().includes(inputTitle)
 
         // if the dropdown is set to 'all', then its true. otherwise, the user
         // should match that column
-        posterCorrect = (poster == "all" || ticket.email == poster)
-        console.log(ticket.email, poster)
-        memberCorrect = (member == "all" || ticket.members.includes(member))
-        tagCorrect = (tag == "all" || ticket.tags.includes(tag))
-        resolvedCorrect = (resolved == "all" || ticket.resolved == resolved)
+        posterCorrect = (inputPoster == "all" || ticket.email == inputPoster)
+        memberCorrect = (inputMember == "all" || ticket.members.includes(inputMember))
+        tagCorrect = (inputTag == "all" || ticket.tags.includes(inputTag))
+        resolvedCorrect = (inputResolved == "all" || ticket.resolved == inputResolved)
 
         // ensure the dates is within the set range
         dateSplit = ticket.date.split("-")
         dateDate = new Date(dateSplit[2], parseInt(dateSplit[1]) - 1, dateSplit[0]) // convert to a date object for comparison
-        dateCorrect = (dateDate >= dateLower && dateDate <= dateHigher)
+        dateCorrect = (dateDate >= inputDateLower && dateDate <= inputDateHigher)
 
         // only make the row visible if it matches for all of the user inputs
         if (titleCorrect && posterCorrect && memberCorrect && tagCorrect && resolvedCorrect && dateCorrect) {
@@ -1693,15 +1691,15 @@ function searchTicket(tableNumber) {
     }
 
     // reset the table
-    renderTable(tableNumber)
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
-    var modal = document.getElementById("modal3");
+    var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
 // clear the ticket form and reset the table
-function resetTicketSearch(tableNumber) {
+function resetTicketSearch(tableNumber, modalNumber, dbclick=null, idField=null) {
     // get the relevant data
     ticketTable = tableData[tableNumber]
     ticketData = ticketTable.dataSet
@@ -1723,10 +1721,10 @@ function resetTicketSearch(tableNumber) {
     tableData[tableNumber].showRows = ticketData
 
     // reset the table
-    renderTable(tableNumber)
+    renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
-    var modal = document.getElementById("modal3");
+    var modal = document.getElementById("modal" + modalNumber);
     modal.style.display = "none";
 }
 
