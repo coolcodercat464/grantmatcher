@@ -58,6 +58,7 @@
             
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to log out?</p>
+            <!-- TODO: remove spacing between all buttons like this: -->
             <div class="together">
                 <form method="post" action="/">
                     <input type="submit" value="Logout!" class="buttonStyle">
@@ -174,6 +175,111 @@
                 </div>
             </div>
             <br>
+        </div>
+    </div>
+
+    <!-- The modal to open a ticket -->
+    <div id="modal4" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Open a Ticket</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close4">&times;</span>
+            </div>
+
+            <div style="width: 100%;">
+                <label><b>TITLE</b></label>
+                <input type="text" id="newTitle" class="form-control" name="newTitle" placeholder="Enter the ticket's title" required>
+            </div><br>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>TAGS</b>
+                        <!-- TODO: add tooltip -->
+                    </label><br>
+                    <select name="newTags" id="newTags" class="form-control" style="width: 100%" multiple>
+                        <option value="bug">Bug Report</option>
+                        <option value="feedback">Feedback</option>
+                        <option value="inquiry">Inquiry</option>
+                        <option value="report">User Report</option>
+                        <option value="help">Tech Help</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div style="width: 100%;">
+                    <label><b>MEMBERS</b>
+                        <!-- TODO: add tooltip -->
+                    </label><br>
+                    <select name="newMembers" id="newMembers" class="form-control" style="width: 100%" multiple>
+                    </select>
+                </div>
+            </div>
+            <br>
+
+            <div>
+                <label><b>CONTENT</b>
+                    <!-- TODO: add tooltip -->
+                </label><br>
+                <textarea id="newContent" name="newContent" class="form-control" style="width: 100%"></textarea>
+            </div><br>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <button id='cancel4' class="buttonStyle blue" style="width: 100%;">Cancel</button>
+                </div>
+                
+                <div style="width: 100%;">
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(5); document.getElementById('modal4').style.display = 'none'">Open Ticket</button>
+                </div>
+            </div>
+            <br>
+        </div>
+    </div>
+
+    <!-- Confirmation modal before adding a new ticket -->
+    <div id="modal5" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Open Ticket</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close5">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to open this ticket? You can go make to the previous modal to proof-read the ticket before opening it.</p>
+            <div class="together">
+                <button class="buttonStyle" onclick="addTicket()">Open Ticket</button>
+                <button id='cancel5' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- When the user didn't fill in all the inputs correctly (front-end check) -->
+    <div id="modal6" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Woops!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close6">&times;</span>
+            </div>
+            <hr/>
+            
+            <p>Please ensure that you have filled in all areas.</p>
+        </div>
+    </div>
+
+    <!-- Another error modal (alerts here come from the backend) -->
+    <div id="modal7" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Error!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close7">&times;</span>
+            </div>
+            <hr/>
+            
+            <p id="showAlert"></p>
         </div>
     </div>
 
@@ -375,6 +481,52 @@
         <% } %>
 
         renderTable(10)
+    </script>
+    <script>
+        function addTicket() {
+            document.getElementById('modal5').style.display = 'none'
+
+            // get all the user input
+            title = document.getElementById('newTitle').value
+            tags = Array.from(document.getElementById('newTags').options)
+                .filter(option => option.selected)
+                .map(option => option.value);
+            members = Array.from(document.getElementById('newMembers').options)
+                .filter(option => option.selected)
+                .map(option => option.value);
+            content = document.getElementById('newContent').value
+            
+            // open error modal if its invalid
+            if (title.trim() == '' || content.trim() == '') {
+                openModal(6)
+                return
+            }
+
+            // turn the info into a json format
+            data = {
+                'title': title,
+                'tags': tags,
+                'members': members,
+                'content': content
+            }
+
+            // add the code to the database
+            fetch('/addticket', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(response => response.json()).then(result => {
+                document.getElementById("modal3").style.display = 'none'
+                if (result.status == "error") {
+                    // open the error modal if there is an error
+                    console.log(result)
+                    document.getElementById('showAlert').textContent = result.alert
+                    openModal(7)
+                } else {
+                    window.location.href = '/ticket/' + result.id
+                }
+            })
+        }
     </script>
 </body>
 </html>

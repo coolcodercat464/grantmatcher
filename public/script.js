@@ -1949,6 +1949,10 @@ fetch('/db/users').then(response => response.json()).then(async data => {
             document.getElementById('ticketMember').innerHTML += `
             <option value="${row.email}">${row.name}</option>
             `
+            // finally in the add ticket modal
+            document.getElementById('newMembers').innerHTML += `
+            <option value="${row.email}">${row.name}</option>
+            `
         } catch {
             
         }

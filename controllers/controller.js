@@ -20,6 +20,9 @@ const spawn = require('child_process').spawn;
 // environment variable then you can use only "python"
 var pythonExecutable = "python";
 
+// the email for the developer (for making tickets)
+var developerEmail = 'flyingbutter213@gmail.com'
+
 // check if a string is an integer
 function isStringInteger(str) {
   const num = Number(str); 
@@ -2785,7 +2788,7 @@ const manageclusterspost = async (req, res)=>{
         // stringify it
         date = `${day}-${month}-${year}`
 
-         // get all clusters
+        // get all clusters
         const result = await queryWithRetry('SELECT * FROM clusters');
         allClusters = result.rows
 
@@ -2858,15 +2861,114 @@ const manageclusterspost = async (req, res)=>{
 } 
 
 // add a ticket
-const ticketspost = async (req, res)=>{
-    console.log("TICKETS POST")
+const addticketpost = async (req, res)=>{
+    console.log("ADD TICKET POST")
 
     x = req.body
     console.log(x)
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
-        res.render('tickets.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
+        try {
+            // get the current date
+            now = new Date();
+
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = now.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+            // stringify it
+            date = `${day}-${month}-${year}`
+
+            // ensure all fields exist
+            if (!x.title || !x.tags || !x.members || !x.content) {
+                res.send({status: 'error', alert: 'It looks like some fields are missing. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                return
+            }
+
+            // ensure title and content arent empty
+            if (x.title.replace(/<[^>]*>/g, '').trim() == '' || x.content.replace(/<[^>]*>/g, '').trim() == '') {
+                res.send({status: 'error', alert: 'Please make sure you filled in all the fields!'})
+                return
+            }
+
+            // add the developer to the members list if not in there already
+            if (!x.members.includes(developerEmail)) {
+                x.members.push(developerEmail)
+            }
+
+            // add the user to the members list if not in there already
+            if (!x.members.includes(req.session.useremail)) {
+                x.members.push(req.session.useremail)
+            }
+
+            // ensure each item in x.tags is valid
+            for (i in x.tags) {
+                if (!['bug', 'feedback', 'inquiry', 'report', 'help', 'other'].includes(x.tags[i])) {
+                    res.send({status: 'error', alert: 'Your tags are invalid. Please retry.'})
+                    return
+                }
+            }
+
+            // get a list of all users
+            excludedUsers = await users_list()
+            for (i in excludedUsers) {
+                excludedUsers[i] = excludedUsers[i].email
+            }
+
+            // ensure each email in x.members is valid
+            for (i in x.members) {
+                index = excludedUsers.indexOf(x.members[i]) // get index of user
+                if (index == -1) {
+                    res.send({status: 'error', alert: 'Your members list is invalid. Please retry.'})
+                    return
+                }
+
+                excludedUsers.splice(index, 1) // remove from excluded users (because if this user is in x.members, they arent excluded from view)
+            }
+
+            console.log(excludedUsers)
+
+            // get all ticket IDs
+            const result = await queryWithRetry('SELECT "ticketID" FROM tickets');
+            allTickets = result.rows
+
+            // get the maximum ticket ID
+            maxTicketID = 9
+            for (i in allTickets) {
+                if (allTickets[i].ticketID > maxTicketID) {
+                    maxTicketID = allTickets[i].ticketID
+                }
+            }
+
+            // add ticket to database
+            await queryWithRetry('INSERT INTO tickets ("ticketID", "userEmail", "ticketDate", title, content, members, tags, replies, "resolutionDetails", "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [maxTicketID+1, req.session.useremail, date, x.title.replace(/<[^>]*>/g, ''), x.content.replace(/<[^>]*>/g, ''), x.members, x.tags, [], [], []])
+
+            // get all changes
+            const result2 = await queryWithRetry('SELECT "changeID" FROM changelog');
+
+            // calculate the maximum changeID
+            maxChangeID = 0
+            for (i in result2.rows) {
+                rowID = result2.rows[i].changeID
+                if (rowID > maxChangeID) {
+                    maxChangeID = rowID
+                }
+            }
+
+            // calculate the next change ID
+            nextChangeID = maxChangeID + 1
+
+            //update changelog
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Created', date, `A ticket called "${x.title.replace(/<[^>]*>/g, '')}" has been created by ${req.session.useremail}. Check it out now!`, excludedUsers]);
+
+            res.send({id: maxTicketID+1});
+        } catch (err) {
+            console.log(err)
+
+            res.send({status: 'error', alert: 'Something went wrong. If this issue persists, please email me at flyingbutter213@gmail.com'})
+        }
     } else {
         urlinit = '/tickets' // redirect them to the current url after they logged in
         res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
@@ -2919,5 +3021,5 @@ module.exports = {
     editresearcherpost,
     addresearcherpost,
     manageclusterspost,
-    ticketspost,
+    addticketpost,
 }

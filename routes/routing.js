@@ -74,7 +74,7 @@ router.get('/manageclusters', control.manageclustersget)
 router.post('/manageclusters', control.manageclusterspost)
 
 router.get('/tickets', control.ticketsget)
-router.post('/tickets', control.ticketspost)
+router.post('/addticket', control.addticketpost)
 
 module.exports = router;
 
