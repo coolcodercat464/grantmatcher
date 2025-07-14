@@ -168,12 +168,19 @@ def clusterMatching(researcherPool, allClusters, keywords, cutOffMethod, cutOff)
 # get the information from nodejs
 keywords = json.loads(sys.argv[1])
 allClusters = json.loads(sys.argv[2])
-researcherPool = json.loads(sys.argv[3])
+
+# Read JSON data from stdin
+researcherPool = sys.stdin.read()
+
+try:
+    researcherPool = json.loads(researcherPool)
+except json.JSONDecodeError as e:
+    raise Exception(e)
 
 # which function used depends on which method the user wants to use
-if sys.argv[6] == "direct":
-    researchersDirect = directMatching(researcherPool, keywords, sys.argv[4], float(sys.argv[5]))
+if sys.argv[5] == "direct":
+    researchersDirect = directMatching(researcherPool, keywords, sys.argv[3], float(sys.argv[4]))
     sys.stdout.write(json.dumps(researchersDirect))
 else:
-    researchersCluster = clusterMatching(researcherPool, allClusters, keywords, sys.argv[4], float(sys.argv[5]))
+    researchersCluster = clusterMatching(researcherPool, allClusters, keywords, sys.argv[3], float(sys.argv[4]))
     sys.stdout.write(json.dumps(researchersCluster))

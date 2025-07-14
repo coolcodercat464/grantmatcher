@@ -533,43 +533,46 @@ const nlpmatch = async (req, res) => {
 
     // STEP 2 - use the python NLP program
     try {
-      // store the output (its very long so the JSON will get processed over multiple .stdout.on() events)
-      output = '';
+        // store the output (its very long so the JSON will get processed over multiple .stdout.on() events)
+        output = '';
 
-      error = false;
+        error = false;
 
-      // execute the python script
-      const scriptExecution = spawn(pythonExecutable, 
-        ["match.py", JSON.stringify(keywords), JSON.stringify(allClusters), JSON.stringify(researcherPool), x.cutOffMethod, x.cutOff, x.matchMethod]);
+        // execute the python script
+        const scriptExecution = spawn(pythonExecutable, 
+            ["match.py", JSON.stringify(keywords), JSON.stringify(allClusters), x.cutOffMethod, x.cutOff, x.matchMethod]);
 
-      // Handle normal output
-      scriptExecution.stdout.on('data', async (data) => {
-          output += data.toString(); // Accumulate output
-          console.log(output)
-      });
+        scriptExecution.stdin.write(JSON.stringify(researcherPool));
+        scriptExecution.stdin.end();
 
-      // Handle error output
-      scriptExecution.stderr.on('data', (data) => {
-        // ensure that no errors occured
-        if (!error) {
-          error = true;
+        // Handle normal output
+        scriptExecution.stdout.on('data', async (data) => {
+            output += data.toString(); // Accumulate output
+            console.log(output)
+        });
 
-          console.log(data.toString())
-          res.send({status: 'error', alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
-          return
-        }
-      });
+        // Handle error output
+        scriptExecution.stderr.on('data', (data) => {
+            // ensure that no errors occured
+            if (!error) {
+            error = true;
 
-      // when the python script finished executing
-      scriptExecution.on('close', (code) => {
-        // ensure that no errors occured
-        if (!error) {
-          // only parse the JSON when it finished
-          result = JSON.parse(output);
-          res.send({'result': result})
-          return
-        } 
-      });
+            console.log(data.toString())
+            res.send({status: 'error', alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
+            return
+            }
+        });
+
+        // when the python script finished executing
+        scriptExecution.on('close', (code) => {
+            // ensure that no errors occured
+            if (!error) {
+            // only parse the JSON when it finished
+            result = JSON.parse(output);
+            res.send({'result': result})
+            return
+            } 
+        });
     } catch (err) {
       console.log(err)
       res.send({status: "error", alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
@@ -1751,7 +1754,7 @@ const confirmmatchpost = async (req, res)=>{
         grant = result.rows[0]
 
         // get the previous version
-        previousVersion = [JSON.stringify(grant.grantName), JSON.stringify(grant.url), JSON.stringify(grant.deadline), JSON.stringify(grant.duration), JSON.stringify(grant.description), gJSON.stringify(rant.clusters), JSON.stringify(grant.keywords), JSON.stringify(grant.researchers), JSON.stringify(grant.matched), JSON.stringify("This grant has been matched.")]
+        previousVersion = [JSON.stringify(grant.grantName), JSON.stringify(grant.url), JSON.stringify(grant.deadline), JSON.stringify(grant.duration), JSON.stringify(grant.description), JSON.stringify(grant.clusters), JSON.stringify(grant.keywords), JSON.stringify(grant.researchers), JSON.stringify(grant.matched), JSON.stringify("This grant has been matched.")]
 
         grantName = grant.grantName
 
