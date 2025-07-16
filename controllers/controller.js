@@ -1221,7 +1221,7 @@ const ticketpageget = async (req, res)=>{
 
     // validation - ensure id is an integer (id might be 'script.js' sometimes)
     if (!isStringInteger(id) || parseInt(id) <= 0) {
-        res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticket: [], user: req.session.useremail});
+        res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticket: [], user: req.session.useremail, replies: []});
         return
     }
 
@@ -1232,7 +1232,7 @@ const ticketpageget = async (req, res)=>{
             ticket = ticket.rows
 
             if (ticket.length == 0) {
-                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticket: [], user: req.session.useremail});
+                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticket: [], user: req.session.useremail, replies: []});
                 return
             } else {
                 // get the poster's name from their email
@@ -1252,13 +1252,19 @@ const ticketpageget = async (req, res)=>{
 
             if (ticket[0].members.includes(req.session.useremail)) {
                 console.log(ticket[0])
-                res.render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no', ticket: ticket, user: req.session.useremail});
+
+                // list of replies
+                replies = await queryWithRetry('SELECT * FROM replies WHERE "ticketID" = $1', [ticket[0].ticketID])
+                replies = replies.rows
+
+                res.render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no', ticket: ticket, user: req.session.useremail, replies: replies});
             } else {
-                res.status(403).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'You are not a member of the ticket so you cannot view it.', ticket: [], user: req.session.useremail});
+                res.status(403).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'You are not a member of the ticket so you cannot view it.', ticket: [], user: req.session.useremail, replies: []});
             }
             
         } catch (err) {
-            res.status(500).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong. Please try again. Email me at flyingbutter213@gmail.com if this issue persists.', ticket: [], user: req.session.useremail})
+            console.log(err)
+            res.status(500).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong. Please try again. Email me at flyingbutter213@gmail.com if this issue persists.', ticket: [], user: req.session.useremail, replies: []})
             return
         }
     } else {
