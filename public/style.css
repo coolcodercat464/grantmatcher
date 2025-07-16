@@ -54,6 +54,13 @@ h2 {
   text-transform: uppercase; /* make it all uppercase */
 }
 
+h3 {
+  font-size: 18px !important;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
 /* normal text */
 * {
   font-family: "Noto Sans", sans-serif;

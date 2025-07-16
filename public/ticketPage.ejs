@@ -112,6 +112,52 @@
         </div>
     </div>
 
+    <!-- Reply version history modal -->
+    <div id="modal5" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Version Information</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close5">&times;</span>
+            </div>
+            <hr/>
+            
+            <p>TODO</p>
+        </div>
+    </div>
+
+    <!-- Send reply modal -->
+    <div id="modal6" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Resolve Ticket</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close6">&times;</span>
+            </div>
+            <hr/>
+            
+            <p>Are you sure you want to send this reply?</p>
+            <div class="together">
+                <button class="buttonStyle" onclick="sendReply()">Send Reply</button>
+                <button id='cancel6' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- When the user didn't fill in all the inputs correctly (front-end check) -->
+    <div id="modal7" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Woops!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close7">&times;</span>
+            </div>
+            <hr/>
+            
+            <p>Please ensure that you have filled in all areas.</p>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section>
@@ -136,22 +182,22 @@
 
                 <!-- get the ticket's tags-->
                 <% ticketTags = [] %>
-                <% if (tickets[i].tags.includes('other')) { %>
+                <% if (ticket.tags.includes('other')) { %>
                     <% ticketTags.push('Other') %>
                 <% } %>
-                <% if (tickets[i].tags.includes('bug')) { %>
+                <% if (ticket.tags.includes('bug')) { %>
                     <% ticketTags.push('Bug Report') %>
                 <% } %>
-                <%  if (tickets[i].tags.includes('feedback')) { %>
+                <%  if (ticket.tags.includes('feedback')) { %>
                     <% ticketTags.push('Feedback') %>
                 <% } %>
-                <%  if (tickets[i].tags.includes('inquiry')) { %>
+                <%  if (ticket.tags.includes('inquiry')) { %>
                     <% ticketTags.push('Inquiry') %>
                 <% } %>
-                <%  if (tickets[i].tags.includes('report')) { %>
+                <%  if (ticket.tags.includes('report')) { %>
                     <% ticketTags.push('User Report') %>
                 <% } %>
-                <% if (tickets[i].tags.includes('help')) { %>
+                <% if (ticket.tags.includes('help')) { %>
                     <% ticketTags.push('Tech Help') %>
                 <% } %>
                 
@@ -192,6 +238,34 @@
                     <button class="buttonStyle pink" onclick="openModal(4)">Resolve Ticket</button>
                 <% } %>
             </section>
+            <hr/>
+
+            <section>
+                <h2>Version Information</h2>
+                <!-- TODO -->
+            </section>
+            <hr/>
+
+            <section>
+                <h2>Replies</h2>
+                <!-- TODO -->
+                
+                <h3>Reply to the Discussion</h3>
+                <div style="width: 100%; justify-content: space-between;" class="together align-items-center">
+                    <div>
+                        <i onclick="wrapText('**', '**')" class="fa fa-bold" style="padding-left: 5px; font-size: 20px;"></i>
+                        <i onclick="wrapText('*', '*')" class="fa fa-italic" style="padding-left: 10px; font-size: 20px;"></i>
+                        <i onclick="wrapText('-', '-')" class="fa fa-strikethrough" style="padding-left: 10px; font-size: 20px;"></i>
+                        <i onclick="wrapText('_', '_')" class="fa fa-underline" style="padding-left: 10px; font-size: 20px;"></i>
+                    </div>
+                    <div>
+                        <button class="buttonStyle blue" style="padding-top: 0; padding-bottom: 0; margin-bottom: 10px;">Reset</button> <button onclick="openModal(6)" class="buttonStyle pink" style="padding-top: 0; padding-bottom: 0; margin-bottom: 10px;">Submit</button>
+                    </div>
+                    
+                </div>
+                <textarea style="width: 100%;" id="newReply" class="form-control"></textarea>
+                <br>
+            </section>
         <% } %>
     </main>
     
@@ -212,6 +286,74 @@
         // show alerts
         if ("<%= showAlert %>" != "no") {
             openModal(2);
+        }
+    </script>
+    <script>
+    // Function to wrap selected text with start and end tags (e.g., for bold or italic formatting)
+    function wrapText(startTag, endTag) {
+      const textarea = document.getElementById('newReply');
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const text = textarea.value;
+
+      // Get the selected text
+      const selectedText = text.substring(start, end);
+
+      // Replace the selected text with formatted text
+      const formattedText = startTag + selectedText + endTag;
+      textarea.value = text.substring(0, start) + formattedText + text.substring(end);
+
+      // Reposition the cursor
+      textarea.selectionStart = start;
+      textarea.selectionEnd = start + formattedText.length;
+
+      // Focus back on the textarea
+      textarea.focus();
+    }
+
+    // Function to insert text at the cursor position
+    function insertText(textToInsert) {
+      const textarea = document.getElementById('newReply');
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const text = textarea.value;
+
+      // Insert the text at the cursor position
+      textarea.value = text.substring(0, start) + textToInsert + text.substring(end);
+
+      // Update cursor position
+      textarea.selectionStart = textarea.selectionEnd = start + textToInsert.length;
+
+      // Focus back on the textarea
+      textarea.focus();
+    }
+    </script>
+    <script>
+        function sendReply() {
+            replyArea = document.getElementById("newReply").value
+
+            // ensure the reply isnt empty
+            if (replyArea.trim() == '') {
+                document.getElementById('modal6').style.display = 'none'
+                openModal(7)
+            } else {
+                // add the code to the database
+                fetch('/addreply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({content: replyArea, id: '<%= ticket.ticketID %>'})
+                }).then(response => response.json()).then(result => {
+                    document.getElementById("modal6").style.display = 'none'
+                    if (result.status == "error") {
+                        // open the error modal if there is an error
+                        console.log(result)
+                        document.getElementById('showAlert').textContent = result.alert
+                        openModal(2)
+                    } else {
+                        window.location.reload()
+                    }
+                })
+            }
         }
     </script>
 </body>

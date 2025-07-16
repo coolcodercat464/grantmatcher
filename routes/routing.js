@@ -77,6 +77,7 @@ router.get('/tickets', control.ticketsget)
 router.post('/addticket', control.addticketpost)
 
 router.get('/ticket/:id', control.ticketpageget)
+router.post('/addreply', control.addreplypost)
 
 module.exports = router;
 

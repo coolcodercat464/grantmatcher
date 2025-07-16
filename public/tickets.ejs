@@ -394,90 +394,88 @@
     <script>
         // get all the ticket information to be presented in the table
         <% for (var i = 0 ; i < tickets.length ; i++) { %>
-            <% if (tickets[i].members.includes(currentuser)) { %>
-                ticketString = ''
-                ticketData = {}
+            ticketString = ''
+            ticketData = {}
 
-                // add ticket link
-                ticketString += '<p><a href="ticket/<%= tickets[i].ticketID %>">'
-                // get resolution status
-                resolved = 'yes'
-                <% if (tickets[i].resolutionDetails.length == 0) { %>
-                    ticketString += '<i class="fa fa-circle-o"></i> '
-                    resolved = 'no'
-                <% } else { %>
-                    ticketString += '<i class="fa fa-check-circle"></i> '
-                <% } %>
-
-                // ticket title
-                ticketString += '<b><%= tickets[i].title %>'
-
-                // add information for the tags
-                ticketTags = []
-                ticketTagsPresent = []
-                <% if (tickets[i].tags.includes('other')) { %>
-                    ticketTags.push('other')
-                    ticketTagsPresent.push('Other')
-                <% } %>
-                <% if (tickets[i].tags.includes('bug')) { %>
-                    ticketTags.push('bug')
-                    ticketTagsPresent.push('Bug Report')
-                <% } %>
-                <%  if (tickets[i].tags.includes('feedback')) { %>
-                    ticketTags.push('feedback')
-                    ticketTagsPresent.push('Feedback')
-                <% } %>
-                <%  if (tickets[i].tags.includes('inquiry')) { %>
-                    ticketTags.push('inquiry')
-                    ticketTagsPresent.push('Inquiry')
-                <% } %>
-                <%  if (tickets[i].tags.includes('report')) { %>
-                    ticketTags.push('report')
-                    ticketTagsPresent.push('User Report')
-                <% } %>
-                <% if (tickets[i].tags.includes('help')) { %>
-                    ticketTags.push('help')
-                    ticketTagsPresent.push('Tech Help')
-                <% } %>
-
-                if (ticketTagsPresent.length > 0) {
-                    ticketString += ' (' + ticketTagsPresent.join(', ') + ')'
-                }
-
-                // ticket member information
-                ticketString += ' - </b><%= tickets[i].username %>'
-
-                <% if (tickets[i].members.length > 1) { %>
-                    ticketString += ' + <%= tickets[i].members.length - 1 %> others'
-                <% } %>
-                
-                // add preview for content
-                ticketString += '</a></p><p><b><%= tickets[i].ticketDate %></b> <%= tickets[i].content.slice(0, 50) %></p>'
-
-                // add to data
-                ticketData.ticketString = ticketString
-                ticketData.username = '<%= tickets[i].username %>'
-                ticketData.email = '<%= tickets[i].userEmail %>'
-                ticketData.ticketDate = "<%= tickets[i].ticketDate.split('-').reverse().join('/') %>"
-                ticketData.memberNumber = "<%= tickets[i].members.length %>"
-                ticketData.replyNumber = "<%= tickets[i].replies.length %>"
-                ticketData.title = "<%= tickets[i].title %>"
-                ticketData.content = "<%= tickets[i].content %>"
-                ticketData.tags = ticketTags
-                ticketData.resolved = resolved
-                ticketData.date = '<%= tickets[i].ticketDate %>'
-
-                // get members
-                members = []
-                <% for (x in tickets[i].members) { %>
-                    members.push('<%= tickets[i].members[x] %>')
-                <% } %>
-
-                ticketData.members = members
-
-                tableData[10].dataSet.push(ticketData)
-                tableData[10].showRows.push(ticketData)
+            // add ticket link
+            ticketString += '<p><a href="ticket/<%= tickets[i].ticketID %>">'
+            // get resolution status
+            resolved = 'yes'
+            <% if (tickets[i].resolutionDetails.length == 0) { %>
+                ticketString += '<i class="fa fa-circle-o"></i> '
+                resolved = 'no'
+            <% } else { %>
+                ticketString += '<i class="fa fa-check-circle"></i> '
             <% } %>
+
+            // ticket title
+            ticketString += '<b><%= tickets[i].title %>'
+
+            // add information for the tags
+            ticketTags = []
+            ticketTagsPresent = []
+            <% if (tickets[i].tags.includes('other')) { %>
+                ticketTags.push('other')
+                ticketTagsPresent.push('Other')
+            <% } %>
+            <% if (tickets[i].tags.includes('bug')) { %>
+                ticketTags.push('bug')
+                ticketTagsPresent.push('Bug Report')
+            <% } %>
+            <%  if (tickets[i].tags.includes('feedback')) { %>
+                ticketTags.push('feedback')
+                ticketTagsPresent.push('Feedback')
+            <% } %>
+            <%  if (tickets[i].tags.includes('inquiry')) { %>
+                ticketTags.push('inquiry')
+                ticketTagsPresent.push('Inquiry')
+            <% } %>
+            <%  if (tickets[i].tags.includes('report')) { %>
+                ticketTags.push('report')
+                ticketTagsPresent.push('User Report')
+            <% } %>
+            <% if (tickets[i].tags.includes('help')) { %>
+                ticketTags.push('help')
+                ticketTagsPresent.push('Tech Help')
+            <% } %>
+
+            if (ticketTagsPresent.length > 0) {
+                ticketString += ' (' + ticketTagsPresent.join(', ') + ')'
+            }
+
+            // ticket member information
+            ticketString += ' - </b><%= tickets[i].username %>'
+
+            <% if (tickets[i].members.length > 1) { %>
+                ticketString += ' + <%= tickets[i].members.length - 1 %> others'
+            <% } %>
+            
+            // add preview for content
+            ticketString += '</a></p><p><b><%= tickets[i].ticketDate %></b> <%= tickets[i].content.slice(0, 50) %></p>'
+
+            // add to data
+            ticketData.ticketString = ticketString
+            ticketData.username = '<%= tickets[i].username %>'
+            ticketData.email = '<%= tickets[i].userEmail %>'
+            ticketData.ticketDate = "<%= tickets[i].ticketDate.split('-').reverse().join('/') %>"
+            ticketData.memberNumber = "<%= tickets[i].members.length %>"
+            ticketData.replyNumber = "<%= tickets[i].replies.length %>"
+            ticketData.title = "<%= tickets[i].title %>"
+            ticketData.content = "<%= tickets[i].content %>"
+            ticketData.tags = ticketTags
+            ticketData.resolved = resolved
+            ticketData.date = '<%= tickets[i].ticketDate %>'
+
+            // get members
+            members = []
+            <% for (x in tickets[i].members) { %>
+                members.push('<%= tickets[i].members[x] %>')
+            <% } %>
+
+            ticketData.members = members
+
+            tableData[10].dataSet.push(ticketData)
+            tableData[10].showRows.push(ticketData)
         <% } %>
 
         renderTable(10)
