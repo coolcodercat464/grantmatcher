@@ -6,3 +6,6 @@ node_modules/
 
 # ignore the model folder for lm
 paraphrase-MiniLM-L3-v2/
+
+# ignore sessions
+/sessions

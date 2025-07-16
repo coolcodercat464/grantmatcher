@@ -1172,7 +1172,7 @@ const manageclustersget = async (req, res)=>{
     }
 } 
 
-// present the tickets page
+// present the tickets
 const ticketsget = async (req, res)=>{
     console.log("TICKETS GET")
 
@@ -1196,6 +1196,56 @@ const ticketsget = async (req, res)=>{
             res.render('tickets.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no', tickets: tickets, currentuser: req.session.useremail});
         } catch (err) {
             res.render('tickets.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong. Please try again. Email me at flyingbutter213@gmail.com if this issue persists.', tickets: [], currentuser: req.session.useremail});
+        }
+    } else {
+        urlinit = '/tickets' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
+// present the ticket page
+const ticketpageget = async (req, res)=>{
+    console.log("TICKET PAGE GET")
+
+    // get the id (from the route name itself)
+    id = req.params.id
+    console.log(id);
+
+    // validation - ensure id is an integer (id might be 'script.js' sometimes)
+    if (!isStringInteger(id) || parseInt(id) <= 0) {
+        res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticket: [], user: req.session.useremail});
+        return
+    }
+
+    // only allow them to see tickets if they have been authenticated
+    if (req.isAuthenticated()) {
+        try {
+            ticket = await queryWithRetry('SELECT * FROM tickets WHERE "ticketID" = $1', [id])
+            ticket = ticket.rows
+
+            if (ticket.length == 0) {
+                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticket: [], user: req.session.useremail});
+                return
+            } else {
+                // get the poster's name from their email
+                poster = await get_user_by_email(ticket[0].userEmail)
+                ticket[0].username = poster.name
+
+                // get the members names from their emails
+                ticket[0].membersNames = []
+                for (i in ticket[0].members) {
+                    // exclude the poster
+                    if (ticket[0].members[i] != ticket[0].userEmail) {
+                        member = await get_user_by_email(ticket[0].members[i])
+                        ticket[0].membersNames.push(member.name)
+                    }
+                }
+            }
+
+            res.render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no', ticket: ticket, user: req.session.useremail});
+        } catch (err) {
+            res.status(500).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong. Please try again. Email me at flyingbutter213@gmail.com if this issue persists.', ticket: [], user: req.session.useremail})
+            return
         }
     } else {
         urlinit = '/tickets' // redirect them to the current url after they logged in
@@ -3004,6 +3054,7 @@ module.exports = {
     addresearcherget,
     manageclustersget,
     ticketsget,
+    ticketpageget,
 
     indexpost,
     loginpost,

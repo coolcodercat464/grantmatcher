@@ -1634,7 +1634,7 @@ function searchTicket(tableNumber, modalNumber, dbclick=null, idField=null) {
     ticketData = ticketTable.dataSet
 
     // get the text inputs
-    inputTitle = document.getElementById('title').value.trim()
+    inputTitle = document.getElementById('title').value.trim().toLowerCase()
 
     // get the dropdown inputs
     inputPoster = document.getElementById('ticketPoster').value
@@ -1665,7 +1665,7 @@ function searchTicket(tableNumber, modalNumber, dbclick=null, idField=null) {
         ticket = ticketData[i]
 
         // ensure the titles match
-        titleCorrect = ticket.title.trim().includes(inputTitle)
+        titleCorrect = ticket.title.trim().toLowerCase().includes(inputTitle)
 
         // if the dropdown is set to 'all', then its true. otherwise, the user
         // should match that column

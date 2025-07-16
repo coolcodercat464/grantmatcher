@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>GrantMatcher</title>
+    <%- head %>
+</head>
+<body>
+    <!-- Navigation (sticky header). Links and dropdown collapse into a hamburger menu when the screen size is small. -->
+    <nav class="navbar navbar-expand-lg navbar-dark px-3" id="navbar">
+        <!-- Brand on the left -->
+        <a class="navbar-brand bigBrand" href="/" id="navbar-brand">Grant Matcher</a>
+
+        <!-- Toggler (for mobile view) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" id="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links on the right -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Links here -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tickets">Tickets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tutorial">Tutorial</a>
+                </li>
+
+                <!-- Dropdown (user menu) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <!-- Logout button (opens a modal) -->
+                        <li><button class="dropdown-item" id="modalBtn1" onclick="openModal(1)">Logout</button></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- The modal the logout button in the navigation bar opens -->
+    <div id="modal1" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Log out</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close1">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to log out?</p>
+            <div class="together">
+                <form method="post" action="/">
+                    <input type="submit" value="Logout!" class="buttonStyle">
+                </form>
+                <button id='cancel1' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error modal -->
+    <div id="modal2" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Error!</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close2">&times;</span>
+            </div>
+            <hr/>
+            
+            <p id="showAlert"><%= showAlert %></p>
+        </div>
+    </div>
+
+    <!-- Edit ticket modal -->
+    <div id="modal3" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Edit Ticket</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close3">&times;</span>
+            </div>
+            <hr/>
+            
+            <p>TODO</p>
+            <button id='cancel3' class="buttonStyle">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Resolve ticket modal -->
+    <div id="modal4" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Resolve Ticket</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close4">&times;</span>
+            </div>
+            <!-- TODO: use of <hr> in modals is inconsistent. please change.-->
+            <hr/>
+            
+            <p>TODO</p>
+            <button id='cancel4' class="buttonStyle">Cancel</button>
+        </div>
+    </div>
+
+    <!-- The main content -->
+    <main>
+        <section>
+            <!-- TODO: add the X icon for all pages-->
+            <h1>Ticket</h1>
+        </section>
+        <hr/>
+
+        <% if (ticket.length == 0) { %>
+            <section>
+                <h2>Ticket cannot be found.</h2>
+                <p>Something went wrong. Please email me at flyingbutter213@gmail.com if this issue persists.</p>
+            </section>
+        <% } else { %>
+            <% ticket = ticket[0] %>
+            <section>
+                <!-- if the user is the poster, you have to add an edit icon -->
+                <% if (user == ticket.userEmail) { %>
+                    <div class="together align-items-center" style="justify-content: space-between;">
+                        <div>
+                <% } %>
+
+                <!-- get the ticket's tags-->
+                <% ticketTags = [] %>
+                <% if (tickets[i].tags.includes('other')) { %>
+                    <% ticketTags.push('Other') %>
+                <% } %>
+                <% if (tickets[i].tags.includes('bug')) { %>
+                    <% ticketTags.push('Bug Report') %>
+                <% } %>
+                <%  if (tickets[i].tags.includes('feedback')) { %>
+                    <% ticketTags.push('Feedback') %>
+                <% } %>
+                <%  if (tickets[i].tags.includes('inquiry')) { %>
+                    <% ticketTags.push('Inquiry') %>
+                <% } %>
+                <%  if (tickets[i].tags.includes('report')) { %>
+                    <% ticketTags.push('User Report') %>
+                <% } %>
+                <% if (tickets[i].tags.includes('help')) { %>
+                    <% ticketTags.push('Tech Help') %>
+                <% } %>
+                
+                <h2>
+                    <%= ticket.title %> (<%= ticketTags.join(', ') %>)
+                    <!-- handle resolution status (question mark for unresolved, checkmark for resolved) -->
+                    <% if (ticket.resolutionDetails.length == 0) { %>
+                        <i class="fa fa-question"></i>
+                    <% } else { %>
+                        <i class="fa fa-check"></i>
+                    <% } %> 
+                </h2>
+
+                <% if (user == ticket.userEmail) { %>
+                        </div>
+                        <div>
+                            <i class="fa fa-pencil-square-o" onclick="openModal(3)"></i>
+                        </div>
+                    </div>
+                <% } %>
+                
+                <div class="together align-items-center" style="justify-content: space-between;">
+                    <div>
+                        <p style="font-size: 0.8em"><%= ticket.username %> on <%= ticket.ticketDate %></p>
+                    </div>
+                    <div>
+                        <!-- tooltip for other ticket members -->
+                        <button style="padding: 0" type="button" class="btn" data-toggle="tooltip" data-placement="top" title="<%= ticket.membersNames.join(', ') %>">
+                            <p style="font-size: 0.8em">+ <%= ticket.membersNames.length %> others</p>
+                        </button>
+                    </div>
+                </div>
+                <!-- the ticket's content -->
+                <p><%= ticket.content %></p><br>
+
+                <!-- resolution button-->
+                <% if (user == ticket.userEmail) { %>
+                    <button class="buttonStyle pink" onclick="openModal(4)">Resolve Ticket</button>
+                <% } %>
+            </section>
+        <% } %>
+    </main>
+    
+    <!-- EJS partial (for code reuse and efficiency) -->
+    <%- footer %>
+
+    <!-- Bootstrap for JS -->
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <!-- This file allows for the user to interact with the elements on the site and for the site to give feedback to the user -->
+    <script src="/script.js"></script>
+    <!-- JQuery for the tooltip -->
+    <script>
+        $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+    </script>
+    <script>
+        // show alerts
+        if ("<%= showAlert %>" != "no") {
+            openModal(2);
+        }
+    </script>
+</body>
+</html>
