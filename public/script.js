@@ -939,6 +939,7 @@ function searchResearcher(tableNumber, modalNumber, dbclick=null, idField=null, 
     }
 
     // reset the table
+    tableData[tableNumber].currentPage = 1
     renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
@@ -1145,6 +1146,7 @@ function searchGrant(tableNumber, modalNumber, dbclick=null, idField=null) {
     }
 
     // reset the table
+    tableData[tableNumber].currentPage = 1
     renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
@@ -1279,6 +1281,7 @@ function searchUser(tableNumber, modalNumber, dbclick=null, idField=null) {
     }
 
     // reset the table
+    tableData[tableNumber].currentPage = 1
     renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
@@ -1406,6 +1409,7 @@ async function searchCluster(tableNumber, dbclick=null, idField=null) {
         }
 
         // reset the table
+        tableData[tableNumber].currentPage = 1
         renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
         // close the modal
@@ -1493,6 +1497,7 @@ function searchChange(tableNumber, modalNumber, dbclick=null, idField=null) {
     }
 
     // reset the table
+    tableData[tableNumber].currentPage = 1
     renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
@@ -1591,6 +1596,7 @@ function searchCode(tableNumber, modalNumber, dbclick=null, idField=null) {
     }
 
     // reset the table
+    tableData[tableNumber].currentPage = 1
     renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
@@ -1691,6 +1697,7 @@ function searchTicket(tableNumber, modalNumber, dbclick=null, idField=null) {
     }
 
     // reset the table
+    tableData[tableNumber].currentPage = 1
     renderTable(tableNumber, dbclick=dbclick, idField=idField)
 
     // close the modal
