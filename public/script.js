@@ -1746,6 +1746,7 @@ thus reducing the processing time.
 
 clustersData = [] // list of dictionaries
 var clustersInitialised = false
+var editTicketMembersInitialised = false
 
 // does many things at once - initialises the tables AND  initialises the cluster
 // selectors. ALSO, it initialises the researcher dropdown in the search modal for
@@ -1956,10 +1957,20 @@ fetch('/db/users').then(response => response.json()).then(async data => {
             document.getElementById('ticketMember').innerHTML += `
             <option value="${row.email}">${row.name}</option>
             `
-            // finally in the add ticket modal
+            // next in the add ticket modal
             document.getElementById('newMembers').innerHTML += `
             <option value="${row.email}">${row.name}</option>
             `
+        } catch {
+            
+        }
+
+        try {
+            // fianlly in the edit ticket modal
+            document.getElementById('editTicketMembers').innerHTML += `
+            <option value="${row.email}">${row.name}</option>
+            `
+            editTicketMembersInitialised = true
         } catch {
             
         }

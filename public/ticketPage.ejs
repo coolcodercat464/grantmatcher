@@ -90,9 +90,51 @@
                 <span class="close" id="close3">&times;</span>
             </div>
             <hr/>
-            
-            <p>TODO</p>
-            <button id='cancel3' class="buttonStyle">Cancel</button>
+
+            <div style="width: 100%;">
+                <label><b>TITLE</b></label>
+                <input type="text" id="editTicketTitle" class="form-control" name="editTicketTitle" required>
+            </div><br>
+
+            <div class="together">
+                <div style="width: 100%;">
+                    <label><b>TAGS</b>
+                        <!-- TODO: add tooltip -->
+                    </label><br>
+                    <select name="editTicketTags" id="editTicketTags" class="form-control" style="width: 100%" multiple>
+                        <option value="bug">Bug Report</option>
+                        <option value="feedback">Feedback</option>
+                        <option value="inquiry">Inquiry</option>
+                        <option value="report">User Report</option>
+                        <option value="help">Tech Help</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div style="width: 100%;">
+                    <label><b>MEMBERS</b>
+                        <!-- TODO: add tooltip -->
+                    </label><br>
+                    <select name="editTicketMembers" id="editTicketMembers" class="form-control" style="width: 100%" multiple>
+                    </select>
+                </div>
+            </div>
+            <br>
+
+            <label><b>CONTENT</b>
+                <!-- TODO: add tooltip -->
+            </label><br>
+            <textarea id="editTicketContent" name="editTicketContent" class="form-control" style="width: 100%"></textarea><br>
+
+            <label><b>REASON FOR EDIT</b></label>
+            <p>Why did you edit your ticket?</p>
+            <textarea id="editTicketReason" class="form-control"></textarea><br>
+
+            <div class="together">
+                <button id='cancel3' class="buttonStyle blue" style="width: 100%;">Cancel</button>
+                <button class="buttonStyle pink" onclick="editTicket()" style="width: 100%;">Edit Ticket</button>
+            </div>
+            <br>
         </div>
     </div>
 
@@ -192,13 +234,13 @@
         </section>
         <hr/>
 
-        <% if (ticket.length == 0) { %>
+        <% if (ticketList.length == 0) { %>
             <section>
                 <h2>Ticket cannot be found.</h2>
                 <p>Something went wrong. Please email me at flyingbutter213@gmail.com if this issue persists.</p>
             </section>
         <% } else { %>
-            <% ticket = ticket[0] %>
+            <% ticket = ticketList[0] %>
             <section>
                 <!-- if the user is the poster, you have to add an edit icon -->
                 <% if (user == ticket.userEmail) { %>
@@ -517,6 +559,111 @@
                     }
                 })
             }
+        }
+    </script>
+    <script>
+        // wait for a condition to be true
+        const waitFor = (conditionFn, callback, interval = 50) => {
+            const checker = setInterval(() => {
+            if (conditionFn()) {
+                clearInterval(checker);
+                callback();
+            }
+            }, interval);
+        };
+
+        // setup default values in edit ticket
+        function setUpEditTickets() {
+            <% if (ticketList.length == 0) { %>
+                console.log("womp womp")
+            <% } else { %>
+                <% ticket = ticketList[0] %>
+
+                // text fields
+                document.getElementById("editTicketTitle").value = '<%= ticket.title %>'
+                document.getElementById("editTicketContent").value = '<%= ticket.content %>'
+
+                // multi-select fields (tag)
+                tagsSelect = document.getElementById('editTicketTags');
+                <% for (var t = 0; t < ticket.tags.length; t++) { %>
+                    <% currentTag = ticket.tags[t] %>
+                    for (let i = 0; i < tagsSelect.options.length; i++) {
+                        if (tagsSelect.options[i].value == '<%= currentTag %>') {
+                            tagsSelect.options[i].selected = true; // select it if its the same as the current tag
+                            break;
+                        }
+                    }
+                <% } %>
+
+                // multi-select fields (members)
+                membersSelect = document.getElementById('editTicketMembers');
+                <% for (var m = 0; m < ticket.members.length; m++) { %>
+                    <% currentMember = ticket.members[m] %>
+                    for (let i = 0; i < membersSelect.options.length; i++) {
+                        if (membersSelect.options[i].value == '<%= currentMember %>') {
+                            membersSelect.options[i].selected = true; // select it if its the same as the current member
+                            break;
+                        }
+                    }
+                <% } %>
+            <% } %>
+        }
+
+        // wait for membersSelect to be initialised (otherwise editTicketMembers is empty)
+        waitFor(
+            () => editTicketMembersInitialised === true,
+            () => {
+                setUpEditTickets()
+            }
+        );
+
+        function editTicket() {
+            <% if (ticketList.length == 0) { %>
+                console.log("womp womp")
+            <% } else { %>
+                title = document.getElementById("editTicketTitle").value
+                content = document.getElementById("editTicketContent").value
+                reason = document.getElementById("editTicketReason").value
+                tags = Array.from(document.getElementById('editTicketTags').options)
+                    .filter(option => option.selected)
+                    .map(option => option.value);
+                members = Array.from(document.getElementById('editTicketMembers').options)
+                    .filter(option => option.selected)
+                    .map(option => option.value);
+                
+                // open error modal if its invalid
+                if (title.trim() == '' || content.trim() == '' || reason.trim() == '') {
+                    openModal(7)
+                    return
+                }
+
+                // turn the info into a json format
+                data = {
+                    'title': title,
+                    'tags': tags,
+                    'members': members,
+                    'content': content,
+                    'reason': reason,
+                    'id': <%= ticketList[0].ticketID %>
+                }
+
+                // add the code to the database
+                fetch('/editticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                }).then(response => response.json()).then(result => {
+                    document.getElementById("modal3").style.display = 'none'
+                    if (result.status == "error") {
+                        // open the error modal if there is an error
+                        console.log(result)
+                        document.getElementById('showAlert').textContent = result.alert
+                        openModal(2)
+                    } else {
+                        window.location.reload()
+                    }
+                })
+            <% } %>
         }
     </script>
 </body>

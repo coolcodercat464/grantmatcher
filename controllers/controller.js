@@ -1221,7 +1221,7 @@ const ticketpageget = async (req, res)=>{
 
     // validation - ensure id is an integer (id might be 'script.js' sometimes)
     if (!isStringInteger(id) || parseInt(id) <= 0) {
-        res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticket: [], user: req.session.useremail, replies: []});
+        res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticketList: [], user: req.session.useremail, replies: []});
         return
     }
 
@@ -1232,7 +1232,7 @@ const ticketpageget = async (req, res)=>{
             ticket = ticket.rows
 
             if (ticket.length == 0) {
-                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticket: [], user: req.session.useremail, replies: []});
+                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticketList: [], user: req.session.useremail, replies: []});
                 return
             } else {
                 // get the poster's name from their email
@@ -1264,14 +1264,14 @@ const ticketpageget = async (req, res)=>{
                     replies[r].username = poster.name
                 }
 
-                res.render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no', ticket: ticket, user: req.session.useremail, replies: replies});
+                res.render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no', ticketList: ticket, user: req.session.useremail, replies: replies});
             } else {
-                res.status(403).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'You are not a member of the ticket so you cannot view it.', ticket: [], user: req.session.useremail, replies: []});
+                res.status(403).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'You are not a member of the ticket so you cannot view it.', ticketList: [], user: req.session.useremail, replies: []});
             }
             
         } catch (err) {
             console.log(err)
-            res.status(500).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong. Please try again. Email me at flyingbutter213@gmail.com if this issue persists.', ticket: [], user: req.session.useremail, replies: []})
+            res.status(500).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong. Please try again. Email me at flyingbutter213@gmail.com if this issue persists.', ticketList: [], user: req.session.useremail, replies: []})
             return
         }
     } else {
@@ -3291,6 +3291,135 @@ const editreplypost = async (req, res)=>{
     }
 } 
 
+// add a ticket
+const editticketpost = async (req, res)=>{
+    console.log("EDIT TICKET POST")
+
+    x = req.body
+    console.log(x)
+
+    // only allow them to see tickets if they have been authenticated
+    if (req.isAuthenticated()) {
+        try {
+            // get the current date
+            now = new Date();
+
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = now.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+            // stringify it
+            date = `${day}-${month}-${year}`
+
+            // ensure all fields exist
+            if (!x.title || !x.tags || !x.members || !x.content || !x.reason || !x.id) {
+                res.send({status: 'error', alert: 'It looks like some fields are missing. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                return
+            }
+
+            // ensure title and content arent empty
+            if (x.title.replace(/<[^>]*>/g, '').trim() == '' || x.content.replace(/<[^>]*>/g, '').trim() == '' || x.reason.replace(/<[^>]*>/g, '').trim() == '') {
+                res.send({status: 'error', alert: 'Please make sure you filled in all the fields!'})
+                return
+            }
+
+            // add the developer to the members list if not in there already
+            if (!x.members.includes(developerEmail)) {
+                x.members.push(developerEmail)
+            }
+
+            // add the user to the members list if not in there already
+            if (!x.members.includes(req.session.useremail)) {
+                x.members.push(req.session.useremail)
+            }
+
+            // ensure each item in x.tags is valid
+            for (i in x.tags) {
+                if (!['bug', 'feedback', 'inquiry', 'report', 'help', 'other'].includes(x.tags[i])) {
+                    res.send({status: 'error', alert: 'Your tags are invalid. Please retry.'})
+                    return
+                }
+            }
+
+            // get a list of all users
+            excludedUsers = await users_list()
+            for (i in excludedUsers) {
+                excludedUsers[i] = excludedUsers[i].email
+            }
+
+            // ensure each email in x.members is valid
+            for (i in x.members) {
+                index = excludedUsers.indexOf(x.members[i]) // get index of user
+                if (index == -1) {
+                    res.send({status: 'error', alert: 'Your members list is invalid. Please retry.'})
+                    return
+                }
+
+                excludedUsers.splice(index, 1) // remove from excluded users (because if this user is in x.members, they arent excluded from view)
+            }
+
+            console.log(excludedUsers)
+
+            // TODO: complete stubs
+            // get ticket info
+            ticket = await queryWithRetry('SELECT * FROM tickets WHERE "ticketID" = $1', [x.id])
+            ticket = ticket.rows
+
+            // ensure ticket exists
+            if (ticket.length == 0) {
+                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticket: [], user: req.session.useremail});
+                return
+            }
+
+            ticket = ticket[0]
+
+            // ensure that user is in ticket members
+            if (!ticket.members.includes(req.session.useremail)) {
+                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'You are not a member of the ticket so you cannot add replies to it.', ticket: [], user: req.session.useremail});
+                return
+            }
+
+            // get previous version
+            previousVersion = [ticket.title, ticket.content, JSON.stringify(ticket.members), JSON.stringify(ticket.tags), JSON.stringify(ticket.resolutionDetails), x.reason.replace(/<[^>]*>/g, ''), date]
+
+            // handle version information
+            versionInformation = ticket.versionInformation
+            versionInformation.push(previousVersion)
+
+            // update ticket
+            await queryWithRetry('UPDATE tickets SET title = $1, content = $2, members = $3, tags = $4, "versionInformation" = $5 WHERE "ticketID" = $6', [x.title.replace(/<[^>]*>/g, ''), x.content.replace(/<[^>]*>/g, ''), x.members, x.tags, versionInformation, x.id])
+            
+            // get all changes
+            const result = await queryWithRetry('SELECT "changeID" FROM changelog');
+
+            // calculate the maximum changeID
+            maxChangeID = 0
+            for (i in result.rows) {
+                rowID = result.rows[i].changeID
+                if (rowID > maxChangeID) {
+                    maxChangeID = rowID
+                }
+            }
+
+            // calculate the next change ID
+            nextChangeID = maxChangeID + 1
+
+            //update changelog
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Edited', date, `A ticket called "${x.title.replace(/<[^>]*>/g, '')}" has been edited by ${req.session.useremail}. Check it out now!`, excludedUsers]);
+
+            res.send({status: 'success'});
+        } catch (err) {
+            console.log(err)
+
+            res.send({status: 'error', alert: 'Something went wrong. If this issue persists, please email me at flyingbutter213@gmail.com'})
+        }
+    } else {
+        urlinit = '/tickets' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
 // Export of all methods as object 
 module.exports = { 
     dbgrants,
@@ -3341,4 +3470,5 @@ module.exports = {
     addticketpost,
     addreplypost,
     editreplypost,
+    editticketpost,
 }

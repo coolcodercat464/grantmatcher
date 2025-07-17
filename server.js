@@ -67,7 +67,7 @@ app.post(['/addcode', '/removecode', '/manageclusters'], routes)
 
 // tickets
 app.get(['/tickets', '/ticket/:id'], routes)
-app.post(['/addticket', '/ticket/:id', '/resolve', '/editpost', '/editreply', '/addreply'], routes)
+app.post(['/addticket', '/ticket/:id', '/resolve', '/editticket', '/editreply', '/addreply'], routes)
 
 // listen to port
 app.listen(port, () => {
