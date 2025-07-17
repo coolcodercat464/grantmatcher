@@ -58,7 +58,7 @@
             
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to log out?</p>
-            <div class="together">
+            <div style="display: flex">
                 <form method="post" action="/">
                     <input type="submit" value="Logout!" class="buttonStyle">
                 </form>
@@ -104,10 +104,8 @@
             
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to go back the the dashboard?</p>
-            <div class="together">
-                <button class="buttonStyle" onclick="window.location.href = '/'">Go Back</button>
-                <button id='cancel4' class="buttonStyle">Cancel</button>
-            </div>
+            <button class="buttonStyle" onclick="window.location.href = '/'">Go Back</button>
+            <button id='cancel4' class="buttonStyle">Cancel</button>
         </div>
     </div>
 
@@ -122,10 +120,8 @@
             
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to add this grant now?</p>
-            <div class="together">
-                <button class="buttonStyle" onclick="submit()">Add Grant</button>
-                <button id='cancel5' class="buttonStyle">Cancel</button>
-            </div>
+            <button class="buttonStyle" onclick="submit()">Add Grant</button>
+            <button id='cancel5' class="buttonStyle">Cancel</button>
         </div>
     </div>
 

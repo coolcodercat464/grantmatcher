@@ -58,7 +58,7 @@
             
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to log out?</p>
-            <div class="together">
+            <div style="display: flex">
                 <form method="post" action="/">
                     <input type="submit" value="Logout!" class="buttonStyle">
                 </form>
@@ -458,8 +458,8 @@
                 </div>
                 
                 <div style="width: 100%;">
-                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetClusterSearch(3, 4)">Reset Form</button><br>
                     <button class="buttonStyle pink" style="width: 100%;" onclick="searchCluster(3, 4)">Search</button>
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetClusterSearch(3, 4)">Reset Form</button><br>
                 </div>
             </div>
         </div>
@@ -528,11 +528,11 @@
 
             <div class="together" style="align-items: flex-start;">
                 <div style="width: 100%;">
-                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetUserSearch(4, 5)">Reset Form</button>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchUser(4, 5)">Search</button>
                 </div>
                 
                 <div style="width: 100%;">
-                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchUser(4, 5)">Search</button>
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetUserSearch(4, 5)">Reset Form</button>
                 </div>
             </div>
         </div>
@@ -593,8 +593,8 @@
                 </div>
                 
                 <div style="width: 100%;">
-                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetChangeSearch(5, 6, dbclick='description', idField='changeID')">Reset Form</button><br>
                     <button class="buttonStyle pink" style="width: 100%;" onclick="searchChange(5, 6, dbclick='description', idField='changeID')">Search</button>
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetChangeSearch(5, 6, dbclick='description', idField='changeID')">Reset Form</button><br>
                 </div>
             </div>
         </div>

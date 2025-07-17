@@ -58,7 +58,7 @@
             
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to log out?</p>
-            <div class="together">
+            <div style="display: flex">
                 <form method="post" action="/">
                     <input type="submit" value="Logout!" class="buttonStyle">
                 </form>
@@ -125,8 +125,8 @@
                 </div>
                 
                 <div style="width: 100%;">
-                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetCodeSearch(9, 2, dbclick=null, idField='code')">Reset Form</button><br>
-                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchCode(9, 2, dbclick=null, idField='code')">Search</button>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchCode(9, 2, dbclick=null, idField='code')">Search</button><br>
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetCodeSearch(9, 2, dbclick=null, idField='code')">Reset Form</button>
                 </div>
             </div>
             <br>
@@ -161,11 +161,11 @@
 
             <div class="together">
                 <div style="width: 100%;">
-                    <button id='cancel3' class="buttonStyle blue" style="width: 100%;">Cancel</button>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="addCode()">Add this Code</button>
                 </div>
                 
                 <div style="width: 100%;">
-                    <button class="buttonStyle pink" style="width: 100%;" onclick="addCode()">Add this Code</button>
+                    <button id='cancel3' class="buttonStyle blue" style="width: 100%;">Cancel</button>
                 </div>
             </div>
             <br>
@@ -183,10 +183,8 @@
             
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to remove this code?</p>
-            <div class="together">
-                <button class="buttonStyle" id="confirmDelete">Delete</button>
-                <button id='cancel4' class="buttonStyle">Cancel</button>
-            </div>
+            <button class="buttonStyle" id="confirmDelete">Delete</button>
+            <button id='cancel4' class="buttonStyle">Cancel</button>
         </div>
     </div>
 

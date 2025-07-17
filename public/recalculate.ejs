@@ -58,7 +58,7 @@
             
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to log out?</p>
-            <div class="together">
+            <div style="display: flex">
                 <form method="post" action="/">
                     <input type="submit" value="Logout!" class="buttonStyle">
                 </form>
@@ -253,10 +253,8 @@
             
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to recalculate the researchers' data now? This might take some time.</p>
-            <div class="together">
-                <button class="buttonStyle" onclick="recalculate()">Recalculate now</button>
-                <button id='cancel3' class="buttonStyle">Cancel</button>
-            </div>
+            <button class="buttonStyle" onclick="recalculate()">Recalculate now</button>
+            <button id='cancel3' class="buttonStyle">Cancel</button>
         </div>
     </div>
 
@@ -455,11 +453,11 @@
 
             <div class="together" style="align-items: flex-start;">
                 <div style="width: 100%;">
-                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetResearcherSearch(8, 6, dbclick=null, idField='uniqueId', searchId=2);">Reset Form</button>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchResearcher(8, 6, dbclick=null, idField='uniqueId', searchId=2);">Search</button>
                 </div>
                 
                 <div style="width: 100%;">
-                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchResearcher(8, 6, dbclick=null, idField='uniqueId', searchId=2);">Search</button>
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetResearcherSearch(8, 6, dbclick=null, idField='uniqueId', searchId=2);">Reset Form</button>
                 </div>
             </div>
             <br>
@@ -477,10 +475,8 @@
             
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to confirm all changes? This action cannot be undone.</p>
-            <div class="together">
-                <button class="buttonStyle" onclick="confirmChanges(); document.getElementById('modal7').style.display = 'none'">Confirm Changes</button>
-                <button id='cancel7' class="buttonStyle">Cancel</button>
-            </div>
+            <button class="buttonStyle" onclick="confirmChanges(); document.getElementById('modal7').style.display = 'none'">Confirm Changes</button>
+            <button id='cancel7' class="buttonStyle">Cancel</button>
         </div>
     </div>
 

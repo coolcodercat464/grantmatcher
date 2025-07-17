@@ -1585,7 +1585,7 @@ const editgrantpost = async (req, res)=>{
 
     // add validation - ensure id is an integer (id might be 'script.js' sometimes)
     if (!isStringInteger(id) || parseInt(id) <= 0) {
-        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", matched: "unknown", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+        res.send({status: 'error', alert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
         return
     }
 
@@ -1728,7 +1728,7 @@ const deletegrantpost = async (req, res)=>{
 
     // add validation - ensure id is an integer (id might be 'script.js' sometimes)
     if (!isStringInteger(id) || parseInt(id) <= 0) {
-        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+        res.send({status: 'error', alert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
         return
     }
 
@@ -1811,7 +1811,7 @@ const confirmmatchpost = async (req, res)=>{
 
     // add validation - ensure id is an integer (id might be 'script.js' sometimes)
     if (!isStringInteger(id) || parseInt(id) <= 0) {
-        res.status(404).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "Unknown Title", user: "unknown user", date: "unknown", url: "unknown URL", deadline: "unknown deadline", duration: "unknown duration", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+        res.send({status: 'error', alert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
         return
     }
 
@@ -3097,7 +3097,7 @@ const addreplypost = async (req, res)=>{
 
             // ensure ticket exists
             if (ticket.length == 0) {
-                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticketList: [], replies: [], user: req.session.useremail});
+                res.send({status: 'error', alert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
                 return
             }
 
@@ -3111,7 +3111,7 @@ const addreplypost = async (req, res)=>{
 
             // ensure that user is in ticket members
             if (!ticket.members.includes(req.session.useremail)) {
-                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'You are not a member of the ticket so you cannot add replies to it.', ticketList: [], replies: [], user: req.session.useremail});
+                res.send({status: 'error', alert: 'You are not a member of the ticket so you cannot add replies to it.'});
                 return
             }
 
@@ -3223,7 +3223,7 @@ const editreplypost = async (req, res)=>{
 
             // ensure reply exists
             if (reply.length == 0) {
-                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticketList: [], replies: [],  user: req.session.useremail});
+                res.send({status: 'error', alert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
                 return
             }
 
@@ -3236,7 +3236,7 @@ const editreplypost = async (req, res)=>{
 
             // ensure ticket exists
             if (ticket.length == 0) {
-                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticketList: [], replies: [],  user: req.session.useremail});
+                res.send({status: 'error', alert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
                 return
             }
 
@@ -3250,7 +3250,7 @@ const editreplypost = async (req, res)=>{
 
             // ensure that user is in ticket members
             if (!ticket.members.includes(req.session.useremail)) {
-                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'You are not a member of the ticket so you cannot add replies to it.', ticketList: [], replies: [],  user: req.session.useremail});
+                res.send({status: 'error', alert: 'You are not a member of the ticket so you cannot add replies to it.'});
                 return
             }
 
@@ -3386,7 +3386,7 @@ const editticketpost = async (req, res)=>{
 
             // ensure ticket exists
             if (ticket.length == 0) {
-                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticketList: [], replies: [], user: req.session.useremail});
+                res.send({status: 'error', alert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
                 return
             }
 
@@ -3400,7 +3400,7 @@ const editticketpost = async (req, res)=>{
 
             // ensure that user is in ticket members
             if (!ticket.members.includes(req.session.useremail)) {
-                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'You are not a member of the ticket so you cannot add replies to it.', ticketList: [], replies: [],  user: req.session.useremail});
+                res.send({status: 'error', alert: 'You are not a member of the ticket so you cannot add replies to it.'});
                 return
             }
 
@@ -3494,7 +3494,7 @@ const resolvepost = async (req, res)=>{
 
             // ensure ticket exists
             if (ticket.length == 0) {
-                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticketList: [], replies: [], user: req.session.useremail});
+                res.send({status: 'error', alert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
                 return
             }
 
@@ -3502,7 +3502,7 @@ const resolvepost = async (req, res)=>{
 
             // ensure ticket hasnt already been resolved
             if (ticket.length == 0) {
-                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticketList: [], replies: [], user: req.session.useremail});
+                res.send({status: 'error', alert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
                 return
             }
 
@@ -3514,8 +3514,7 @@ const resolvepost = async (req, res)=>{
 
             // ensure that user is in ticket members
             if (!ticket.members.includes(req.session.useremail)) {
-                // TODO: change all this to res.send
-                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'You are not a member of the ticket so you cannot add replies to it.', ticketList: [], replies: [], user: req.session.useremail});
+                res.send({status: 'error', alert: 'You are not a member of the ticket so you cannot add replies to it.'});
                 return
             }
 

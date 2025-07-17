@@ -58,8 +58,7 @@
             
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to log out?</p>
-            <!-- TODO: remove spacing between all buttons like this: -->
-            <div class="together">
+            <div style="display: flex">
                 <form method="post" action="/">
                     <input type="submit" value="Logout!" class="buttonStyle">
                 </form>
@@ -166,11 +165,11 @@
 
             <div class="together">
                 <div style="width: 100%;">
-                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetTicketSearch(10, 3)">Reset Form</button><br>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchTicket(10, 3)">Search</button>
                 </div>
                 
                 <div style="width: 100%;">
-                    <button class="buttonStyle pink" style="width: 100%;" onclick="searchTicket(10, 3)">Search</button>
+                    <button class="buttonStyle blue" style="width: 100%;" onclick="resetTicketSearch(10, 3)">Reset Form</button><br>
                 </div>
             </div>
             <br>
@@ -234,11 +233,11 @@
 
             <div class="together">
                 <div style="width: 100%;">
-                    <button id='cancel4' class="buttonStyle blue" style="width: 100%;">Cancel</button>
+                    <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(5); document.getElementById('modal4').style.display = 'none'">Open Ticket</button>
                 </div>
                 
                 <div style="width: 100%;">
-                    <button class="buttonStyle pink" style="width: 100%;" onclick="openModal(5); document.getElementById('modal4').style.display = 'none'">Open Ticket</button>
+                    <button id='cancel4' class="buttonStyle blue" style="width: 100%;">Cancel</button>
                 </div>
             </div>
             <br>
@@ -256,10 +255,8 @@
             
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to open this ticket? You can go make to the previous modal to proof-read the ticket before opening it.</p>
-            <div class="together">
-                <button class="buttonStyle" onclick="addTicket()">Open Ticket</button>
-                <button id='cancel5' class="buttonStyle">Cancel</button>
-            </div>
+            <button class="buttonStyle" onclick="addTicket()">Open Ticket</button>
+            <button id='cancel5' class="buttonStyle">Cancel</button>
         </div>
     </div>
 

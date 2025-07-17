@@ -58,7 +58,7 @@
             
             <!-- Confirmation message (for user control) -->
             <p>Are you sure you want to log out?</p>
-            <div class="together">
+            <div style="display: flex">
                 <form method="post" action="/">
                     <input type="submit" value="Logout!" class="buttonStyle">
                 </form>
@@ -90,11 +90,10 @@
             </div>
             
             <label><b>REASON FOR DELETION</b></label>
-            <p>Why do you want to delete this grant? This action cannot be undone.
-</p>
+            <p>Why do you want to delete this grant? This action cannot be undone.</p>
             <textarea style="width: 100%" id="deleteReason" rows="6"></textarea>
-            <button style="width: 100%" class="buttonStyle blue" id="cancel3">Cancel</button>
             <button style="width: 100%" class="buttonStyle pink" onclick="deleteGrant()">Delete this Grant</button>
+            <button style="width: 100%" class="buttonStyle blue" id="cancel3">Cancel</button>
         </div>
     </div>
 
