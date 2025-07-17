@@ -109,6 +109,14 @@ hr {
   opacity: 0.9 !important;
 }
 
+.vl {
+  border-left: 4px solid black;
+  height: 15px;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 20px;
+}
+
 /* Making a better blockquote (with an actual quote on it) */
 blockquote {
   position: relative;

@@ -323,7 +323,7 @@
                 <p style="overflow: auto;"><%= ticket.content %></p><br>
 
                 <!-- resolution button-->
-                <% if (user == ticket.userEmail) { %>
+                <% if (user == ticket.userEmail && ticket.resolutionDetails.length == 0) { %>
                     <button class="buttonStyle pink" onclick="openModal(4)">Resolve Ticket</button>
                 <% } %>
             </section>
@@ -339,47 +339,73 @@
             </section>
             <hr/>
 
-            <section>
-                <h2>Replies</h2>
-                <% for (var r = 0; r < replies.length; r ++) { %>
-                    <% if (replies[r].userEmail == user) { %>
-                        <div style="margin-bottom: 10px; border: 2px solid black; padding: 5px;">
-                            <div id="replyContent<%= parseInt(r) + 1 %>" style="overflow: auto;"><%= replies[r].content %></div>
-                            
-                            <div style="display: flex; justify-content: right; align-items: flex-end;" style="overflow: auto;">
-                                <p style="margin: 0">#<%= parseInt(r) + 1 %> -<%= replies[r].username %> on <%= replies[r].replyDate %></p>
-                                <button style="margin-left: 5px; margin-right: 5px; padding: 0; padding-right: 2px; padding-left: 2px;" class="buttonStyle pink" onclick="loadEditReply(<%= parseInt(r) + 1 %>, <%= replies[r].replyID %>)"><i class="fa fa-pencil-square-o"></i></button>
-                                <button style="margin-left: 5px; margin-right: 5px; padding: 0; padding-right: 2px; padding-left: 2px;" class="buttonStyle" onclick="loadReplyHistory(<%= parseInt(r) + 1 %>, <%= replies[r].replyID %>)"><i class="fa fa-history"></i></button>
+            <% if (ticketList.length != 0) { %>
+                <% ticket = ticketList[0] %>
+                <% resolutionDetails = ticket.resolutionDetails %>
+
+                <section>
+                    <h2>Replies</h2>
+                    <% for (var r = 0; r < replies.length; r ++) { %>
+                        <!-- add vertical line -->
+                        <% if (r > 0) { %>
+                            <div class="vl"></div>
+                        <% } %>
+
+                        <% if (resolutionDetails.length > 0 && resolutionDetails[1] == replies[r].replyID) { %>
+                            <div style="border-radius: 15px; border: 2px solid black; padding: 10px; background-color: rgb(175, 226, 175);">
+                        <% } else { %>
+                            <div style="border-radius: 15px; border: 2px solid black; padding: 10px;">
+                        <% } %>
+                        <% if (replies[r].userEmail == user) { %>
+                                <div id="replyContent<%= parseInt(r) + 1 %>" style="overflow: auto;"><%= replies[r].content %></div>
+                                
+                                <div style="display: flex; justify-content: right; align-items: flex-end;" style="overflow: auto;">
+                                    <p style="margin: 0">#<%= parseInt(r) + 1 %> -<%= replies[r].username %> on <%= replies[r].replyDate %></p>
+                                    
+                                    <% if (resolutionDetails.length == 0) { %>
+                                        <button style="margin-left: 5px; margin-right: 5px; padding: 0; padding-right: 2px; padding-left: 2px;" class="buttonStyle pink" onclick="loadEditReply(<%= parseInt(r) + 1 %>, <%= replies[r].replyID %>)"><i class="fa fa-pencil-square-o"></i></button>
+                                    <% } %>
+                                    <button style="margin-left: 5px; margin-right: 5px; padding: 0; padding-right: 2px; padding-left: 2px;" class="buttonStyle" onclick="loadReplyHistory(<%= parseInt(r) + 1 %>, <%= replies[r].replyID %>)"><i class="fa fa-history"></i></button>
+                                </div>
                             </div>
-                        </div>
-                    <% } else { %>
-                        <div style="margin-bottom: 10px; border: 2px solid black; padding: 5px;">
-                            <div id="replyContent<%= parseInt(r) + 1 %>" style="overflow: auto;"><%= replies[r].content %></div>
-                            
-                            <div style="display: flex; justify-content: right;" style="overflow: auto;">
-                                <p style="margin: 0">#<%= parseInt(r) + 1 %> -<%= replies[r].username %> on <%= replies[r].replyDate %></p>
-                                <button style="margin-left: 5px; margin-right: 5px; padding: 0; padding-right: 2px; padding-left: 2px;" class="buttonStyle" onclick="loadReplyHistory(<%= parseInt(r) + 1 %>, <%= replies[r].replyID %>)"><i class="fa fa-history"></i></button>
+                        <% } else { %>
+                                <div id="replyContent<%= parseInt(r) + 1 %>" style="overflow: auto;"><%= replies[r].content %></div>
+                                
+                                <div style="display: flex; justify-content: right;" style="overflow: auto;">
+                                    <p style="margin: 0">#<%= parseInt(r) + 1 %> -<%= replies[r].username %> on <%= replies[r].replyDate %></p>
+                                    <button style="margin-left: 5px; margin-right: 5px; padding: 0; padding-right: 2px; padding-left: 2px;" class="buttonStyle" onclick="loadReplyHistory(<%= parseInt(r) + 1 %>, <%= replies[r].replyID %>)"><i class="fa fa-history"></i></button>
+                                </div>
                             </div>
-                        </div>
+                        <% } %>
                     <% } %>
-                <% } %>
-                
-                <h3>Reply to the Discussion</h3>
-                <div style="width: 100%; justify-content: space-between;" class="together align-items-center">
-                    <div>
-                        <i onclick="wrapText('**', '**')" class="fa fa-bold" style="padding-left: 5px; font-size: 20px;"></i>
-                        <i onclick="wrapText('*', '*')" class="fa fa-italic" style="padding-left: 10px; font-size: 20px;"></i>
-                        <i onclick="wrapText('-', '-')" class="fa fa-strikethrough" style="padding-left: 10px; font-size: 20px;"></i>
-                        <i onclick="wrapText('_', '_')" class="fa fa-underline" style="padding-left: 10px; font-size: 20px;"></i>
-                    </div>
-                    <div>
-                        <button class="buttonStyle blue" style="padding-top: 0; padding-bottom: 0; margin-bottom: 10px;">Reset</button> <button onclick="openModal(6)" class="buttonStyle pink" style="padding-top: 0; padding-bottom: 0; margin-bottom: 10px;">Submit</button>
-                    </div>
                     
-                </div>
-                <textarea style="width: 100%;" id="newReply" class="form-control"></textarea>
-                <br>
-            </section>
+                    <br>
+                    
+                    <% if (resolutionDetails.length > 0) { %>
+                        <p>This ticket has been resolved on the <%= resolutionDetails[3] %>. It is locked, so no more changes can be made to it.</p>
+                        <p><b>Reason for Resolution:</b> <%= resolutionDetails[0] %></p>
+                        <p><b>Most Helpful User:</b> <%= resolutionDetails[4] %></p>
+                        <p><b>Most Helpful Reply:</b> Highlighted in green above.</p>
+                    <% } else { %>
+                        <!-- allow users to reply to the ticket if it hasnt been resolved -->
+                        <h3>Reply to the Discussion</h3>
+                        <div style="width: 100%; justify-content: space-between;" class="together align-items-center">
+                            <div>
+                                <i onclick="wrapText('**', '**')" class="fa fa-bold" style="padding-left: 5px; font-size: 20px;"></i>
+                                <i onclick="wrapText('*', '*')" class="fa fa-italic" style="padding-left: 10px; font-size: 20px;"></i>
+                                <i onclick="wrapText('-', '-')" class="fa fa-strikethrough" style="padding-left: 10px; font-size: 20px;"></i>
+                                <i onclick="wrapText('_', '_')" class="fa fa-underline" style="padding-left: 10px; font-size: 20px;"></i>
+                            </div>
+                            <div>
+                                <button class="buttonStyle blue" style="padding-top: 0; padding-bottom: 0; margin-bottom: 10px;">Reset</button> <button onclick="openModal(6)" class="buttonStyle pink" style="padding-top: 0; padding-bottom: 0; margin-bottom: 10px;">Submit</button>
+                            </div>
+                            
+                        </div>
+                        <textarea style="width: 100%;" id="newReply" class="form-control"></textarea>
+                    <% } %>
+                    <br>
+                </section>
+            <% } %>
         <% } %>
     </main>
     
@@ -726,7 +752,7 @@
                     tags = JSON.parse(decodedTags);
 
                     // setup members
-                    memberString = '<%= versionInfo[v][3] %>';
+                    memberString = '<%= versionInfo[v][2] %>';
 
                     // decode html entities (like &#34;) to actual characters
                     decodedMembers = new DOMParser().parseFromString(memberString, 'text/html').body.textContent;
@@ -744,8 +770,8 @@
                             <div class='together'>
                                 <div style="width: 100%; flex: 1;">
                                     <p><b>Title: </b> ${title}</p>
-                                    <p><b>Tags: </b> ${tags.join(', ')}</p><br>
-                                    <b>Members: </b>
+                                    <p><b>Tags: </b> ${tags.join(', ')}</p>
+                                    <b>Members: </b><br>
                                     <!-- TODO: add copy feature -->
                                     <textarea disabled>${members.join('\n')}</textarea>
                                 </div>
@@ -770,11 +796,11 @@
                 <% } %>
 
                 // current version / reason
-                document.getElementById("replyVersionSpan").textContent = `Version ${parseInt(<%= v %>)+2} (${dateCurrent})`
-                document.getElementById("replyReasonSpan").textContent = reasonCurrent
+                document.getElementById("ticketVersionSpan").textContent = `Version ${parseInt(<%= v %>)+2} (${dateCurrent})`
+                document.getElementById("ticketReasonSpan").textContent = reasonCurrent
             <% } else { %>
-                document.getElementById("replyVersionSpan").textContent = `Version 1 (<%= replies[i].replyDate %>)`
-                document.getElementById("replyReasonP").style.display = "none"
+                document.getElementById("ticketVersionSpan").textContent = `Version 1 (<%= ticket.ticketDate %>)`
+                document.getElementById("ticketReasonP").style.display = "none"
             <% } %>
         <% } %>
     </script>

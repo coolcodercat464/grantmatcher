@@ -1248,6 +1248,13 @@ const ticketpageget = async (req, res)=>{
                         ticket[0].membersNames.push(member.name)
                     }
                 }
+
+                // get the name of the most helpful user (if ticket has been resolved)
+                if (ticket[0].resolutionDetails.length > 0) {
+                    helpfulUser = ticket[0].resolutionDetails[2]
+                    helpfulUser = await get_user_by_email(helpfulUser)
+                    ticket[0].resolutionDetails.push(helpfulUser.name) // add name to the list
+                }
             }
 
             if (ticket[0].members.includes(req.session.useremail)) {
@@ -3533,7 +3540,7 @@ const resolvepost = async (req, res)=>{
             console.log(excludedUsers)
 
             // get the resolution details
-            resolutionDetails = [reason.replace(/<[^>]*>/g, ''),  reply, user]
+            resolutionDetails = [reason.replace(/<[^>]*>/g, ''), reply, user, date]
 
             // update ticket
             await queryWithRetry('UPDATE tickets SET "resolutionDetails" = $1 WHERE "ticketID" = $2', [resolutionDetails, id])
