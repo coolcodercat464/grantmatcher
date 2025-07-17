@@ -8,4 +8,4 @@ node_modules/
 paraphrase-MiniLM-L3-v2/
 
 # ignore sessions
-/sessions
+sessions/

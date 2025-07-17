@@ -41,7 +41,7 @@ async function users_list() {
 
     try {
         // get all user credentials
-        res = await queryWithRetry('SELECT name, role, email, password FROM users');
+        res = await queryWithRetry('SELECT name, role, email, password, "dateJoined" FROM users');
 
         // res is a list of dictionaries
         res = res.rows
@@ -372,7 +372,38 @@ const dbusers = async (req, res) => {
 }
 
 const dbchangelog = async (req, res) => {
-    res.send(await queryAll('changelog', req))
+    try {
+        // ensure the user is logged in before giving them the data
+        if (req.isAuthenticated()) {
+            // get info about the user
+            user = await get_user_by_email(req.session.useremail)
+
+            // get everything in changelog
+            result = await queryWithRetry(`SELECT * FROM changelog`);
+
+            filteredResults = [] // will store all changes that the user is permitted to view
+
+            // iterate through result
+            for (r in result.rows) {
+                change = result.rows[r]
+
+                // get the date
+                changeDate = new Date(change.date.split('-')[2], change.date.split('-')[1], change.date.split('-')[0])
+                userDate = new Date(user.dateJoined.split('-')[2], user.dateJoined.split('-')[1], user.dateJoined.split('-')[0])
+
+                // only allow user to view the change if the change happened after they joined AND they aren't in excludedFromView
+                if (userDate <= changeDate && !change.excludedFromView.includes(user.email)) {
+                    filteredResults.push(change)
+                }
+            }
+            
+            res.send(filteredResults)
+        } else {
+            res.send([])
+        }
+    } catch {
+        res.send([])
+    }
 }
 
 const dbcodes = async (req, res) => {
