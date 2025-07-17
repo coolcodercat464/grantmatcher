@@ -1254,8 +1254,15 @@ const ticketpageget = async (req, res)=>{
                 console.log(ticket[0])
 
                 // list of replies
-                replies = await queryWithRetry('SELECT * FROM replies WHERE "ticketID" = $1', [ticket[0].ticketID])
+                replies = await queryWithRetry('SELECT * FROM replies WHERE "ticketID" = $1 ORDER BY "replyID"', [ticket[0].ticketID])
                 replies = replies.rows
+
+                for (r in replies) {
+                    // get the poster for each reply
+                    poster = await get_user_by_email(replies[r].userEmail)
+                    // add it to the json dictionary
+                    replies[r].username = poster.name
+                }
 
                 res.render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no', ticket: ticket, user: req.session.useremail, replies: replies});
             } else {
@@ -3160,6 +3167,130 @@ const addreplypost = async (req, res)=>{
     }
 } 
 
+// edit a ticket reply
+const editreplypost = async (req, res)=>{
+    console.log("EDIT TICKET REPLY POST")
+
+    x = req.body
+    console.log(x)
+
+    // only allow them to see tickets if they have been authenticated
+    if (req.isAuthenticated()) {
+        try {
+            // get the current date
+            now = new Date();
+
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = now.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+            // stringify it
+            date = `${day}-${month}-${year}`
+
+            // ensure all fields exist
+            if (!x.content || x.content.replace(/<[^>]*>/g, '').trim() == '') {
+                res.send({status: 'error', alert: 'It looks like the reply content is missing / empty. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                return
+            }
+
+            if (!x.reason || x.reason.replace(/<[^>]*>/g, '').trim() == '') {
+                res.send({status: 'error', alert: 'It looks like the edit reason is missing / empty. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                return
+            }
+
+            if (!x.id || !isStringInteger(x.id) || x.id < 0) {
+                res.send({status: 'error', alert: 'It looks like the reply details are missing or invalid. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                return
+            }
+
+            // get reply info
+            reply = await queryWithRetry('SELECT * FROM replies WHERE "replyID" = $1', [x.id])
+            reply = reply.rows
+
+            // ensure reply exists
+            if (reply.length == 0) {
+                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticket: [], user: req.session.useremail});
+                return
+            }
+
+            reply = reply[0]
+            ticketID = reply.ticketID
+
+            // get ticket info
+            ticket = await queryWithRetry('SELECT * FROM tickets WHERE "ticketID" = $1', [reply.ticketID])
+            ticket = ticket.rows
+
+            // ensure ticket exists
+            if (ticket.length == 0) {
+                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'Something went wrong when fetching the data from our servers. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.', ticket: [], user: req.session.useremail});
+                return
+            }
+
+            ticket = ticket[0]
+
+            // ensure that user is in ticket members
+            if (!ticket.members.includes(req.session.useremail)) {
+                res.status(404).render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'You are not a member of the ticket so you cannot add replies to it.', ticket: [], user: req.session.useremail});
+                return
+            }
+
+            // get a list of all users
+            excludedUsers = await users_list()
+            for (i in excludedUsers) {
+                excludedUsers[i] = excludedUsers[i].email
+            }
+
+            // remove the members from the list of excluded users
+            for (i in ticket.members) {
+                index = excludedUsers.indexOf(ticket.members[i]) // get index of user
+                if (index != -1) {
+                    excludedUsers.splice(index, 1) // remove from excluded users (because if this user is in x.members, they arent excluded from view)
+                }
+            }
+
+            console.log(excludedUsers)
+
+            // get the previous version
+            previousVersion = [reply.content, x.reason.replace(/<[^>]*>/g, ''), date]
+
+            // update version information
+            versionInformation = reply.versionInformation
+            versionInformation.push(previousVersion)
+
+            // update the table
+            await queryWithRetry('UPDATE replies SET content = $1, "versionInformation" = $2 WHERE "replyID" = $3', [x.content.replace(/<[^>]*>/g, ''), versionInformation, x.id])
+
+            // get all changes
+            const result = await queryWithRetry('SELECT "changeID" FROM changelog');
+
+            // calculate the maximum changeID
+            maxChangeID = 0
+            for (i in result.rows) {
+                rowID = result.rows[i].changeID
+                if (rowID > maxChangeID) {
+                    maxChangeID = rowID
+                }
+            }
+
+            // calculate the next change ID
+            nextChangeID = maxChangeID + 1
+
+            //update changelog
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Reply Edited', date, `A reply in a ticket called "${ticket.title.replace(/<[^>]*>/g, '')}" has been edited by ${req.session.username} for the reason: ${x.reason.replace(/<[^>]*>/g, '')}`, excludedUsers]);
+
+            res.send({status: 'success'});
+        } catch (err) {
+            console.log(err)
+
+            res.send({status: 'error', alert: 'Something went wrong. If this issue persists, please email me at flyingbutter213@gmail.com'})
+        }
+    } else {
+        urlinit = '/tickets' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
 // Export of all methods as object 
 module.exports = { 
     dbgrants,
@@ -3209,4 +3340,5 @@ module.exports = {
     manageclusterspost,
     addticketpost,
     addreplypost,
+    editreplypost,
 }

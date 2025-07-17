@@ -122,7 +122,11 @@
             </div>
             <hr/>
             
-            <p>TODO</p>
+            <p id="replyVersionP"><b>Current Version:</b> <span id="replyVersionSpan"></span></p>
+            <p id="replyReasonP"><b>Reason for Edit:</b> <span id="replyReasonSpan"></span></p>
+            <!-- Accordion items are added here -->
+            <div class="accordion" id="replyAccordion">
+            </div>
         </div>
     </div>
 
@@ -155,6 +159,28 @@
             <hr/>
             
             <p>Please ensure that you have filled in all areas.</p>
+        </div>
+    </div>
+
+    <!-- Reply edit modal -->
+    <div id="modal8" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Edit Reply</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close8">&times;</span>
+            </div>
+            <hr/>
+            
+            <label><b>EDIT CONTENT</b></label>
+            <textarea id="editReplyContent" class="form-control"></textarea><br>
+
+            <label><b>REASON FOR EDIT</b></label>
+            <p>Why did you edit your reply?</p>
+            <textarea id="editReplyReason" class="form-control"></textarea><br>
+
+            <button class="buttonStyle" id="editReply">Edit Reply</button>
+            <button id='cancel8' class="buttonStyle">Cancel</button>
         </div>
     </div>
 
@@ -231,7 +257,7 @@
                     </div>
                 </div>
                 <!-- the ticket's content -->
-                <p><%= ticket.content %></p><br>
+                <p style="overflow: auto;"><%= ticket.content %></p><br>
 
                 <!-- resolution button-->
                 <% if (user == ticket.userEmail) { %>
@@ -249,8 +275,27 @@
             <section>
                 <h2>Replies</h2>
                 <!-- TODO -->
-                <% for (r in replies) { %>
-                    <%= replies[r].content %>
+                <% for (var r = 0; r < replies.length; r ++) { %>
+                    <% if (replies[r].userEmail == user) { %>
+                        <div style="margin-bottom: 10px; border: 2px solid black; padding: 5px;">
+                            <div id="replyContent<%= parseInt(r) + 1 %>" style="overflow: auto;"><%= replies[r].content %></div>
+                            
+                            <div style="display: flex; justify-content: right; align-items: flex-end;" style="overflow: auto;">
+                                <p style="margin: 0">#<%= parseInt(r) + 1 %> -<%= replies[r].username %> on <%= replies[r].replyDate %></p>
+                                <button style="margin-left: 5px; margin-right: 5px; padding: 0; padding-right: 2px; padding-left: 2px;" class="buttonStyle pink" onclick="loadEditReply(<%= parseInt(r) + 1 %>, <%= replies[r].replyID %>)"><i class="fa fa-pencil-square-o"></i></button>
+                                <button style="margin-left: 5px; margin-right: 5px; padding: 0; padding-right: 2px; padding-left: 2px;" class="buttonStyle" onclick="loadReplyHistory(<%= parseInt(r) + 1 %>, <%= replies[r].replyID %>)"><i class="fa fa-history"></i></button>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <div style="margin-bottom: 10px; border: 2px solid black; padding: 5px;">
+                            <div id="replyContent<%= parseInt(r) + 1 %>" style="overflow: auto;"><%= replies[r].content %></div>
+                            
+                            <div style="display: flex; justify-content: right;" style="overflow: auto;">
+                                <p style="margin: 0">#<%= parseInt(r) + 1 %> -<%= replies[r].username %> on <%= replies[r].replyDate %></p>
+                                <button style="margin-left: 5px; margin-right: 5px; padding: 0; padding-right: 2px; padding-left: 2px;" class="buttonStyle" onclick="loadReplyHistory(<%= parseInt(r) + 1 %>, <%= replies[r].replyID %>)"><i class="fa fa-history"></i></button>
+                            </div>
+                        </div>
+                    <% } %>
                 <% } %>
                 
                 <h3>Reply to the Discussion</h3>
@@ -340,13 +385,128 @@
                 document.getElementById('modal6').style.display = 'none'
                 openModal(7)
             } else {
-                // add the code to the database
+                // add the reply to the database
                 fetch('/addreply', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({content: replyArea, id: '<%= ticket.ticketID %>'})
                 }).then(response => response.json()).then(result => {
                     document.getElementById("modal6").style.display = 'none'
+                    if (result.status == "error") {
+                        // open the error modal if there is an error
+                        console.log(result)
+                        document.getElementById('showAlert').textContent = result.alert
+                        openModal(2)
+                    } else {
+                        window.location.reload()
+                    }
+                })
+            }
+        }
+    </script>
+    <script>
+        function loadEditReply(r, id) {
+            console.log(r, id)
+            // ensure r and id are integers
+            if (Number.isInteger(r) && Number.isInteger(id)) {
+                // reset and change the button's onclick parameters
+                document.getElementById("editReply").removeAttribute('onclick')
+                document.getElementById("editReply").setAttribute('onclick', 'editReply(' + id + ')')
+            
+                // add the content into the editReplyContent so the user doesnt have to retype everything (efficiency)
+                document.getElementById("editReplyContent").value = document.getElementById('replyContent' + r).textContent
+
+                // open the edit modal
+                openModal(8)
+            } else {
+                document.getElementById('showAlert').textContent = "Something went wrong loading the edit modal. Please retry."
+                openModal(2)
+            }
+        }
+
+        function loadReplyHistory(r, id) {
+            console.log(r, id)
+            // ensure r and id are integers
+            if (Number.isInteger(r) && Number.isInteger(id)) {
+                // iterate over each reply in the database
+                <% for (var i = 0; i < replies.length; i++ ) { %>
+                    // find the reply that has the same ID as the parameter
+                    if (<%= replies[i].replyID %> == id) { 
+                        // get its version information
+                        <% versionInfo = replies[i].versionInformation %>
+
+                        <% if (versionInfo.length > 0) { %>
+                            dateCurrent = '<%= replies[i].replyDate %>'
+                            reasonCurrent = 'First version.'
+
+                            // get the accordion
+                            accordion = document.getElementById("replyAccordion")
+                            // reset accordion content
+                            accordion.innerHTML = ''
+
+                            // loop through each version
+                            <% for (var v = 0; v < versionInfo.length; v ++) { %>
+                                // get the information of the version
+                                id = <%= v %> + 1
+                                content = '<%= versionInfo[v][0] %>'
+                                reasonNext = '<%= versionInfo[v][1] %>'
+                                dateNext = '<%= versionInfo[v][2] %>'
+
+                                // create an accordion item HTML for it
+                                accordionItem = `<div class="accordion-item">
+                                    <h2 class="accordion-header" id="heading1-${id}">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1-${id}" aria-expanded="true" aria-controls="collapse1-${id}">
+                                        Version ${id} (${dateCurrent})
+                                    </button>
+                                    </h2>
+                                    <div id="collapse1-${id}" class="accordion-collapse collapse" aria-labelledby="heading1-${id}" data-bs-parent="#accordionExample">
+                                    <div class="accordion-body">
+                                        <b>Reply Content: </b>
+                                        <p>${content}</p><br>
+                                        <p><b>Reason for edit:</b> ${reasonCurrent}</p>
+                                    </div>
+                                    </div>
+                                </div>`
+
+                                accordion.innerHTML += accordionItem // add to the accordion
+
+                                // update reason and date
+                                dateCurrent = dateNext
+                                reasonCurrent = reasonNext
+                            <% } %>
+
+                            // current version / reason
+                            document.getElementById("replyVersionSpan").textContent = `Version ${parseInt(<%= v %>)+2} (${dateCurrent})`
+                            document.getElementById("replyReasonSpan").textContent = reasonCurrent
+                        <% } else { %>
+                            document.getElementById("replyVersionSpan").textContent = `Version 1 (<%= replies[i].replyDate %>)`
+                            document.getElementById("replyReasonP").style.display = "none"
+                        <% } %>
+                    }
+                <% } %>
+
+                openModal(5)
+            } else {
+                document.getElementById('showAlert').textContent = "Something went wrong loading the edit modal. Please retry."
+                openModal(2)
+            }
+        }
+
+        function editReply(replyID) {
+            // get the user input
+            newContent = document.getElementById('editReplyContent').value
+            reason = document.getElementById('editReplyReason').value
+
+            if (newContent.trim() == '' || reason.trim() == '') {
+                openModal(7)
+            } else {
+                // send the edit info to the server
+                fetch('/editreply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({content: newContent, reason: reason, id: replyID})
+                }).then(response => response.json()).then(result => {
+                    document.getElementById("modal8").style.display = 'none'
                     if (result.status == "error") {
                         // open the error modal if there is an error
                         console.log(result)

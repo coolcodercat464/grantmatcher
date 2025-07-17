@@ -78,6 +78,7 @@ router.post('/addticket', control.addticketpost)
 
 router.get('/ticket/:id', control.ticketpageget)
 router.post('/addreply', control.addreplypost)
+router.post('/editreply', control.editreplypost)
 
 module.exports = router;
 
