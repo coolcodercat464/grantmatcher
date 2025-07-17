@@ -310,13 +310,16 @@
 
             <section>
                 <h2>Version Information</h2>
-                <!-- TODO -->
+                <p id="ticketVersionP"><b>Current Version:</b> <span id="ticketVersionSpan"></span></p>
+                <p id="ticketReasonP"><b>Reason for Edit:</b> <span id="ticketReasonSpan"></span></p>
+                <!-- Accordion items are added here -->
+                <div class="accordion" id="ticketAccordion">
+                </div>
             </section>
             <hr/>
 
             <section>
                 <h2>Replies</h2>
-                <!-- TODO -->
                 <% for (var r = 0; r < replies.length; r ++) { %>
                     <% if (replies[r].userEmail == user) { %>
                         <div style="margin-bottom: 10px; border: 2px solid black; padding: 5px;">
@@ -665,6 +668,94 @@
                 })
             <% } %>
         }
+    </script>
+    <script>
+         <% if (ticketList.length == 0) { %>
+            console.log("womp womp")
+        <% } else { %>
+            <% ticket = ticketList[0] %>
+
+            // get version information
+            <% versionInfo = ticket.versionInformation %>
+
+            <% if (versionInfo.length > 0) { %>
+                dateCurrent = '<%= ticket.ticketDate %>'
+                reasonCurrent = 'First version.'
+
+                // get the accordion
+                accordion = document.getElementById("ticketAccordion")
+                // reset accordion content
+                accordion.innerHTML = ''
+
+                // loop through each version
+                <% for (var v = 0; v < versionInfo.length; v ++) { %>
+                    // get the information of the version
+                    id = <%= v %> + 1
+                    title = '<%= versionInfo[v][0] %>'
+                    content = '<%= versionInfo[v][1] %>'
+                    resolutionDetails = '<%= versionInfo[v][4] %>' // ignore for now, TODO later
+                    reasonNext = '<%= versionInfo[v][5] %>'
+                    dateNext = '<%= versionInfo[v][6] %>'
+
+                    // setup tags
+                    tagString = '<%= versionInfo[v][3] %>';
+
+                    // decode html entities (like &#34;) to actual characters
+                    decodedTags = new DOMParser().parseFromString(tagString, 'text/html').body.textContent;
+                    tags = JSON.parse(decodedTags);
+
+                    // setup members
+                    memberString = '<%= versionInfo[v][3] %>';
+
+                    // decode html entities (like &#34;) to actual characters
+                    decodedMembers = new DOMParser().parseFromString(memberString, 'text/html').body.textContent;
+                    members = JSON.parse(decodedMembers);
+
+                    // create an accordion item HTML for it
+                    accordionItem = `<div class="accordion-item">
+                        <h2 class="accordion-header" id="heading1-${id}">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1-${id}" aria-expanded="true" aria-controls="collapse1-${id}">
+                            Version ${id} (${dateCurrent})
+                        </button>
+                        </h2>
+                        <div id="collapse1-${id}" class="accordion-collapse collapse" aria-labelledby="heading1-${id}" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class='together'>
+                                <div style="width: 100%; flex: 1;">
+                                    <p><b>Title: </b> ${title}</p>
+                                    <p><b>Tags: </b> ${tags.join(', ')}</p><br>
+                                    <b>Members: </b>
+                                    <!-- TODO: add copy feature -->
+                                    <textarea disabled>${members.join('\n')}</textarea>
+                                </div>
+                                <div style="width: 100%; flex: 1;">
+                                    <b>Content: </b>
+                                    <!-- TODO: add copy feature -->
+                                    <!-- TODO: make the two heights the same -->
+                                    <textarea style="width: 100%; height: 100%;" disabled>${content}</textarea>
+                                </div>
+                            </div>
+
+                            <p><b>Reason for edit:</b> ${reasonCurrent}</p>
+                        </div>
+                        </div>
+                    </div>`
+
+                    accordion.innerHTML += accordionItem // add to the accordion
+
+                    // update reason and date
+                    dateCurrent = dateNext
+                    reasonCurrent = reasonNext
+                <% } %>
+
+                // current version / reason
+                document.getElementById("replyVersionSpan").textContent = `Version ${parseInt(<%= v %>)+2} (${dateCurrent})`
+                document.getElementById("replyReasonSpan").textContent = reasonCurrent
+            <% } else { %>
+                document.getElementById("replyVersionSpan").textContent = `Version 1 (<%= replies[i].replyDate %>)`
+                document.getElementById("replyReasonP").style.display = "none"
+            <% } %>
+        <% } %>
     </script>
 </body>
 </html>
