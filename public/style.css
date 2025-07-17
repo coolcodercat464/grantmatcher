@@ -202,7 +202,7 @@ date inputs, which take up a lot of space in the modals */
   }
 }
 
-/* Expand the the modal when the screen is small */
+/* Expand the modal when the screen is small */
 @media (max-width: 780px) {
   .modal-body {
     width: 90% !important;

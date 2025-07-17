@@ -1811,7 +1811,7 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
 
             rowDictionary = {}
 
-            // store the data in the row dictionary (will be appended the the clustersData variable)
+            // store the data in the row dictionary (will be appended to the clustersData variable)
             rowDictionary.id = row.clusterID
             rowDictionary.name = row.name
             times = 0

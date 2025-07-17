@@ -97,10 +97,33 @@
         </div>
     </div>
 
+    <!-- Confirmation modal for going back to dashboard -->
+    <div id="modal9" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Go Back</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close9">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to go back to the dashboard?</p>
+            <button class="buttonStyle" onclick="window.location.href = '/'">Go Back</button>
+            <button id='cancel9' class="buttonStyle">Cancel</button>
+        </div>
+    </div>
+
     <!-- The main content -->
     <main>
         <section>
-            <h1>Grant Page</h1>
+            <div class="together align-items-center" style="justify-content: space-between;">
+                <div>
+                    <h1>Grant Page</h1>
+                </div>
+                <div>
+                    <i class="fa fa-times" onclick="openModal(9)"></i>
+                </div>
+            </div>
         </section>
         <hr/>
 
