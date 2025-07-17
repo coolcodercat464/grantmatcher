@@ -1318,6 +1318,28 @@ const ticketpageget = async (req, res)=>{
     }
 } 
 
+// present profile page
+const profileget = async (req, res)=>{
+    console.log("PROFILE GET")
+
+    // only allow them to access profile page if the user is signed-in, and redirect to login if they aren't
+    if (req.isAuthenticated()) {
+        // find the user
+        theuser = await get_user_by_email(req.session.useremail)
+
+        // check if the user exists
+        if (theuser != undefined) {
+            res.render('profile.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
+        } else {
+            req.session.destroy()
+            res.redirect('/')
+        }
+    } else {
+        urlinit = '/profile'
+        res.redirect('/login')
+    }
+} 
+
 // POST
 // when user logs out
 const indexpost = (req, res, next) => {
@@ -3635,6 +3657,7 @@ module.exports = {
     manageclustersget,
     ticketsget,
     ticketpageget,
+    profileget,
 
     indexpost,
     loginpost,

@@ -69,6 +69,9 @@ app.post(['/addcode', '/removecode', '/manageclusters'], routes)
 app.get(['/tickets', '/ticket/:id'], routes)
 app.post(['/addticket', '/ticket/:id', '/resolve', '/editticket', '/editreply', '/addreply'], routes)
 
+// non-crucial features
+app.get(['/profile'], routes)
+
 // listen to port
 app.listen(port, () => {
     console.log("Backend is listening on port 3000");

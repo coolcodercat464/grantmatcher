@@ -82,5 +82,7 @@ router.post('/editreply', control.editreplypost)
 router.post('/editticket', control.editticketpost)
 router.post('/resolve', control.resolvepost)
 
+router.get('/profile', control.profileget)
+
 module.exports = router;
 
