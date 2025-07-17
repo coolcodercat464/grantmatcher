@@ -80,6 +80,7 @@ router.get('/ticket/:id', control.ticketpageget)
 router.post('/addreply', control.addreplypost)
 router.post('/editreply', control.editreplypost)
 router.post('/editticket', control.editticketpost)
+router.post('/resolve', control.resolvepost)
 
 module.exports = router;
 

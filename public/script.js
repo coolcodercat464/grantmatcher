@@ -1966,8 +1966,12 @@ fetch('/db/users').then(response => response.json()).then(async data => {
         }
 
         try {
-            // fianlly in the edit ticket modal
+            // then in the edit ticket modal
             document.getElementById('editTicketMembers').innerHTML += `
+            <option value="${row.email}">${row.name}</option>
+            `
+            // fianlly in the resolve ticket modal
+            document.getElementById('helpfulUser').innerHTML += `
             <option value="${row.email}">${row.name}</option>
             `
             editTicketMembersInitialised = true

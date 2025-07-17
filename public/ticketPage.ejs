@@ -149,8 +149,29 @@
             <!-- TODO: use of <hr> in modals is inconsistent. please change.-->
             <hr/>
             
-            <p>TODO</p>
-            <button id='cancel4' class="buttonStyle">Cancel</button>
+            <label><b>REASON FOR RESOLUTION</b></label>
+            <p>Why do you want to resolve this ticket? What conclusion was reached? The ticket will be locked (no edits or new replies can be made) and this cannot be undone.</p>
+            <textarea id="resolutionArea" class="form-control" style="width: 100%"></textarea><br>
+            <div class="together">
+                <div style="width: 100%">
+                    <label><b>MOST HELPFUL REPLY</b></label>
+                    <select name="helpfulReply" id="helpfulReply" style="width: 100%" class="form-control">
+                        <option value="" selected>Select</option>
+                        <option value="0">None</option>
+                        <% for (var r = 0; r < replies.length; r ++) { %>
+                            <option value="<%= replies[r].replyID %>">Post #<%= parseInt(r) + 1 %></option>
+                        <% } %>
+                    </select>
+                </div>
+                <div style="width: 100%">
+                    <label><b>MOST HELPFUL USER</b></label>
+                    <select name="helpfulUser" id="helpfulUser" style="width: 100%" class="form-control">
+                        <option value="" selected>Select</option>
+                    </select>
+                </div>
+            </div><br>
+            <button onclick='resolveTicket()' class="buttonStyle pink" style="width: 100%">Resolve</button>
+            <button id='cancel4' class="buttonStyle blue" style="width: 100%">Cancel</button>
         </div>
     </div>
 
@@ -756,6 +777,52 @@
                 document.getElementById("replyReasonP").style.display = "none"
             <% } %>
         <% } %>
+    </script>
+    <script>
+        function resolveTicket() {
+            <% if (ticketList.length == 0) { %>
+                console.log("womp womp")
+            <% } else { %>
+                reason = document.getElementById("resolutionArea").value
+                helpfulReply = document.getElementById("helpfulReply").value
+                helpfulUser = document.getElementById("helpfulUser").value
+
+                console.log(helpfulReply)
+                console.log(helpfulUser)
+                
+                // open error modal if its invalid
+                if (reason.trim() == '' || helpfulReply == '' || helpfulUser == '') {
+                    document.getElementById("modal4").style.display = 'none'
+                    openModal(7)
+                    return
+                }
+
+                // turn the info into a json format
+                data = {
+                    'reason': reason,
+                    'reply': helpfulReply,
+                    'user': helpfulUser,
+                    'id': <%= ticketList[0].ticketID %>
+                }
+
+                // add the code to the database
+                fetch('/resolve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                }).then(response => response.json()).then(result => {
+                    document.getElementById("modal4").style.display = 'none'
+                    if (result.status == "error") {
+                        // open the error modal if there is an error
+                        console.log(result)
+                        document.getElementById('showAlert').textContent = result.alert
+                        openModal(2)
+                    } else {
+                        window.location.reload()
+                    }
+                })
+            <% } %>
+        }
     </script>
 </body>
 </html>
