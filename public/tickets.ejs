@@ -76,7 +76,6 @@
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
                 <span class="close" id="close2">&times;</span>
             </div>
-            <hr/>
             
             <p id="showAlert"><%= showAlert %></p>
         </div>
@@ -195,7 +194,10 @@
             <div class="together">
                 <div style="width: 100%;">
                     <label><b>TAGS</b>
-                        <!-- TODO: add tooltip -->
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Broad categories of what your ticket is about. You can select more than one tag by holding down the control button on Windows or the command button on Mac.">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
                     </label><br>
                     <select name="newTags" id="newTags" class="form-control" style="width: 100%" multiple>
                         <option value="bug">Bug Report</option>
@@ -209,7 +211,10 @@
                 
                 <div style="width: 100%;">
                     <label><b>MEMBERS</b>
-                        <!-- TODO: add tooltip -->
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="The users who can view and reply to your ticket (yourself and the developer will be added to this list automatically). You can select more than one member by holding down the control button on Windows or the command button on Mac.">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
                     </label><br>
                     <select name="newMembers" id="newMembers" class="form-control" style="width: 100%" multiple>
                     </select>
@@ -219,7 +224,10 @@
 
             <div>
                 <label><b>CONTENT</b>
-                    <!-- TODO: add tooltip -->
+                    <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="Tell us about the issue you are facing and what you have tried so far.">
+                        <!-- Makes the tooltip circular -->
+                        <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                    </button>
                 </label><br>
                 <textarea id="newContent" name="newContent" class="form-control" style="width: 100%"></textarea>
             </div><br>
@@ -263,7 +271,6 @@
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
                 <span class="close" id="close6">&times;</span>
             </div>
-            <hr/>
             
             <p>Please ensure that you have filled in all areas.</p>
         </div>
@@ -277,7 +284,6 @@
                 <!-- Numbering the IDs so I can use many modals (code reuse) -->
                 <span class="close" id="close7">&times;</span>
             </div>
-            <hr/>
             
             <p id="showAlert"></p>
         </div>
