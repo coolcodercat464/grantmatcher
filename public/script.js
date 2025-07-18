@@ -1992,7 +1992,7 @@ fetch('/db/users').then(response => response.json()).then(async data => {
     await fetch('/db/changelog').then(response => response.json()).then(dataChange => {
         for (var i = 0; i < dataChange.length; i++) {
             row = dataChange[i]
-            row.username = undefined
+            row.username = 'A Deleted User'
 
             // loop through to find the user's name based on email
             for (x in data) {

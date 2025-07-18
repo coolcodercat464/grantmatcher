@@ -3667,7 +3667,7 @@ const changenamepost = async (req, res)=>{
             // get user info
             user = await get_user_by_email(email)
 
-            // ensure ticket exists
+            // ensure user exists
             if (user == undefined) {
                 res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
                 return
@@ -3747,7 +3747,7 @@ const changepasswordpost = async (req, res)=>{
             // get user info
             user = await get_user_by_email(email)
 
-            // ensure ticket exists
+            // ensure user exists
             if (user == undefined) {
                 res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
                 return
@@ -3780,7 +3780,7 @@ const changepasswordpost = async (req, res)=>{
 
 // delete the user's account
 const deleteaccountpost = async (req, res)=>{
-    console.log("CHANGE NAME POST")
+   console.log("DELETE ACCOUNT POST")
 
     x = req.body
     console.log(x)
@@ -3798,21 +3798,45 @@ const deleteaccountpost = async (req, res)=>{
 
             // stringify it
             date = `${day}-${month}-${year}`
-            console.log(x.id)
 
             // ensure all fields exist
-            if (!x.reason || !x.reply || !x.user || !x.id) {
-                res.send({status: 'error', alert: 'It looks like some fields are missing. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+            if (!x.reason || x.reason.trim() == '' || x.reason.length < 10) {
+                res.send({status: 'error', alert: 'Please make sure the reason you provide for account deletion is at least 10 characters long.'})
                 return
             }
             
-            id = x.id
-            reason = x.reason
-            reply = x.reply
-            user = x.user
+            reason = x.reason.replace(/<[^>]*>/g, '')
+            email = req.session.useremail
+
+            // get user info
+            user = await get_user_by_email(email)
+
+            // ensure account exists
+            if (user == undefined) {
+                res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+
+            // update the user
+            await queryWithRetry('DELETE FROM users WHERE email = $1', [email])
+
+            // get all changes
+            const result = await queryWithRetry('SELECT "changeID" FROM changelog');
+
+            // calculate the maximum changeID
+            maxChangeID = 0
+            for (i in result.rows) {
+                rowID = result.rows[i].changeID
+                if (rowID > maxChangeID) {
+                    maxChangeID = rowID
+                }
+            }
+
+            // calculate the next change ID
+            nextChangeID = maxChangeID + 1
 
             //update changelog
-            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Resolved', date, `A ticket called "${ticket.title}" has been resolved by ${req.session.useremail}. Check it out now!`, excludedUsers]);
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, email, 'User Deleted', date, `${user.name} deleted their account for the reason: "${reason}"`, []]);
 
             res.send({status: 'success'});
         } catch (err) {
@@ -3821,7 +3845,7 @@ const deleteaccountpost = async (req, res)=>{
             res.send({status: 'error', alert: 'Something went wrong. If this issue persists, please email me at flyingbutter213@gmail.com'})
         }
     } else {
-        urlinit = '/tickets' // redirect them to the current url after they logged in
+        urlinit = '/profile' // redirect them to the current url after they logged in
         res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
     }
 } 

@@ -238,7 +238,39 @@
     <script>
         <% if (theuser.length != 0) { %>
             function deleteAccount() {
+                // get user input
+                reason = document.getElementById("deleteReason").value
 
+                // validate it
+                if (reason.trim() == '' || reason.length < 10) {
+                    document.getElementById('modal3').style.display = 'none'
+                    document.getElementById("showAlert").textContent = 'The reason you provide for account deletion must be at least 10 characters long.'
+                    openModal(2)
+                    return
+                }
+
+                // turn the info into a json format
+                data = {
+                    'reason': reason
+                }
+
+                // add the code to the database
+                fetch('/deleteaccount', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                }).then(response => response.json()).then(result => {
+                    document.getElementById("modal3").style.display = 'none'
+                    if (result.status == "error") {
+                        // open the error modal if there is an error
+                        document.getElementById('modal3').style.display = 'none'
+                        console.log(result)
+                        document.getElementById('showAlert').textContent = result.alert
+                        openModal(2)
+                    } else {
+                        window.location.href = '/'
+                    }
+                })
             }
 
             function confirmPassword() {
