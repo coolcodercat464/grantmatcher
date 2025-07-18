@@ -71,6 +71,7 @@ app.post(['/addticket', '/ticket/:id', '/resolve', '/editticket', '/editreply', 
 
 // non-crucial features
 app.get(['/profile'], routes)
+app.post(['/changename', '/changepassword', '/deleteaccount'], routes)
 
 // listen to port
 app.listen(port, () => {

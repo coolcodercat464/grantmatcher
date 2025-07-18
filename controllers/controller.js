@@ -41,7 +41,7 @@ async function users_list() {
 
     try {
         // get all user credentials
-        res = await queryWithRetry('SELECT name, role, email, password, "dateJoined" FROM users');
+        res = await queryWithRetry('SELECT * FROM users');
 
         // res is a list of dictionaries
         res = res.rows
@@ -312,17 +312,18 @@ async function queryAll(table, req) {
         if (req.isAuthenticated()) {
             // ensure that you don't get the users' passwords
             if (table == 'users') {
-                result = await queryWithRetry(`SELECT name, email, role, "grantsMatched", xp, "versionInformation", "dateJoined", "colourTheme", "notificationPreferences" FROM ${table}`);
+                result = await queryWithRetry(`SELECT name, email, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences" FROM ${table}`);
             } else {
                 result = await queryWithRetry(`SELECT * FROM ${table}`);
             }
-            
+
             result = result.rows
             return result
         } else {
             return []
         }
-    } catch {
+    } catch (err) {
+        console.log(err)
         return []
     }
 }
@@ -1329,7 +1330,12 @@ const profileget = async (req, res)=>{
 
         // check if the user exists
         if (theuser != undefined) {
-            res.render('profile.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
+            try {
+                res.render('profile.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no', theuser: theuser});
+            } catch (err) {
+                res.render('profile.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, theuser: [], showAlert: 'Something went wrong when fetching your data from our servers. Please try again. Feel free to contact me if this issue persists.'});
+            }
+            
         } else {
             req.session.destroy()
             res.redirect('/')
@@ -1909,7 +1915,7 @@ const confirmmatchpost = async (req, res)=>{
 
         // otherwise, add 5 to the xp
         currentXp = result2.rows[0].xp
-        const mq3 = 'UPDATE users SET xp = $1 WHERE email = $2'
+        const mq3 = 'UPDATE users SET xp = $1, "grantsMatched" = "grantsMatched" + 1 WHERE email = $2'
         const result3 = await queryWithRetry(mq3, [currentXp + 5, req.session.useremail]);
 
         // get the current date
@@ -3592,6 +3598,7 @@ const resolvepost = async (req, res)=>{
             console.log(excludedUsers)
 
             // get the resolution details
+            // TODO: move all the replace to a variable
             resolutionDetails = [reason.replace(/<[^>]*>/g, ''), reply, user, date]
 
             // update ticket
@@ -3611,6 +3618,177 @@ const resolvepost = async (req, res)=>{
 
             // calculate the next change ID
             nextChangeID = maxChangeID + 1
+
+            //update changelog
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Resolved', date, `A ticket called "${ticket.title}" has been resolved by ${req.session.useremail}. Check it out now!`, excludedUsers]);
+
+            res.send({status: 'success'});
+        } catch (err) {
+            console.log(err)
+
+            res.send({status: 'error', alert: 'Something went wrong. If this issue persists, please email me at flyingbutter213@gmail.com'})
+        }
+    } else {
+        urlinit = '/tickets' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
+// change username
+const changenamepost = async (req, res)=>{
+    console.log("CHANGE NAME POST")
+
+    x = req.body
+    console.log(x)
+
+    // only allow them to see tickets if they have been authenticated
+    if (req.isAuthenticated()) {
+        try {
+            // get the current date
+            now = new Date();
+
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = now.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+            // stringify it
+            date = `${day}-${month}-${year}`
+
+            // ensure all fields exist
+            if (!x.name || x.name.trim() == '' || x.name.length < 5) {
+                res.send({status: 'error', alert: 'It looks like some fields are missing or empty. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                return
+            }
+            
+            username = x.name.replace(/<[^>]*>/g, '')
+            email = req.session.useremail
+
+            // get user info
+            user = await get_user_by_email(email)
+
+            // ensure ticket exists
+            if (user == undefined) {
+                res.send({status: 'error', alert: 'We cuoldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+
+            // store the old name
+            oldName = user.name
+
+            // update the user
+            await queryWithRetry('UPDATE users SET name = $1 WHERE email = $2', [username, email])
+
+            // get all changes
+            const result = await queryWithRetry('SELECT "changeID" FROM changelog');
+
+            // calculate the maximum changeID
+            maxChangeID = 0
+            for (i in result.rows) {
+                rowID = result.rows[i].changeID
+                if (rowID > maxChangeID) {
+                    maxChangeID = rowID
+                }
+            }
+
+            // calculate the next change ID
+            nextChangeID = maxChangeID + 1
+
+            //update changelog
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, email, 'User Edited', date, `${oldName} changed their name to ${username}`, []]);
+
+            res.send({status: 'success'});
+        } catch (err) {
+            console.log(err)
+
+            res.send({status: 'error', alert: 'Something went wrong. If this issue persists, please email me at flyingbutter213@gmail.com'})
+        }
+    } else {
+        urlinit = '/profile' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
+// change password
+const changepasswordpost = async (req, res)=>{
+    console.log("CHANGE NAME POST")
+
+    x = req.body
+    console.log(x)
+
+    // only allow them to see tickets if they have been authenticated
+    if (req.isAuthenticated()) {
+        try {
+            // get the current date
+            now = new Date();
+
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = now.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+            // stringify it
+            date = `${day}-${month}-${year}`
+            console.log(x.id)
+
+            // ensure all fields exist
+            if (!x.reason || !x.reply || !x.user || !x.id) {
+                res.send({status: 'error', alert: 'It looks like some fields are missing. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                return
+            }
+            
+            id = x.id
+            reason = x.reason
+            reply = x.reply
+            user = x.user
+
+            //update changelog
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Resolved', date, `A ticket called "${ticket.title}" has been resolved by ${req.session.useremail}. Check it out now!`, excludedUsers]);
+
+            res.send({status: 'success'});
+        } catch (err) {
+            console.log(err)
+
+            res.send({status: 'error', alert: 'Something went wrong. If this issue persists, please email me at flyingbutter213@gmail.com'})
+        }
+    } else {
+        urlinit = '/tickets' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
+// delete the user's account
+const deleteaccountpost = async (req, res)=>{
+    console.log("CHANGE NAME POST")
+
+    x = req.body
+    console.log(x)
+
+    // only allow them to see tickets if they have been authenticated
+    if (req.isAuthenticated()) {
+        try {
+            // get the current date
+            now = new Date();
+
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = now.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+            // stringify it
+            date = `${day}-${month}-${year}`
+            console.log(x.id)
+
+            // ensure all fields exist
+            if (!x.reason || !x.reply || !x.user || !x.id) {
+                res.send({status: 'error', alert: 'It looks like some fields are missing. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                return
+            }
+            
+            id = x.id
+            reason = x.reason
+            reply = x.reply
+            user = x.user
 
             //update changelog
             await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Resolved', date, `A ticket called "${ticket.title}" has been resolved by ${req.session.useremail}. Check it out now!`, excludedUsers]);
@@ -3662,22 +3840,33 @@ module.exports = {
     indexpost,
     loginpost,
     signuppost,
+    
     addgrantpost,
     editgrantpost,
     deletegrantpost,
+
     confirmmatchpost,
+
     confirmrecalculationpost,
     concluderecalculationpost,
     addclusterspost,
+
     addcodepost,
     removecodepost,
+
     deleteresearcherpost,
     editresearcherpost,
     addresearcherpost,
+
     manageclusterspost,
+
     addticketpost,
     addreplypost,
     editreplypost,
     editticketpost,
     resolvepost,
+
+    changenamepost,
+    changepasswordpost,
+    deleteaccountpost,
 }

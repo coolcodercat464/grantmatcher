@@ -4,8 +4,9 @@ For the header, I will use: https://fonts.google.com/specimen/Arvo
 For the title of the page, I will use: https://fonts.google.com/specimen/Lexend 
 For the sub-headings, I will use: https://fonts.google.com/specimen/Montserrat
 For the normal text, I will use: https://fonts.google.com/noto/specimen/Noto+Sans
+For the h3 text, I will use: https://fonts.google.com/specimen/Sigmar+One
 */
-@import url('https://fonts.googleapis.com/css2?family=Arvo:ital,wght@0,400;0,700;1,400;1,700&family=Lexend:wght@100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Arvo:ital,wght@0,400;0,700;1,400;1,700&family=Lexend:wght@100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Sigmar+One&display=swap');
 
 /* GENERAL SETTINGS */
 
@@ -56,8 +57,8 @@ h2 {
 
 h3 {
   font-size: 18px !important;
-  font-family: "Montserrat", sans-serif;
-  font-optical-sizing: auto;
+  font-family: "Sigmar One", sans-serif;
+  font-weight: 400;
   font-style: normal;
 }
 
