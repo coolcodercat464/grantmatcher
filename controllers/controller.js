@@ -3657,7 +3657,7 @@ const changenamepost = async (req, res)=>{
 
             // ensure all fields exist
             if (!x.name || x.name.trim() == '' || x.name.length < 5) {
-                res.send({status: 'error', alert: 'It looks like some fields are missing or empty. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                res.send({status: 'error', alert: 'It looks like some fields are missing or too short. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
                 return
             }
             
@@ -3669,7 +3669,7 @@ const changenamepost = async (req, res)=>{
 
             // ensure ticket exists
             if (user == undefined) {
-                res.send({status: 'error', alert: 'We cuoldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
                 return
             }
 
@@ -3711,7 +3711,7 @@ const changenamepost = async (req, res)=>{
 
 // change password
 const changepasswordpost = async (req, res)=>{
-    console.log("CHANGE NAME POST")
+    console.log("CHANGE PASSWORD POST")
 
     x = req.body
     console.log(x)
@@ -3729,21 +3729,42 @@ const changepasswordpost = async (req, res)=>{
 
             // stringify it
             date = `${day}-${month}-${year}`
-            console.log(x.id)
 
             // ensure all fields exist
-            if (!x.reason || !x.reply || !x.user || !x.id) {
-                res.send({status: 'error', alert: 'It looks like some fields are missing. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+            if (!x.newPassword || x.oldPassword.trim() == '' || x.newPassword.length < 5) {
+                res.send({status: 'error', alert: 'It looks like some fields are missing or too short. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
                 return
             }
             
-            id = x.id
-            reason = x.reason
-            reply = x.reply
-            user = x.user
+            newPassword = x.newPassword.replace(/<[^>]*>/g, '')
 
-            //update changelog
-            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Resolved', date, `A ticket called "${ticket.title}" has been resolved by ${req.session.useremail}. Check it out now!`, excludedUsers]);
+            // hash the passwords
+            newPassword = MD5(newPassword.trim() + process.env.PASSWORD_SALT).toString();
+            oldPassword = MD5(x.oldPassword.trim() + process.env.PASSWORD_SALT).toString();
+
+            email = req.session.useremail
+
+            // get user info
+            user = await get_user_by_email(email)
+
+            // ensure ticket exists
+            if (user == undefined) {
+                res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+
+            console.log(user)
+
+            // ensure that old password is correct
+            if (user.password != oldPassword) {
+                res.send({status: 'error', alert: 'Your current password is incorrect. Please make sure you have typed it in properly.'});
+                return
+            }
+
+            // update the user
+            await queryWithRetry('UPDATE users SET password = $1 WHERE email = $2', [newPassword, email])
+
+            // dont add to changelog :)
 
             res.send({status: 'success'});
         } catch (err) {
@@ -3752,7 +3773,7 @@ const changepasswordpost = async (req, res)=>{
             res.send({status: 'error', alert: 'Something went wrong. If this issue persists, please email me at flyingbutter213@gmail.com'})
         }
     } else {
-        urlinit = '/tickets' // redirect them to the current url after they logged in
+        urlinit = '/profile' // redirect them to the current url after they logged in
         res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
     }
 } 
