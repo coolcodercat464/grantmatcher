@@ -83,6 +83,7 @@ router.post('/editticket', control.editticketpost)
 router.post('/resolve', control.resolvepost)
 
 router.get('/profile', control.profileget)
+router.get('/user/:id', control.userpageget)
 router.post('/changename', control.changenamepost)
 router.post('/changepassword', control.changepasswordpost)
 router.post('/deleteaccount', control.deleteaccountpost)

@@ -964,6 +964,7 @@ const managecodesget = async (req, res)=>{
     }
 } 
 
+// TODO: change the urlID to email instead for the link ID
 // present the researcher page
 const researcherpageget = async (req, res)=>{
   console.log("RESEARCHER PAGE GET")
@@ -1342,6 +1343,45 @@ const profileget = async (req, res)=>{
         }
     } else {
         urlinit = '/profile'
+        res.redirect('/login')
+    }
+} 
+
+// present user page
+const userpageget = async (req, res)=>{
+    console.log("USER PAGE GET")
+
+    // get the id (from the route name itself)
+    email = req.params.id
+    console.log(email);
+
+    // only allow them to access profile page if the user is signed-in, and redirect to login if they aren't
+    if (req.isAuthenticated()) {
+        // find the user
+        user = await get_user_by_email(email)
+        currentuser = await get_user_by_email(req.session.useremail)
+
+        // get the role (only manager/dev have edit perms)
+        if (currentuser == undefined) {
+            role = 'user'
+        } else {
+            role = currentuser.role
+        }
+
+        console.log(email, user)
+
+        // check if the user exists
+        if (theuser != undefined) {
+            try {
+                res.render('userPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no', theuser: user, role: role});
+            } catch (err) {
+                res.render('userPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, theuser: [], role: role, showAlert: 'Something went wrong when fetching your data from our servers. Please try again. Feel free to contact me if this issue persists.'});
+            }
+        } else {
+            res.render('userPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, theuser: [], role: role, showAlert: 'We couldn\'t find the user you were looking for. Please try again. Feel free to contact me if this issue persists.'});
+        }
+    } else {
+        urlinit = '/user/' + email
         res.redirect('/login')
     }
 } 
@@ -3881,6 +3921,7 @@ module.exports = {
     ticketsget,
     ticketpageget,
     profileget,
+    userpageget,
 
     indexpost,
     loginpost,

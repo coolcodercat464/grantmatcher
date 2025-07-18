@@ -5,7 +5,11 @@
     <title>GrantMatcher - Profile</title>
     <%- head %>
 </head>
+<% if (theuser.length == 0) { %>
+<body>
+<% } else { %>
 <body style="background-color: rgb(255, 214, 214);">
+<% } %>
     <!-- Navigation (sticky header). Links and dropdown collapse into a hamburger menu when the screen size is small. -->
     <nav class="navbar navbar-expand-lg navbar-dark px-3" id="navbar">
         <!-- Brand on the left -->
@@ -187,16 +191,20 @@
                 <hr>
 
                 <section>
-                    <h2>STATS</h2>
+                    <h2>INFORMATION</h2>
 
                     <div class="together align-items-center" style="justify-content: space-between;">
                         <div>
+                            <h3>Name:</h3>
+                            <h3>Email:</h3>
                             <h3>XP:</h3>
                             <h3>Role:</h3>
                             <h3>Grants Matched:</h3>
                             <h3>Date Joined:</h3>
                         </div>
                         <div style="text-align: right;">
+                            <p><%= theuser.name %></p>
+                            <p><%= theuser.email %></p>
                             <p><%= theuser.xp %></p>
                             <p><%= theuser.role %></p>
                             <p><%= theuser.grantsMatched %></p>

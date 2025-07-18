@@ -1924,11 +1924,12 @@ fetch('/db/users').then(response => response.json()).then(async data => {
 
         // reformat date so its easier to sort
         row.dateReformatted = row.dateJoined.split('-').reverse().join('/')
+        row.nameLink = `<a href='/user/${row.email.replace('\'', '&quot').replace('\"', '&quot')}'>${row.name}</a>`
 
         // add to the table data
         tableData[4].dataSet.push(row)
         tableData[4].showRows.push(row)
-        tableData[4].showFields = ['name', 'email', 'role', 'xp']
+        tableData[4].showFields = ['nameLink', 'email', 'role', 'xp']
 
         try {
             // add to the user dropdown

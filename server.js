@@ -73,6 +73,8 @@ app.post(['/addticket', '/ticket/:id', '/resolve', '/editticket', '/editreply', 
 app.get(['/profile'], routes)
 app.post(['/changename', '/changepassword', '/deleteaccount'], routes)
 
+app.get(['/user/:id'], routes)
+
 // listen to port
 app.listen(port, () => {
     console.log("Backend is listening on port 3000");
