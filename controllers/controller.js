@@ -354,7 +354,7 @@ const dbresearcherversion = async (req, res) => {
     result = [] // what to put in res.send()
     if (req.isAuthenticated()) {
         try {
-            result = await queryWithRetry(`SELECT "versionInformation" FROM researchers WHERE "email" = $1`, [id + '@sydney.edu.au']);
+            result = await queryWithRetry(`SELECT "versionInformation" FROM researchers WHERE "email" = $1`, [id]);
             result = result.rows
         } catch {
 
@@ -964,7 +964,6 @@ const managecodesget = async (req, res)=>{
     }
 } 
 
-// TODO: change the urlID to email instead for the link ID
 // present the researcher page
 const researcherpageget = async (req, res)=>{
   console.log("RESEARCHER PAGE GET")
@@ -977,7 +976,7 @@ const researcherpageget = async (req, res)=>{
   if (req.isAuthenticated()) {
     // get the researcher data
     try {
-        const result = await queryWithRetry('SELECT * FROM researchers WHERE "email" = $1', [id + '@sydney.edu.au']);
+        const result = await queryWithRetry('SELECT * FROM researchers WHERE "email" = $1', [id]);
         researcher = result.rows
     } catch (err) {
         console.error(err);
@@ -1102,7 +1101,7 @@ const editresearcherget = async (req, res)=>{
     if (req.isAuthenticated()) {
         // get the researcher data
         try {
-            const result = await queryWithRetry('SELECT * FROM researchers WHERE "email" = $1', [id + '@sydney.edu.au']);
+            const result = await queryWithRetry('SELECT * FROM researchers WHERE "email" = $1', [id]);
             researcher = result.rows
         } catch (err) {
             console.error(err);
@@ -2610,7 +2609,7 @@ const deleteresearcherpost = async (req, res)=>{
     try {
         // get the researcher's name
         const mq1 =  'SELECT "name" FROM researchers WHERE "email" = $1'
-        const result1 = await queryWithRetry(mq1, [id + '@sydney.edu.au']);
+        const result1 = await queryWithRetry(mq1, [id]);
 
         // ensure that it exists
         if (result1.rows.length == 0) {
@@ -2622,7 +2621,7 @@ const deleteresearcherpost = async (req, res)=>{
 
         // remove the grant from the database
         const mq2 = 'DELETE FROM researchers WHERE "email" = $1'
-        const result2 = await queryWithRetry(mq2, [id + '@sydney.edu.au']);
+        const result2 = await queryWithRetry(mq2, [id]);
 
         // get the current date (when this version stopped being the most recent version)
         now = new Date();
@@ -2736,11 +2735,6 @@ const editresearcherpost = async (req, res)=>{
             return
         }
 
-        // ensure the email is the correct domain
-        if (email.split("@")[1] != 'sydney.edu.au') {
-            res.send({alert: 'Please ensure the email domain is a USYD one (i.e., @sydney.edu.au).'});
-            return
-        }
     } catch (err) {
         console.error(err);
 
@@ -2752,7 +2746,7 @@ const editresearcherpost = async (req, res)=>{
     try {
         // get the researcher information (to make versionInformation)
         const mq1 = 'SELECT * FROM researchers WHERE "email" = $1'
-        const result1 = await queryWithRetry(mq1, [id + '@sydney.edu.au']);
+        const result1 = await queryWithRetry(mq1, [id]);
 
         // ensure that the grant exists
         if (result1.rows.length == 0) {
@@ -2784,7 +2778,7 @@ const editresearcherpost = async (req, res)=>{
 
         // add the researcher to researchers table
         const mq2 = 'UPDATE researchers SET name = $1, email = $2, school = $3, gender = $4, publications = $5, "publicationKeywords" = $6, grants = $7, "grantKeywords" = $8, keywords = $9, clusters = $10, activity = $11, "careerStage" = $12, "versionInformation" = $13 WHERE email = $14'
-        const result2 = await queryWithRetry(mq2, [researcherName, email, school, gender, publications, publicationKeywords, grants, grantKeywords, keywords, clustersId, activity, careerStage, versionInformation, id + '@sydney.edu.au']);
+        const result2 = await queryWithRetry(mq2, [researcherName, email, school, gender, publications, publicationKeywords, grants, grantKeywords, keywords, clustersId, activity, careerStage, versionInformation, id]);
         
         // get all changes
         const mq3 = 'SELECT "changeID" FROM changelog'
@@ -2807,7 +2801,7 @@ const editresearcherpost = async (req, res)=>{
         const result4 = await queryWithRetry(mq4, [nextChangeID, req.session.useremail, 'Researcher Edited', date, `The researcher "${researcherName}" has been edited for reason "${reason}". Check it out now!`, '{}']);
 
         // redirect to the grant page
-        res.send({"id": email.split("@")[0]})
+        res.send({"id": email})
     } catch (err) {
         console.error(err);
 
@@ -2878,11 +2872,6 @@ const addresearcherpost = async (req, res)=>{
             return
         }
 
-        // ensure the email is the correct domain
-        if (email.split("@")[1] != 'sydney.edu.au') {
-            res.send({alert: 'Please ensure the email domain is a USYD one (i.e., @sydney.edu.au).'});
-            return
-        }
     } catch (err) {
         console.error(err);
 
@@ -2926,8 +2915,7 @@ const addresearcherpost = async (req, res)=>{
         await queryWithRetry(mq2, [nextChangeID, req.session.useremail, 'Researcher Added', date, `The researcher "${researcherName}" has been added. Check it out now!`, '{}']);
 
         // redirect to the researcher page
-        uniqueId = email.split("@")[0]
-        res.send({"id": uniqueId})
+        res.send({"id": email})
     } catch (err) {
         console.error(err);
 

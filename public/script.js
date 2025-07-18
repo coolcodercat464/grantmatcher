@@ -1758,7 +1758,7 @@ fetch('/db/researchers').then(response => response.json()).then(data => {
         // the name should be a link
         uniqueId = row.email.split("@")[0]
         row.uniqueId = uniqueId
-        row.nameLink = `<a href='/researcher/${uniqueId.replace('\'', '&quot').replace('\"', '&quot')}'>${row.name}</a>`
+        row.nameLink = `<a href='/researcher/${row.email.replace('\'', '&quot').replace('\"', '&quot')}'>${row.name}</a>`
 
         // get the number of edits (for sorting)
         if (row.versionInformation == null) {
