@@ -87,6 +87,9 @@ router.get('/user/:id', control.userpageget)
 router.post('/changename', control.changenamepost)
 router.post('/changepassword', control.changepasswordpost)
 router.post('/deleteaccount', control.deleteaccountpost)
+router.post('/changexp', control.changexppost)
+router.post('/changerole', control.changerolepost)
+router.post('/changematches', control.changematchespost)
 
 module.exports = router;
 

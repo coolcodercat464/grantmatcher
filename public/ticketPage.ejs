@@ -589,7 +589,7 @@
                             <% } %>
 
                             // current version / reason
-                            document.getElementById("replyVersionSpan").textContent = `Version ${parseInt(<%= v %>)+2} (${dateCurrent})`
+                            document.getElementById("replyVersionSpan").textContent = `Version ${parseInt(<%= v %>)+1} (${dateCurrent})`
                             document.getElementById("replyReasonSpan").textContent = reasonCurrent
                         <% } else { %>
                             document.getElementById("replyVersionSpan").textContent = `Version 1 (<%= replies[i].replyDate %>)`

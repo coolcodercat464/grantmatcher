@@ -5,7 +5,7 @@
     <title>GrantMatcher - User Page</title>
     <%- head %>
 </head>
-<% if (theuser.length == 0) { %>
+<% if (theuser.length == 0 || !['manager', 'developer'].includes(role)) { %>
 <body>
 <% } else { %>
 <body style="background-color: rgb(255, 214, 214);">
@@ -95,7 +95,7 @@
             
             <label><b>REASON FOR DELETION</b></label>
             <p>Why do you want to delete your account? This action cannot be undone and your data will be permanently deleted.</p>
-            <textarea style="width: 100%" id="deleteReason" rows="6"></textarea>
+            <textarea style="width: 100%" id="deleteReason" rows="6" class="form-control"></textarea>
             <button style="width: 100%" class="buttonStyle pink" onclick="deleteAccount()">Delete my Account</button>
             <button style="width: 100%" class="buttonStyle blue" id="cancel3">Cancel</button>
         </div>
@@ -125,7 +125,7 @@
                 <section>
                     <div class="together align-items-center" style="justify-content: space-between;">
                         <div>
-                            <h1>Profile</h1>
+                            <h1>Error</h1>
                         </div>
                         <div>
                             <i class="fa fa-times" onclick="openModal(9)"></i>
@@ -157,37 +157,75 @@
 
                 <% if (['manager', 'developer'].includes(role)) { %>
                     <section>
-                            <h2>Edit Name</h2>
-                            <label><b>NAME:</b></label>
-                            <input type="text" id="newName" class="form-control" style="width: 100%" value="<%= theuser.name %>"><br>
-                            <div style="display: flex">
-                                <button class="buttonStyle pink" style="width: 100%" onclick="confirmName()">Confirm</button>
-                                <button class="buttonStyle blue" style="width: 100%" onclick="resetName()">Reset</button>
-                            </div><br><br>
-
-                            <h2>Change Password</h2>
-                            <label><b>CURRENT PASSWORD:</b></label>
-                            <div class="together" style="gap: 0;">
-                                <input type="password" id="currentPassword" class="form-control" style="width: 100%">
-                                <button onclick="toggleOld()" id="oldToggle"><i class="fa fa-eye"></i></button>
-                            </div><br>
-
-                            <label><b>NEW PASSWORD:</b></label>
-                            <div class="together" style="gap: 0;">
-                                <input type="password" id="newPassword" class="form-control" style="width: 100%">
-                                <button onclick="toggleNew()" id="newToggle"><i class="fa fa-eye"></i></button>
-                            </div><br>
-
-                            <label><b>CONFIRM PASSWORD:</b></label>
-                            <div class="together" style="gap: 0;">
-                                <input type="password" id="confirmPassword" class="form-control" style="width: 100%">
-                                <button onclick="toggleConfirm()" id="confirmToggle"><i class="fa fa-eye"></i></button>
-                            </div><br>
-
-                            <div style="display: flex">
-                                <button class="buttonStyle pink" style="width: 100%" onclick="confirmPassword()">Confirm</button>
-                                <button class="buttonStyle blue" style="width: 100%" onclick="resetPassword()">Reset</button>
-                            </div><br>
+                        <div class="together" style="align-items: flex-start">
+                            <div style="width: 100%">
+                                <h2>Edit Name</h2>
+                                <label><b>NEW NAME:</b></label>
+                                <input type="text" id="newName" class="form-control" style="width: 100%" value="<%= theuser.name %>"><br>
+                                <label><b>REASON FOR EDIT:</b></label>
+                                <p>Why do you want to change their name? Briefly explain your changes.</p>
+                                <textarea style="width: 100%" id="nameReason" rows="6" class="form-control"></textarea><br>
+                                <div style="display: flex">
+                                    <button class="buttonStyle pink" style="width: 100%" onclick="confirmName()">Confirm</button>
+                                    <button class="buttonStyle blue" style="width: 100%" onclick="resetName()">Reset</button>
+                                </div>
+                            </div>
+                            <div style="width: 100%">
+                                <h2>Edit XP</h2>
+                                <label><b>NEW XP:</b></label>
+                                <input type="number" id="newXp" class="form-control" style="width: 100%" min=0 value="<%= theuser.xp %>"><br>
+                                <label><b>REASON FOR EDIT:</b></label>
+                                <p>Why do you want to change their XP? Briefly explain your changes.</p>
+                                <textarea style="width: 100%" id="xpReason" rows="6" class="form-control"></textarea><br>
+                                <div style="display: flex">
+                                    <button class="buttonStyle pink" style="width: 100%" onclick="confirmXp()">Confirm</button>
+                                    <button class="buttonStyle blue" style="width: 100%" onclick="resetXp()">Reset</button>
+                                </div>
+                            </div>
+                        </div><br>
+                        <div class="together" style="align-items: flex-start">
+                            <div style="width: 100%">
+                                <h2>Edit Role</h2>
+                                <% if (!['manager', 'developer', 'user'].includes(theuser.role)) { %>
+                                    <!-- the user is suspended -->
+                                    <p>This use is suspended. You can unsuspend them in the Danger Zone by scrolling down.</p>
+                                    <!-- TODO: scroll to the danger zone feature-->
+                                <% } else if (theuser.role == 'developer' && role != 'developer') { %>
+                                    <!-- can't edit the developer's role unless the user is a developer -->
+                                    <p>Since this user is a developer and you aren't a developer, you aren't authorized
+                                        to edit the roles of this user.
+                                    </p>
+                                <% } else { %>
+                                    <label><b>NEW ROLE:</b></label>
+                                    <p>If you want to suspend this user, head to the Danger Zone by scrolling down.</p>
+                                    <!-- TODO: scroll to the danger zone feature-->
+                                    <select name="role" id="newRole" style="width: 100%" class="form-control">
+                                        <option value="user">User</option>
+                                        <option value="manager">Manager</option>
+                                        <option value="developer">Developer</option>
+                                    </select>
+                                    <label><b>REASON FOR EDIT:</b></label>
+                                    <p>Why do you want to change their role? Briefly explain your changes.</p>
+                                    <textarea style="width: 100%" id="roleReason" rows="6" class="form-control"></textarea><br>
+                                    <div style="display: flex">
+                                        <button class="buttonStyle pink" style="width: 100%" onclick="confirmRole()">Confirm</button>
+                                        <button class="buttonStyle blue" style="width: 100%" onclick="resetRole()">Reset</button>
+                                    </div>
+                                <% } %>
+                            </div>
+                            <div style="width: 100%">
+                                <h2>Edit Grants Matched</h2>
+                                <label><b>GRANTS MATCHED:</b></label>
+                                <input type="number" id="newMatch" class="form-control" style="width: 100%" min=0 value="<%= theuser.grantsMatched %>"><br>
+                                <label><b>REASON FOR EDIT:</b></label>
+                                <p>Why do you want to change their number of grants matched? Briefly explain your changes.</p>
+                                <textarea style="width: 100%" id="matchReason" rows="6" class="form-control"></textarea><br>
+                                <div style="display: flex">
+                                    <button class="buttonStyle pink" style="width: 100%" onclick="confirmMatch()">Confirm</button>
+                                    <button class="buttonStyle blue" style="width: 100%" onclick="resetMatch()">Reset</button>
+                                </div>
+                            </div>
+                        </div><br>
                     </section>
                     <hr>
                 <% } %>
@@ -217,12 +255,14 @@
                 <hr style="margin-bottom: 0">
             </div>
 
-            <div style="padding-top: 10px; padding-bottom: 10px; height: 100%">
-                <section>
-                    <h2>Danger Zone!</h2>
-                    <button class="buttonStyle" style="background-color: red; color: white;" onclick="openModal(3)">Delete Account</button>
-                </section>
-            </div>
+            <% if (['manager', 'developer'].includes(role)) { %>
+                <div style="padding-top: 10px; padding-bottom: 10px; height: 100%">
+                    <section>
+                        <h2>Danger Zone!</h2>
+                        <button class="buttonStyle" style="background-color: red; color: white;" onclick="openModal(3)">Delete Account</button>
+                    </section>
+                </div>
+            <% } %>
         </main>
     <% } %>
     
@@ -261,7 +301,8 @@
 
                 // turn the info into a json format
                 data = {
-                    'reason': reason
+                    'reason': reason,
+                    "email": '<%= theuser.email %>'
                 }
 
                 // add the code to the database
@@ -283,73 +324,23 @@
                 })
             }
 
-            function confirmPassword() {
-                // get user input
-                currentPassword = document.getElementById("currentPassword").value
-                newPassword = document.getElementById("newPassword").value
-                confirmPasswordVar = document.getElementById("confirmPassword").value
-
-                // validate it
-
-                // password must be at least 5 characters
-                if (newPassword.length < 5) {
-                    document.getElementById("showAlert").textContent = 'Your new password must be at least 5 characters long.'
-                    openModal(2)
-                    return
-                }
-
-                // new password and confirm password must match
-                if (newPassword != confirmPasswordVar) {
-                    document.getElementById("showAlert").textContent = 'Your passwords don\'t match. Please retry.'
-                    openModal(2)
-                    return
-                }
-
-                // turn the info into a json format
-                data = {
-                    'newPassword': newPassword,
-                    'oldPassword': currentPassword
-                }
-
-                // add the code to the database
-                fetch('/changepassword', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                }).then(response => response.json()).then(result => {
-                    document.getElementById("modal3").style.display = 'none'
-                    if (result.status == "error") {
-                        // open the error modal if there is an error
-                        console.log(result)
-                        document.getElementById('showAlert').textContent = result.alert
-                        openModal(2)
-                    } else {
-                        window.location.reload()
-                    }
-                })
-            }
-
-            function resetPassword() {
-                // reset the input fields
-                document.getElementById("currentPassword").value = ""
-                document.getElementById("newPassword").value = ""
-                document.getElementById("confirmPassword").value = ""
-            }
-
             function confirmName() {
                 // get user input
                 name = document.getElementById("newName").value
+                reason = document.getElementById("nameReason").value
 
                 // validate it
-                if (name.trim() == '' || name.length < 5) {
-                    document.getElementById("showAlert").textContent = 'Please make sure your details are valid before confirming. Your name should be at least 5 characters long.'
+                if (name.trim() == '' || name.length < 5 || reason.trim() == '' || reason.length < 5) {
+                    document.getElementById("showAlert").textContent = 'Please make sure the details are valid before confirming. The name and reason should be at least 5 characters long.'
                     openModal(2)
                     return
                 }
 
                 // turn the info into a json format
                 data = {
-                    'name': name
+                    'name': name,
+                    'reason': reason,
+                    'email': '<%= theuser.email %>'
                 }
 
                 // add the code to the database
@@ -373,60 +364,140 @@
             function resetName() {
                 // reset the input fields
                 document.getElementById("newName").value = "<%= theuser.name %>"
+                document.getElementById("nameReason").value = ""
             }
+
+            function confirmXp() {
+                // get user input
+                xp = document.getElementById("newXp").value
+                reason = document.getElementById("xpReason").value
+
+                // validate it
+                if (xp == '' || xp < 0 || reason.trim() == '' || reason.length < 5) {
+                    document.getElementById("showAlert").textContent = 'Please make sure the details are valid before confirming. The XP should be positive and the reason should be at least 5 characters long.'
+                    openModal(2)
+                    return
+                }
+
+                // turn the info into a json format
+                data = {
+                    'xp': xp,
+                    'reason': reason,
+                    'email': '<%= theuser.email %>'
+                }
+
+                // add the code to the database
+                fetch('/changexp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                }).then(response => response.json()).then(result => {
+                    document.getElementById("modal3").style.display = 'none'
+                    if (result.status == "error") {
+                        // open the error modal if there is an error
+                        console.log(result)
+                        document.getElementById('showAlert').textContent = result.alert
+                        openModal(2)
+                    } else {
+                        window.location.reload()
+                    }
+                })
+            }
+            
+            function resetXp() {
+                // reset the input fields
+                document.getElementById("newXp").value = "<%= theuser.xp %>"
+                document.getElementById("xpReason").value = ""
+            }
+
+            function confirmRole() {
+                // get user input
+                role = document.getElementById("newRole").value
+                reason = document.getElementById("roleReason").value
+
+                // validate it
+                if (!['manager', 'developer', 'user'].includes(role) || reason.trim() == '' || reason.length < 5) {
+                    document.getElementById("showAlert").textContent = 'Please make sure the details are valid before confirming. The reason should be at least 5 characters long.'
+                    openModal(2)
+                    return
+                }
+
+                // turn the info into a json format
+                data = {
+                    'role': role,
+                    'reason': reason,
+                    'email': '<%= theuser.email %>'
+                }
+
+                // add the code to the database
+                fetch('/changerole', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                }).then(response => response.json()).then(result => {
+                    document.getElementById("modal3").style.display = 'none'
+                    if (result.status == "error") {
+                        // open the error modal if there is an error
+                        console.log(result)
+                        document.getElementById('showAlert').textContent = result.alert
+                        openModal(2)
+                    } else {
+                        window.location.reload()
+                    }
+                })
+            }
+
+            function resetRole() {
+                // reset the input fields
+                document.getElementById("newRole").value = "<%= theuser.role %>"
+                document.getElementById("roleReason").value = ""
+            }
+
+            function confirmMatch() {
+                // get user input
+                matches = document.getElementById("newMatch").value
+                reason = document.getElementById("matchReason").value
+
+                // validate it
+                if (matches == '' || matches < 0 || reason.trim() == '' || reason.length < 5) {
+                    document.getElementById("showAlert").textContent = 'Please make sure the details are valid before confirming. The reason should be at least 5 characters long and the number of grants matched should be a positive integer.'
+                    openModal(2)
+                    return
+                }
+
+                // turn the info into a json format
+                data = {
+                    'matches': matches,
+                    'reason': reason,
+                    'email': '<%= theuser.email %>'
+                }
+
+                // add the code to the database
+                fetch('/changematches', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                }).then(response => response.json()).then(result => {
+                    document.getElementById("modal3").style.display = 'none'
+                    if (result.status == "error") {
+                        // open the error modal if there is an error
+                        console.log(result)
+                        document.getElementById('showAlert').textContent = result.alert
+                        openModal(2)
+                    } else {
+                        window.location.reload()
+                    }
+                })
+            }
+
+            function resetMatch() {
+                // reset the input fields
+                document.getElementById("newMatch").value = "<%= theuser.grantsMatched %>"
+                document.getElementById("matchReason").value = ""
+            }
+
+            document.getElementById("newRole").value = "<%= theuser.role %>" // initialise role
         <% } %>
-    </script>
-    <script>
-        // toggle the old password field
-        function toggleOld() {
-            password = document.getElementById('currentPassword') // get the password element
-
-            // if its hidden...
-            if (password.type == 'password') {
-                password.type = 'text' // make it visible
-                // change the toggle button
-                document.getElementById('oldToggle').innerHTML = '<i class="fa fa-eye-slash"></i>'
-            // otherwise if its visible...
-            } else {
-                password.type = 'password' // make it hidden
-                // change the toggle button
-                document.getElementById('oldToggle').innerHTML = '<i class="fa fa-eye"></i>'
-            }
-        }
-
-        // toggle the new password field
-        function toggleNew() {
-            password = document.getElementById('newPassword') // get the password element
-
-            // if its hidden...
-            if (password.type == 'password') {
-                password.type = 'text' // make it visible
-                // change the toggle button
-                document.getElementById('newToggle').innerHTML = '<i class="fa fa-eye-slash"></i>'
-            // otherwise if its visible...
-            } else {
-                password.type = 'password' // make it hidden
-                // change the toggle button
-                document.getElementById('newToggle').innerHTML = '<i class="fa fa-eye"></i>'
-            }
-        }
-
-        // toggle the confirm password field
-        function toggleConfirm() {
-            password = document.getElementById('confirmPassword') // get the password element
-
-            // if its hidden...
-            if (password.type == 'password') {
-                password.type = 'text' // make it visible
-                // change the toggle button
-                document.getElementById('confirmToggle').innerHTML = '<i class="fa fa-eye-slash"></i>'
-            // otherwise if its visible...
-            } else {
-                password.type = 'password' // make it hidden
-                // change the toggle button
-                document.getElementById('confirmToggle').innerHTML = '<i class="fa fa-eye"></i>'
-            }
-        }
     </script>
 </body>
 </html>

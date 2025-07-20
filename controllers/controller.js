@@ -77,7 +77,7 @@ async function save_user(newUser, role) {
     // catch any errors
     try {
         // insert the user's data into the database
-        await queryWithRetry('INSERT INTO users (name, email, password, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences", "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [userName, email, password, role, 0, 0, date, "light", false, []]);
+        await queryWithRetry('INSERT INTO users (name, email, password, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [userName, email, password, role, 0, 0, date, "light", false, []]);
         
         // get all changes
         result = await queryWithRetry('SELECT "changeID" FROM changelog');
@@ -610,6 +610,7 @@ const nlpmatch = async (req, res) => {
             } 
         });
     } catch (err) {
+        // TODO: add a feature that emails flying butter when there is an error (nodemailer)
       console.log(err)
       res.send({status: "error", alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
       return
@@ -3685,20 +3686,56 @@ const changenamepost = async (req, res)=>{
 
             // ensure all fields exist
             if (!x.name || x.name.trim() == '' || x.name.length < 5) {
-                res.send({status: 'error', alert: 'It looks like some fields are missing or too short. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                res.send({status: 'error', alert: 'It looks like the name field is missing or too short. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
                 return
             }
             
             username = x.name.replace(/<[^>]*>/g, '')
-            email = req.session.useremail
 
-            // get user info
-            user = await get_user_by_email(email)
+            // if the name change is the user themselves
+            if (!x.email) {
+                email = req.session.useremail
 
-            // ensure user exists
-            if (user == undefined) {
-                res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
-                return
+                // get user info
+                user = await get_user_by_email(email)
+
+                // ensure user exists
+                if (user == undefined) {
+                    res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                    return
+                }
+
+                editingUser = undefined
+            // if the name change is coming from somebody else
+            } else {
+                email = x.email
+
+                // ensure that a reason is provided
+                if (!x.reason || x.reason.trim() == '' || x.reason.length < 5) {
+                    res.send({status: 'error', alert: 'It looks like the reason field is missing or too short. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                    return
+                } else {
+                    reason = x.reason.trim().replace(/<[^>]*>/g, '')
+                }
+                
+                // get user info
+                user = await get_user_by_email(email)
+
+                // ensure user exists
+                if (user == undefined) {
+                    res.send({status: 'error', alert: 'We couldn\'t find the account of the user you want to edit. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                    return
+                }
+
+                // get info of the user who is making the post request
+                editingUserEmail = req.session.useremail
+                editingUser = await get_user_by_email(editingUserEmail)
+
+                // ensure that the user is a manager/dev
+                if (!editingUser || !['manager', 'developer'].includes(editingUser.role)) {
+                    res.send({status: 'error', alert: 'It looks like you aren\'t a manager or a developer, so you aren\'t authorized to edit the details of other users.'})
+                    return
+                }
             }
 
             // store the old name
@@ -3723,8 +3760,15 @@ const changenamepost = async (req, res)=>{
             nextChangeID = maxChangeID + 1
 
             //update changelog
-            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, email, 'User Edited', date, `${oldName} changed their name to ${username}`, []]);
 
+            // user is editing their own account
+            if (!editingUser) {
+                await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, email, 'User Edited', date, `${oldName} changed their name to ${username}`, []]);
+            // the name change is coming from somebody else
+            } else {
+                await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, editingUserEmail, 'User Edited', date, `${editingUser.name} changed ${oldName}\'s name to ${username} for reason: "${reason}"`, []]);
+            }
+            
             res.send({status: 'success'});
         } catch (err) {
             console.log(err)
@@ -3878,6 +3922,306 @@ const deleteaccountpost = async (req, res)=>{
     }
 } 
 
+// change xp of a user
+const changexppost = async (req, res)=>{
+    console.log("CHANGE XP POST")
+
+    x = req.body
+    console.log(x)
+
+    // only allow them to see tickets if they have been authenticated
+    if (req.isAuthenticated()) {
+        try {
+            // get the current date
+            now = new Date();
+
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = now.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+            // stringify it
+            date = `${day}-${month}-${year}`
+
+            // ensure the email is provided
+            if (!x.email) {
+                res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+                
+            email = x.email
+
+            // ensure the xp is valid
+            if (!x.xp || parseInt(x.xp) < 0) {
+                res.send({status: 'error', alert: 'The XP entered is invalid. Please ensure that it is a positive integer. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+
+            xp = parseInt(x.xp)
+
+            // ensure that a reason is provided
+            if (!x.reason || x.reason.trim() == '' || x.reason.length < 5) {
+                res.send({status: 'error', alert: 'It looks like the reason field is missing or too short. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                return
+            } else {
+                reason = x.reason.trim().replace(/<[^>]*>/g, '')
+            }
+            
+            // get user info
+            user = await get_user_by_email(email)
+
+            // ensure user exists
+            if (user == undefined) {
+                res.send({status: 'error', alert: 'We couldn\'t find the account of the user you want to edit. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+
+            // get info of the user who is making the post request
+            editingUserEmail = req.session.useremail
+            editingUser = await get_user_by_email(editingUserEmail)
+
+            // ensure that the user is a manager/dev
+            if (!editingUser || !['manager', 'developer'].includes(editingUser.role)) {
+                res.send({status: 'error', alert: 'It looks like you aren\'t a manager or a developer, so you aren\'t authorized to edit the details of other users.'})
+                return
+            }
+
+            // store the old xp
+            oldXp = user.xp
+
+            // update the user
+            await queryWithRetry('UPDATE users SET xp = $1 WHERE email = $2', [xp, email])
+
+            // get all changes
+            const result = await queryWithRetry('SELECT "changeID" FROM changelog');
+
+            // calculate the maximum changeID
+            maxChangeID = 0
+            for (i in result.rows) {
+                rowID = result.rows[i].changeID
+                if (rowID > maxChangeID) {
+                    maxChangeID = rowID
+                }
+            }
+
+            // calculate the next change ID
+            nextChangeID = maxChangeID + 1
+
+            //update changelog
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, editingUserEmail, 'User Edited', date, `${editingUser.name} changed ${user.name}\'s XP from ${oldXp} to ${xp} for reason: "${reason}"`, []]);
+            
+            res.send({status: 'success'});
+        } catch (err) {
+            console.log(err)
+
+            res.send({status: 'error', alert: 'Something went wrong. If this issue persists, please email me at flyingbutter213@gmail.com'})
+        }
+    } else {
+        urlinit = '/profile' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
+// change role of a user
+const changerolepost = async (req, res)=>{
+    console.log("CHANGE ROLE POST")
+
+    x = req.body
+    console.log(x)
+
+    // only allow them to see tickets if they have been authenticated
+    if (req.isAuthenticated()) {
+        try {
+            // get the current date
+            now = new Date();
+
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = now.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+            // stringify it
+            date = `${day}-${month}-${year}`
+
+            // ensure the email is provided
+            if (!x.email) {
+                res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+                
+            email = x.email
+
+            // ensure the role is valid
+            if (!x.role || !['manager', 'developer', 'user'].includes(role)) {
+                res.send({status: 'error', alert: 'The role entered is invalid. Please ensure that it is either manager, developer, or user. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+
+            role = x.role
+
+            // ensure that a reason is provided
+            if (!x.reason || x.reason.trim() == '' || x.reason.length < 5) {
+                res.send({status: 'error', alert: 'It looks like the reason field is missing or too short. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                return
+            } else {
+                reason = x.reason.trim().replace(/<[^>]*>/g, '')
+            }
+            
+            // get user info
+            user = await get_user_by_email(email)
+
+            // ensure user exists
+            if (user == undefined) {
+                res.send({status: 'error', alert: 'We couldn\'t find the account of the user you want to edit. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+
+            // get info of the user who is making the post request
+            editingUserEmail = req.session.useremail
+            editingUser = await get_user_by_email(editingUserEmail)
+
+            // ensure that the user is a manager/dev
+            if (!editingUser || !['manager', 'developer'].includes(editingUser.role)) {
+                res.send({status: 'error', alert: 'It looks like you aren\'t a manager or a developer, so you aren\'t authorized to edit the details of other users.'})
+                return
+            }
+
+            // store the old role
+            oldRole = user.role
+
+            // update the user
+            await queryWithRetry('UPDATE users SET role = $1 WHERE email = $2', [role, email])
+
+            // get all changes
+            const result = await queryWithRetry('SELECT "changeID" FROM changelog');
+
+            // calculate the maximum changeID
+            maxChangeID = 0
+            for (i in result.rows) {
+                rowID = result.rows[i].changeID
+                if (rowID > maxChangeID) {
+                    maxChangeID = rowID
+                }
+            }
+
+            // calculate the next change ID
+            nextChangeID = maxChangeID + 1
+
+            //update changelog
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, editingUserEmail, 'User Edited', date, `${editingUser.name} changed ${user.name}\'s role from ${oldRole} to ${role} for reason: "${reason}"`, []]);
+            
+            res.send({status: 'success'});
+        } catch (err) {
+            console.log(err)
+
+            res.send({status: 'error', alert: 'Something went wrong. If this issue persists, please email me at flyingbutter213@gmail.com'})
+        }
+    } else {
+        urlinit = '/profile' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
+// change number of grants mached
+const changematchespost = async (req, res)=>{
+    console.log("CHANGE MATCHES POST")
+
+    x = req.body
+    console.log(x)
+
+    // only allow them to see tickets if they have been authenticated
+    if (req.isAuthenticated()) {
+        try {
+            // get the current date
+            now = new Date();
+
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = now.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+            // stringify it
+            date = `${day}-${month}-${year}`
+
+            // ensure the email is provided
+            if (!x.email) {
+                res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+                
+            email = x.email
+
+            // ensure the # of matches is valid
+            if (!x.matches || parseInt(x.matches) < 0) {
+                res.send({status: 'error', alert: 'The # of matches entered is invalid. Please ensure that it is a positive integer. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+
+            matches = parseInt(x.matches)
+
+            // ensure that a reason is provided
+            if (!x.reason || x.reason.trim() == '' || x.reason.length < 5) {
+                res.send({status: 'error', alert: 'It looks like the reason field is missing or too short. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                return
+            } else {
+                reason = x.reason.trim().replace(/<[^>]*>/g, '')
+            }
+            
+            // get user info
+            user = await get_user_by_email(email)
+
+            // ensure user exists
+            if (user == undefined) {
+                res.send({status: 'error', alert: 'We couldn\'t find the account of the user you want to edit. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+
+            // get info of the user who is making the post request
+            editingUserEmail = req.session.useremail
+            editingUser = await get_user_by_email(editingUserEmail)
+
+            // ensure that the user is a manager/dev
+            if (!editingUser || !['manager', 'developer'].includes(editingUser.role)) {
+                res.send({status: 'error', alert: 'It looks like you aren\'t a manager or a developer, so you aren\'t authorized to edit the details of other users.'})
+                return
+            }
+
+            // store the old matches
+            oldMatches = user.grantsMatched
+
+            // update the user
+            await queryWithRetry('UPDATE users SET "grantsMatched" = $1 WHERE email = $2', [matches, email])
+
+            // get all changes
+            const result = await queryWithRetry('SELECT "changeID" FROM changelog');
+
+            // calculate the maximum changeID
+            maxChangeID = 0
+            for (i in result.rows) {
+                rowID = result.rows[i].changeID
+                if (rowID > maxChangeID) {
+                    maxChangeID = rowID
+                }
+            }
+
+            // calculate the next change ID
+            nextChangeID = maxChangeID + 1
+
+            //update changelog
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, editingUserEmail, 'User Edited', date, `${editingUser.name} changed ${user.name}\'s # of grants matched from ${oldMatches} to ${matches} for reason: "${reason}"`, []]);
+            
+            res.send({status: 'success'});
+        } catch (err) {
+            console.log(err)
+
+            res.send({status: 'error', alert: 'Something went wrong. If this issue persists, please email me at flyingbutter213@gmail.com'})
+        }
+    } else {
+        urlinit = '/profile' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
 // Export of all methods as object 
 module.exports = { 
     dbgrants,
@@ -3943,4 +4287,7 @@ module.exports = {
     changenamepost,
     changepasswordpost,
     deleteaccountpost,
+    changexppost,
+    changerolepost,
+    changematchespost,
 }

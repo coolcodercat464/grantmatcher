@@ -1324,7 +1324,7 @@ function resetUserSearch(tableNumber, modalNumber, dbclick=null, idField=null) {
 }
 
 // filter through the clusters table
-async function searchCluster(tableNumber, dbclick=null, idField=null) {
+async function searchCluster(tableNumber, modalNumber, dbclick=null, idField=null) {
     // get the relevant data
     clusterTable = tableData[tableNumber]
     clusterTableData = clusterTable.dataSet
@@ -1419,7 +1419,7 @@ async function searchCluster(tableNumber, dbclick=null, idField=null) {
 }
 
 // clear the cluster form and reset the table
-function resetClusterSearch(tableNumber, dbclick=null, idField=null) {
+function resetClusterSearch(tableNumber, modalNumber, dbclick=null, idField=null) {
     // get the relevant data
     clusterTable = tableData[tableNumber]
     clusterTableData = clusterTable.dataSet
