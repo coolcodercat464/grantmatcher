@@ -90,6 +90,7 @@ router.post('/deleteaccount', control.deleteaccountpost)
 router.post('/changexp', control.changexppost)
 router.post('/changerole', control.changerolepost)
 router.post('/changematches', control.changematchespost)
+router.post('/suspend', control.suspenduserpost)
 
 module.exports = router;
 

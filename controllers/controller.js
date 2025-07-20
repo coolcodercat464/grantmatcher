@@ -77,7 +77,7 @@ async function save_user(newUser, role) {
     // catch any errors
     try {
         // insert the user's data into the database
-        await queryWithRetry('INSERT INTO users (name, email, password, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [userName, email, password, role, 0, 0, date, "light", false, []]);
+        await queryWithRetry('INSERT INTO users (name, email, password, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [userName, email, password, role, 0, 0, date, "light", false]);
         
         // get all changes
         result = await queryWithRetry('SELECT "changeID" FROM changelog');
@@ -329,6 +329,58 @@ async function queryAll(table, req) {
 }
 
 const dbresearchers =  async (req, res) => {
+    // TODO: maybe make this a decorator? add to all routes
+    theuser = await get_user_by_email(req.session.useremail)
+
+    if (theuser != undefined) {
+        if (!['developer', 'manager', 'user'].includes(theuser.role)) {
+            // they must be suspended
+            suspensionDetails = theuser.role.split(':')
+
+            // `get suspension details
+            duration = suspensionDetails[1]
+            date = suspensionDetails[2]
+            role = suspensionDetails[3]
+
+            // get date unsuspended
+            unsuspended = new Date(date.split('-')[2], parseInt(date.split('-')[1]) - 1, date.split('-')[0])
+            unsuspended.setDate(unsuspended.getDate() + duration);
+
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = unsuspended.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(unsuspended)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(unsuspended)
+
+            now = new Date() // get today's date
+
+            // if it is past the unsuspension date
+            if (now >= unsuspended) {
+                try {
+                    await queryWithRetry('UPDATE users SET role = $1 WHERE email = $2', [role, req.session.useremail])
+                    res.send(await queryAll('researchers', req))
+                } catch (err) {
+                    console.log(error)
+
+                    res.send({status: 'error', alert: 'Something went wrong. Please try again. Let me know if this problem persists.'})
+                    return
+                }
+            }
+
+            // stringify it
+            unsuspended = `${day}-${month}-${year}`
+
+            // get reason for suspension
+            reason = suspensionDetails[4]
+
+            // in case there are colons in the reason
+            for (var i = 5; i < suspensionDetails.length; i++) {
+                reason += suspensionDetails[i]
+            }
+
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: duration, date: date, unsuspended: unsuspended, reason: reason, footer: partialfooterLoggedIn});
+            return
+        }
+    }
     res.send(await queryAll('researchers', req))
 }
 
@@ -696,6 +748,58 @@ const indexget = async (req, res)=>{
         theuser = await get_user_by_email(req.session.useremail)
 
         if (theuser != undefined) {
+            if (!['developer', 'manager', 'user'].includes(theuser.role)) {
+                // they must be suspended
+                suspensionDetails = theuser.role.split(':')
+
+                // `get suspension details
+                duration = suspensionDetails[1]
+                date = suspensionDetails[2]
+                role = suspensionDetails[3]
+
+                // get date unsuspended
+                unsuspended = new Date(date.split('-')[2], parseInt(date.split('-')[1]) - 1, date.split('-')[0])
+                unsuspended.setDate(unsuspended.getDate() + duration);
+
+                // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+                year = unsuspended.getFullYear()
+                month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(unsuspended)
+                day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(unsuspended)
+
+                now = new Date() // get today's date
+
+                console.log(now, unsuspended)
+
+                // if it is past the unsuspension date
+                if (now >= unsuspended) {
+                    try {
+                        await queryWithRetry('UPDATE users SET role = $1 WHERE email = $2', [role, req.session.useremail])
+                        
+                        tempShow = showAlertDashboard // temporarily store the showAlertDashboard (as we need to set it to no)
+                        showAlertDashboard = "no"
+                        res.render('dashboard.ejs', {root: path.join(__dirname, '../public'), head: headpartial, user: theuser.name, role: theuser.role, footer: partialfooterLoggedIn, showAlert: tempShow});
+                        return
+                    } catch (err) {
+                        console.log(error)
+
+                        res.send({status: 'error', alert: 'Something went wrong. Please try again. Let me know if this problem persists.'})
+                    }
+                }
+
+                // stringify it
+                unsuspended = `${day}-${month}-${year}`
+
+                // get reason for suspension
+                reason = suspensionDetails[4]
+
+                // in case there are colons in the reason
+                for (var i = 5; i < suspensionDetails.length; i++) {
+                    reason += suspensionDetails[i]
+                }
+
+                res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: duration, date: date, unsuspended: unsuspended, reason: reason, footer: partialfooterLoggedIn});
+                return
+            }
             tempShow = showAlertDashboard // temporarily store the showAlertDashboard (as we need to set it to no)
             showAlertDashboard = "no"
             res.render('dashboard.ejs', {root: path.join(__dirname, '../public'), head: headpartial, user: theuser.name, role: theuser.role, footer: partialfooterLoggedIn, showAlert: tempShow});
@@ -3880,13 +3984,48 @@ const deleteaccountpost = async (req, res)=>{
             reason = x.reason.replace(/<[^>]*>/g, '')
             email = req.session.useremail
 
-            // get user info
-            user = await get_user_by_email(email)
+            // if the name change is the user themselves
+            if (!x.email) {
+                email = req.session.useremail
 
-            // ensure account exists
-            if (user == undefined) {
-                res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
-                return
+                // get user info
+                user = await get_user_by_email(email)
+
+                // ensure account exists
+                if (user == undefined) {
+                    res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                    return
+                }
+
+                editingUser = undefined
+            // if the name change is coming from somebody else
+            } else {
+                email = x.email
+
+                // get user info
+                user = await get_user_by_email(email)
+
+                // ensure user exists
+                if (user == undefined) {
+                    res.send({status: 'error', alert: 'We couldn\'t find the account of the user you want to delete. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                    return
+                }
+
+                // get info of the user who is making the post request
+                editingUserEmail = req.session.useremail
+                editingUser = await get_user_by_email(editingUserEmail)
+
+                // ensure that the user is a manager/dev
+                if (!editingUser || !['manager', 'developer'].includes(editingUser.role)) {
+                    res.send({status: 'error', alert: 'It looks like you aren\'t a manager or a developer, so you aren\'t authorized to delete other users.'})
+                    return
+                }
+
+                // can't suspend a developer
+                if (user.role == 'developer' && editingUser.role != 'developer') {
+                    res.send({status: 'error', alert: 'You can\'t delete the developer unless you are a developer.'})
+                    return
+                }
             }
 
             // update the user
@@ -3908,8 +4047,12 @@ const deleteaccountpost = async (req, res)=>{
             nextChangeID = maxChangeID + 1
 
             //update changelog
-            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, email, 'User Deleted', date, `${user.name} deleted their account for the reason: "${reason}"`, []]);
-
+            if (!editingUser) {
+                await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, email, 'User Deleted', date, `${user.name} deleted their account for the reason: "${reason}"`, []]);
+            } else {
+                await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'User Deleted', date, `${editingUser.name} deleted ${user.name}'s account for the reason: "${reason}"`, []]);
+            }
+            
             res.send({status: 'success'});
         } catch (err) {
             console.log(err)
@@ -3945,7 +4088,7 @@ const changexppost = async (req, res)=>{
 
             // ensure the email is provided
             if (!x.email) {
-                res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                res.send({status: 'error', alert: 'We couldn\'t find the account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
                 return
             }
                 
@@ -4145,7 +4288,7 @@ const changematchespost = async (req, res)=>{
 
             // ensure the email is provided
             if (!x.email) {
-                res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                res.send({status: 'error', alert: 'We couldn\'t find the account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
                 return
             }
                 
@@ -4209,6 +4352,120 @@ const changematchespost = async (req, res)=>{
 
             //update changelog
             await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, editingUserEmail, 'User Edited', date, `${editingUser.name} changed ${user.name}\'s # of grants matched from ${oldMatches} to ${matches} for reason: "${reason}"`, []]);
+            
+            res.send({status: 'success'});
+        } catch (err) {
+            console.log(err)
+
+            res.send({status: 'error', alert: 'Something went wrong. If this issue persists, please email me at flyingbutter213@gmail.com'})
+        }
+    } else {
+        urlinit = '/profile' // redirect them to the current url after they logged in
+        res.render('login.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut, urlinit: urlinit});
+    }
+} 
+
+// suspend a user
+const suspenduserpost = async (req, res)=>{
+    console.log("CHANGE MATCHES POST")
+
+    x = req.body
+    console.log(x)
+
+    // only allow them to see tickets if they have been authenticated
+    if (req.isAuthenticated()) {
+        try {
+            // get the current date
+            now = new Date();
+
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = now.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+            // stringify it
+            date = `${day}-${month}-${year}`
+
+            // ensure the email is provided
+            if (!x.email) {
+                res.send({status: 'error', alert: 'We couldn\'t find the account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+                
+            email = x.email
+
+            // ensure the suspension duration is valid
+            if (!x.duration || parseInt(x.duration) < 0) {
+                res.send({status: 'error', alert: 'The suspension duration is invalid. Please ensure that it is a positive integer. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+
+            duration = parseInt(x.duration)
+
+            // ensure the returning role is valid
+            if (!x.role || !['manager', 'developer', 'user'].includes(x.role)) {
+                res.send({status: 'error', alert: 'The returning role is invalid. Please ensure that it is either developer, manager, or user. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+
+            role = x.role
+
+            // ensure that a reason is provided
+            if (!x.reason || x.reason.trim() == '' || x.reason.length < 5) {
+                res.send({status: 'error', alert: 'It looks like the reason field is missing or too short. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
+                return
+            } else {
+                reason = x.reason.trim().replace(/<[^>]*>/g, '')
+            }
+            
+            // get user info
+            user = await get_user_by_email(email)
+
+            // ensure user exists
+            if (user == undefined) {
+                res.send({status: 'error', alert: 'We couldn\'t find the account of the user you want to suspend. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                return
+            }
+
+            // get info of the user who is making the post request
+            editingUserEmail = req.session.useremail
+            editingUser = await get_user_by_email(editingUserEmail)
+
+            // ensure that the user is a manager/dev
+            if (!editingUser || !['manager', 'developer'].includes(editingUser.role)) {
+                res.send({status: 'error', alert: 'It looks like you aren\'t a manager or a developer, so you aren\'t authorized to suspend other users.'})
+                return
+            }
+
+            // can't suspend a developer
+            if (user.role == 'developer' && editingUser.role != 'developer') {
+                res.send({status: 'error', alert: 'You can\'t suspend the developer unless you are a developer.'})
+                return
+            }
+
+            // store the suspension details
+            suspensionDetails = `suspended:${duration}:${date}:${role}:${reason}`
+
+            // update the user
+            await queryWithRetry('UPDATE users SET "role" = $1 WHERE email = $2', [suspensionDetails, email])
+
+            // get all changes
+            const result = await queryWithRetry('SELECT "changeID" FROM changelog');
+
+            // calculate the maximum changeID
+            maxChangeID = 0
+            for (i in result.rows) {
+                rowID = result.rows[i].changeID
+                if (rowID > maxChangeID) {
+                    maxChangeID = rowID
+                }
+            }
+
+            // calculate the next change ID
+            nextChangeID = maxChangeID + 1
+
+            //update changelog
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, editingUserEmail, 'User Suspended', date, `${editingUser.name} suspended ${user.name} for ${duration} days (returning as a ${role}) for reason: "${reason}"`, []]);
             
             res.send({status: 'success'});
         } catch (err) {
@@ -4290,4 +4547,5 @@ module.exports = {
     changexppost,
     changerolepost,
     changematchespost,
+    suspenduserpost,
 }

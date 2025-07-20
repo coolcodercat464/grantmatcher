@@ -71,7 +71,7 @@ app.post(['/addticket', '/ticket/:id', '/resolve', '/editticket', '/editreply', 
 
 // non-crucial features
 app.get(['/profile'], routes)
-app.post(['/changename', '/changepassword', '/deleteaccount', '/changexp', '/changerole', '/changematches'], routes)
+app.post(['/changename', '/changepassword', '/deleteaccount', '/changexp', '/changerole', '/changematches', '/suspend'], routes)
 
 app.get(['/user/:id'], routes)
 
