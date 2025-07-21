@@ -1,3 +1,4 @@
+// TODO: remove all try-catch
 const path = require('path');                                // install path
 const options = {root: path.join(__dirname, '../public')};   // set options (root)
 
@@ -715,7 +716,6 @@ const nlpmatch = async (req, res) => {
             } 
         });
     } catch (err) {
-        // TODO: add a feature that emails flying butter when there is an error (nodemailer)
       console.log(err)
       res.send({status: "error", alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
       return
@@ -877,14 +877,8 @@ const grantpageget = async (req, res)=>{
     console.log(suspensionDetails)
 
     // get the grant data
-    try {
-        result = await queryWithRetry('SELECT * FROM grants WHERE "grantID" = $1', [id]);
-        grant = result.rows
-    } catch (err) {
-        console.error(err);
-        res.status(500).render('grantPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, title: "", user: "", date: "", url: "", deadline: "", duration: "", clusters: "", id: id, keywords: "", description: "", researchers: "", showAlert: 'Something went wrong when fetching the data from our servers. Please try again.'});
-        return
-    }
+    result = await queryWithRetry('SELECT * FROM grant WHERE "grantID" = $1', [id]);
+    grant = result.rows
 
     // ensure that grant exists
     if (grant.length == 0) {

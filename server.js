@@ -1,6 +1,7 @@
 // setup
 const express = require('express');                       // import express
 const path = require('path');                             // install path
+var nodemailer = require('nodemailer');                   // for sending emails
 const options = {root: path.join(__dirname, '/public')};  // set options root
 const app = express();                                    // initialise app
 const port = 3000;                                        // set port
@@ -115,8 +116,41 @@ app.get(['/user/:id'], routes)
 
 // error handling
 app.use((err, req, res, next) => {
-  console.error('Express error:', err.stack);
-  res.status(500).send({status: 'error', alert: 'Something went wrong. Please try again. If this problem persists, please email me at flyingbutter213@gmail.com.'});
+    // if you need to refresh the credentials, use: https://dev.to/chandrapantachhetri/sending-emails-securely-using-node-js-nodemailer-smtp-gmail-and-oauth2-g3a
+    err = err.stack
+    console.error('Express error:', err);
+
+    // create transporter
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          type: 'OAuth2',
+          user: process.env.MAIL_USERNAME,
+          pass: process.env.MAIL_PASSWORD,
+          clientId: process.env.OAUTH_CLIENTID,
+          clientSecret: process.env.OAUTH_CLIENT_SECRET,
+          refreshToken: process.env.OAUTH_REFRESH_TOKEN
+        }
+    });
+
+    // the email info
+    var mailOptions = {
+        from: 'flyingbutter213@gmail.com',
+        to: 'flyingbutter213@gmail.com',
+        subject: '[URGENT] GRANT MATCHER ERROR AT ' + req.originalUrl,
+        html: err
+    };
+
+    // emails flying butter when there is an error
+    transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+        }
+    });
+
+    res.status(500).send({status: 'error', alert: 'Something went wrong. Please try again. If this problem persists, please email me at flyingbutter213@gmail.com.'});
 });
 
 // listen to port
