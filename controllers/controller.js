@@ -163,14 +163,74 @@ async function get_user_by_email(useremail) {
     users = await users_list();
 
     // linear search to find the user with the email
-    for (x in users) {
-        if (users[x].email == useremail) {
-            theuser = users[x];
+    for (i in users) {
+        if (users[i].email == useremail) {
+            theuser = users[i];
             break;
         }
     }
 
     return theuser
+}
+
+async function verifyUser(req) {
+    theuser = await get_user_by_email(req.session.useremail)
+
+    if (theuser != undefined) {
+        if (!['developer', 'manager', 'user'].includes(theuser.role)) {
+            // they must be suspended
+            suspensionDetails = theuser.role.split(':')
+
+            // `get suspension details
+            duration = suspensionDetails[1]
+            date = suspensionDetails[2]
+            role = suspensionDetails[3]
+
+            // get date unsuspended
+            unsuspended = new Date(date.split('-')[2], parseInt(date.split('-')[1]) - 1, date.split('-')[0])
+            unsuspended.setDate(unsuspended.getDate() + duration);
+
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = unsuspended.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(unsuspended)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(unsuspended)
+
+            now = new Date() // get today's date
+
+            // if it is past the unsuspension date
+            if (now >= unsuspended) {
+                try {
+                    await queryWithRetry('UPDATE users SET role = $1 WHERE email = $2', [role, req.session.useremail])
+                    return 'success'
+                } catch (err) {
+                    console.log(err)
+
+                    return 'error'
+                }
+            }
+
+            // stringify it
+            unsuspended = `${day}-${month}-${year}`
+
+            // get reason for suspension
+            reason = suspensionDetails[4]
+
+            // in case there are colons in the reason
+            for (var i = 5; i < suspensionDetails.length; i++) {
+                reason += suspensionDetails[i]
+            }
+
+            return {duration: duration, date: date, unsuspended: unsuspended, reason: reason}
+        } else {
+            return 'success'
+        }
+    } else {
+        return 'login'
+    }
+}
+
+function isString(variable) {
+  return typeof variable === 'string';
 }
 
 // save initial url so after login it doesnt get lost
@@ -309,7 +369,7 @@ passport.deserializeUser(async (email, done) => {
 async function queryAll(table, req) {
     try {
         // ensure the user is logged in before giving them the data
-        if (req.isAuthenticated()) {
+        if (req.isAuthenticated() && await verifyUser(req) == 'success') {
             // ensure that you don't get the users' passwords
             if (table == 'users') {
                 result = await queryWithRetry(`SELECT name, email, role, "grantsMatched", xp, "dateJoined", "colourTheme", "notificationPreferences" FROM ${table}`);
@@ -329,58 +389,6 @@ async function queryAll(table, req) {
 }
 
 const dbresearchers =  async (req, res) => {
-    // TODO: maybe make this a decorator? add to all routes
-    theuser = await get_user_by_email(req.session.useremail)
-
-    if (theuser != undefined) {
-        if (!['developer', 'manager', 'user'].includes(theuser.role)) {
-            // they must be suspended
-            suspensionDetails = theuser.role.split(':')
-
-            // `get suspension details
-            duration = suspensionDetails[1]
-            date = suspensionDetails[2]
-            role = suspensionDetails[3]
-
-            // get date unsuspended
-            unsuspended = new Date(date.split('-')[2], parseInt(date.split('-')[1]) - 1, date.split('-')[0])
-            unsuspended.setDate(unsuspended.getDate() + duration);
-
-            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
-            year = unsuspended.getFullYear()
-            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(unsuspended)
-            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(unsuspended)
-
-            now = new Date() // get today's date
-
-            // if it is past the unsuspension date
-            if (now >= unsuspended) {
-                try {
-                    await queryWithRetry('UPDATE users SET role = $1 WHERE email = $2', [role, req.session.useremail])
-                    res.send(await queryAll('researchers', req))
-                } catch (err) {
-                    console.log(error)
-
-                    res.send({status: 'error', alert: 'Something went wrong. Please try again. Let me know if this problem persists.'})
-                    return
-                }
-            }
-
-            // stringify it
-            unsuspended = `${day}-${month}-${year}`
-
-            // get reason for suspension
-            reason = suspensionDetails[4]
-
-            // in case there are colons in the reason
-            for (var i = 5; i < suspensionDetails.length; i++) {
-                reason += suspensionDetails[i]
-            }
-
-            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: duration, date: date, unsuspended: unsuspended, reason: reason, footer: partialfooterLoggedIn});
-            return
-        }
-    }
     res.send(await queryAll('researchers', req))
 }
 
@@ -390,7 +398,7 @@ const dbgrants = async (req, res) => {
 
 const dbgrantversion = async (req, res) => {
     result = [] // what to put in res.send()
-    if (req.isAuthenticated()) {
+    if (req.isAuthenticated() && await verifyUser(req) == 'success') {
         try {
             result = await queryWithRetry(`SELECT "versionInformation" FROM grants WHERE "grantID" = $1`, [id]);
             result = result.rows
@@ -404,7 +412,7 @@ const dbgrantversion = async (req, res) => {
 
 const dbresearcherversion = async (req, res) => {
     result = [] // what to put in res.send()
-    if (req.isAuthenticated()) {
+    if (req.isAuthenticated() && await verifyUser(req) == 'success') {
         try {
             result = await queryWithRetry(`SELECT "versionInformation" FROM researchers WHERE "email" = $1`, [id]);
             result = result.rows
@@ -427,7 +435,7 @@ const dbusers = async (req, res) => {
 const dbchangelog = async (req, res) => {
     try {
         // ensure the user is logged in before giving them the data
-        if (req.isAuthenticated()) {
+        if (req.isAuthenticated() && await verifyUser(req) == 'success') {
             // get info about the user
             user = await get_user_by_email(req.session.useremail)
 
@@ -473,6 +481,14 @@ const nlpclustermatch = async (req, res) => {
   // ensure that they are logged in first
   if (!req.isAuthenticated()) {
     res.send({"error": "Please log in first :)", "relevant": []})
+    return
+  }
+
+  // handle suspended users
+  suspensionDetails = await verifyUser(req)
+  if (!isString(suspensionDetails)) {
+    res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+    return
   }
 
   try {
@@ -513,6 +529,13 @@ const nlpmatch = async (req, res) => {
     // ensure that they are logged in first
     if (!req.isAuthenticated()) {
         res.send({status: "error", alert: 'Please login first :)'});
+        return
+    }
+
+    // handle suspension
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
         return
     }
 
@@ -679,6 +702,13 @@ const nlprecalculate = async (req, res) => {
         return
     }
 
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+        return
+    }
+
     x = req.body
 
     try {
@@ -744,62 +774,17 @@ const indexget = async (req, res)=>{
 
     // dashboard if the user is signed-in, and landing page if they arent
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         // find the user
         theuser = await get_user_by_email(req.session.useremail)
 
         if (theuser != undefined) {
-            if (!['developer', 'manager', 'user'].includes(theuser.role)) {
-                // they must be suspended
-                suspensionDetails = theuser.role.split(':')
-
-                // `get suspension details
-                duration = suspensionDetails[1]
-                date = suspensionDetails[2]
-                role = suspensionDetails[3]
-
-                // get date unsuspended
-                unsuspended = new Date(date.split('-')[2], parseInt(date.split('-')[1]) - 1, date.split('-')[0])
-                unsuspended.setDate(unsuspended.getDate() + duration);
-
-                // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
-                year = unsuspended.getFullYear()
-                month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(unsuspended)
-                day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(unsuspended)
-
-                now = new Date() // get today's date
-
-                console.log(now, unsuspended)
-
-                // if it is past the unsuspension date
-                if (now >= unsuspended) {
-                    try {
-                        await queryWithRetry('UPDATE users SET role = $1 WHERE email = $2', [role, req.session.useremail])
-                        
-                        tempShow = showAlertDashboard // temporarily store the showAlertDashboard (as we need to set it to no)
-                        showAlertDashboard = "no"
-                        res.render('dashboard.ejs', {root: path.join(__dirname, '../public'), head: headpartial, user: theuser.name, role: theuser.role, footer: partialfooterLoggedIn, showAlert: tempShow});
-                        return
-                    } catch (err) {
-                        console.log(error)
-
-                        res.send({status: 'error', alert: 'Something went wrong. Please try again. Let me know if this problem persists.'})
-                    }
-                }
-
-                // stringify it
-                unsuspended = `${day}-${month}-${year}`
-
-                // get reason for suspension
-                reason = suspensionDetails[4]
-
-                // in case there are colons in the reason
-                for (var i = 5; i < suspensionDetails.length; i++) {
-                    reason += suspensionDetails[i]
-                }
-
-                res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: duration, date: date, unsuspended: unsuspended, reason: reason, footer: partialfooterLoggedIn});
-                return
-            }
             tempShow = showAlertDashboard // temporarily store the showAlertDashboard (as we need to set it to no)
             showAlertDashboard = "no"
             res.render('dashboard.ejs', {root: path.join(__dirname, '../public'), head: headpartial, user: theuser.name, role: theuser.role, footer: partialfooterLoggedIn, showAlert: tempShow});
@@ -852,6 +837,15 @@ const grantpageget = async (req, res)=>{
   
   // only allow them to access this page if they have been authenticated
   if (req.isAuthenticated()) {
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+        return
+    }
+
+    console.log(suspensionDetails)
+
     // get the grant data
     try {
         result = await queryWithRetry('SELECT * FROM grants WHERE "grantID" = $1', [id]);
@@ -904,6 +898,13 @@ const addgrantget = async (req, res)=>{
 
     // only allow them to add grants if they havent been authenticated yet
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         res.render('addGrant.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
     } else {
         urlinit = '/addgrant' // redirect them to the current url after they logged in
@@ -925,6 +926,13 @@ const editgrantget = async (req, res)=>{
 
     // only allow them to signup if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         id = parseInt(id)
 
         // get the grants data
@@ -985,6 +993,13 @@ const matchget = async (req, res)=>{
     
     // only allow them to access this page if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         // get the grant data
         try {
             const result = await queryWithRetry('SELECT * FROM grants WHERE "grantID" = $1', [id]);
@@ -1033,6 +1048,13 @@ const matchget = async (req, res)=>{
 const recalculateget = async (req, res) => {
     // only allow them to signup if they have already been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         res.render('recalculate.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
     } else {
         urlinit = '/recalculate'
@@ -1046,6 +1068,13 @@ const managecodesget = async (req, res)=>{
 
     // only allow them to manage codes if they havent been authenticated yet
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             // ensure that they are a manager/developer
             const result1 = await queryWithRetry('SELECT role FROM users WHERE email = $1', [req.session.useremail]);
@@ -1079,6 +1108,13 @@ const researcherpageget = async (req, res)=>{
   
   // only allow them to access this page if they have been authenticated
   if (req.isAuthenticated()) {
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+        return
+    }
+
     // get the researcher data
     try {
         const result = await queryWithRetry('SELECT * FROM researchers WHERE "email" = $1', [id]);
@@ -1204,6 +1240,13 @@ const editresearcherget = async (req, res)=>{
 
     // only allow them to signup if they havent been authenticated yet
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         // get the researcher data
         try {
             const result = await queryWithRetry('SELECT * FROM researchers WHERE "email" = $1', [id]);
@@ -1282,6 +1325,13 @@ const addresearcherget = async (req, res)=>{
 
     // only allow them to add researchers if they havent been authenticated yet
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         res.render('addResearcher.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
     } else {
         urlinit = '/addresearcher' // redirect them to the current url after they logged in
@@ -1295,6 +1345,13 @@ const manageclustersget = async (req, res)=>{
 
     // only allow them to add researchers if they havent been authenticated yet
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             result = await queryWithRetry('SELECT * FROM clusters')
             console.log(result.rows)
@@ -1316,6 +1373,13 @@ const ticketsget = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             tickets = await queryWithRetry('SELECT * FROM tickets')
             tickets = tickets.rows
@@ -1364,6 +1428,13 @@ const ticketpageget = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             ticket = await queryWithRetry('SELECT * FROM tickets WHERE "ticketID" = $1', [id])
             ticket = ticket.rows
@@ -1430,6 +1501,13 @@ const profileget = async (req, res)=>{
 
     // only allow them to access profile page if the user is signed-in, and redirect to login if they aren't
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         // find the user
         theuser = await get_user_by_email(req.session.useremail)
 
@@ -1461,6 +1539,13 @@ const userpageget = async (req, res)=>{
 
     // only allow them to access profile page if the user is signed-in, and redirect to login if they aren't
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         // find the user
         user = await get_user_by_email(email)
         currentuser = await get_user_by_email(req.session.useremail)
@@ -1662,6 +1747,13 @@ const addgrantpost = async (req, res)=>{
         return
     }
 
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+        return
+    }
+
     // validation (will error out if the fields arent in the correct format, thus invalid inputs are handled in the catch part)
     try {
         // isolate each field
@@ -1779,6 +1871,13 @@ const editgrantpost = async (req, res)=>{
     // ensure that user is authenticated
     if (req.isAuthenticated() == false) {
         res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
         return
     }
 
@@ -1925,6 +2024,13 @@ const deletegrantpost = async (req, res)=>{
         return
     }
 
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+        return
+    }
+
     // get the id (from the route name itself)
     id = req.params.id
     console.log(id);
@@ -2005,6 +2111,13 @@ const confirmmatchpost = async (req, res)=>{
     // ensure that user is authenticated
     if (req.isAuthenticated() == false) {
         res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
         return
     }
 
@@ -2130,6 +2243,13 @@ const addclusterspost = async (req, res)=>{
         return
     }
 
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+        return
+    }
+
     x = req.body
 
     // ensure that clusters are provided
@@ -2177,6 +2297,13 @@ const confirmrecalculationpost = async (req, res)=>{
     // ensure that user is authenticated
     if (req.isAuthenticated() == false) {
         res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
         return
     }
 
@@ -2439,6 +2566,13 @@ const concluderecalculationpost = async (req, res)=>{
         return
     }
 
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+        return
+    }
+
     x = req.body
 
     // ensure that researchers names are provided
@@ -2511,6 +2645,13 @@ const addcodepost = async (req, res)=>{
     // only allow them to manage codes if they havent been authenticated yet
     if (!req.isAuthenticated()) {
         res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
         return
     }
 
@@ -2606,6 +2747,13 @@ const removecodepost = async (req, res)=>{
         return
     }
 
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+        return
+    }
+
     try {
         // ensure that they are a manager/developer
         const result1 = await queryWithRetry('SELECT role FROM users WHERE email = $1', [req.session.useremail]);
@@ -2697,6 +2845,13 @@ const deleteresearcherpost = async (req, res)=>{
         return
     }
 
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+        return
+    }
+
     // get the id (from the route name itself)
     id = req.params.id
     console.log(id);
@@ -2774,6 +2929,13 @@ const editresearcherpost = async (req, res)=>{
     // ensure that user is authenticated
     if (req.isAuthenticated() == false) {
         res.send({alert: 'Please login first :)'});
+        return
+    }
+
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
         return
     }
 
@@ -2929,6 +3091,13 @@ const addresearcherpost = async (req, res)=>{
         return
     }
 
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+        return
+    }
+
     // validation (will error out if the fields arent in the correct format, thus invalid inputs are handled in the catch part)
     try {
         // isolate each field
@@ -3039,6 +3208,13 @@ const manageclusterspost = async (req, res)=>{
         return
     }
 
+    // handle suspended users
+    suspensionDetails = await verifyUser(req)
+    if (!isString(suspensionDetails)) {
+        res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+        return
+    }
+
     x = req.body
     console.log(x)
 
@@ -3145,6 +3321,13 @@ const addticketpost = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             // get the current date
             now = new Date();
@@ -3260,6 +3443,13 @@ const addreplypost = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             // get the current date
             now = new Date();
@@ -3381,6 +3571,13 @@ const editreplypost = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             // get the current date
             now = new Date();
@@ -3511,6 +3708,13 @@ const editticketpost = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             // get the current date
             now = new Date();
@@ -3645,6 +3849,13 @@ const resolvepost = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             // get the current date
             now = new Date();
@@ -3776,6 +3987,13 @@ const changenamepost = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             // get the current date
             now = new Date();
@@ -3894,6 +4112,13 @@ const changepasswordpost = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             // get the current date
             now = new Date();
@@ -3963,6 +4188,13 @@ const deleteaccountpost = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             // get the current date
             now = new Date();
@@ -4074,6 +4306,13 @@ const changexppost = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             // get the current date
             now = new Date();
@@ -4174,6 +4413,13 @@ const changerolepost = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             // get the current date
             now = new Date();
@@ -4188,14 +4434,14 @@ const changerolepost = async (req, res)=>{
 
             // ensure the email is provided
             if (!x.email) {
-                res.send({status: 'error', alert: 'We couldn\'t find your account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
+                res.send({status: 'error', alert: 'We couldn\'t find the account. Please refresh the page and ensure that the URL path is typed in correctly. If the issue persists, please open a ticket to let me know.'});
                 return
             }
                 
             email = x.email
 
             // ensure the role is valid
-            if (!x.role || !['manager', 'developer', 'user'].includes(role)) {
+            if (!x.role || !['manager', 'developer', 'user'].includes(x.role)) {
                 res.send({status: 'error', alert: 'The role entered is invalid. Please ensure that it is either manager, developer, or user. If the issue persists, please open a ticket to let me know.'});
                 return
             }
@@ -4251,7 +4497,12 @@ const changerolepost = async (req, res)=>{
             nextChangeID = maxChangeID + 1
 
             //update changelog
-            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, editingUserEmail, 'User Edited', date, `${editingUser.name} changed ${user.name}\'s role from ${oldRole} to ${role} for reason: "${reason}"`, []]);
+            if (!['manager', 'developer', 'user'].includes(oldRole)) {
+                // they have been unsuspended
+                await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, editingUserEmail, 'User Unsuspended', date, `${editingUser.name} unsuspended ${user.name} (now ${role}) for reason: "${reason}"`, []]);
+            } else {
+                await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, editingUserEmail, 'User Edited', date, `${editingUser.name} changed ${user.name}\'s role from ${oldRole} to ${role} for reason: "${reason}"`, []]);
+            }
             
             res.send({status: 'success'});
         } catch (err) {
@@ -4274,6 +4525,13 @@ const changematchespost = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             // get the current date
             now = new Date();
@@ -4374,6 +4632,13 @@ const suspenduserpost = async (req, res)=>{
 
     // only allow them to see tickets if they have been authenticated
     if (req.isAuthenticated()) {
+        // handle suspended users
+        suspensionDetails = await verifyUser(req)
+        if (!isString(suspensionDetails)) {
+            res.render('suspended.ejs', {root: path.join(__dirname, '../public'), head: headpartial, duration: suspensionDetails.duration, date: suspensionDetails.date, unsuspended: suspensionDetails.unsuspended, reason: suspensionDetails.reason, footer: partialfooterLoggedIn});
+            return
+        }
+
         try {
             // get the current date
             now = new Date();
