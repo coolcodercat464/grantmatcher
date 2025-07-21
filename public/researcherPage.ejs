@@ -435,15 +435,18 @@
                             careerStage = "Unknown"
                         }
 
-                        // process cluster IDs
-                        clusterNames = []
-                        for (x in clustersData) {
-                            if (clusters.includes(clustersData[x].id.toString())) {
-                                clusterNames.push(clustersData[x].name)
+                        if (clusters != null && clusters != undefined) {    
+                            clusterNames = []
+                            for (x in clustersData) {
+                                if (clusters.includes(clustersData[x].id.toString())) {
+                                    clusterNames.push(clustersData[x].name)
+                                }
                             }
-                        }
 
-                        clusters = clusterNames.join(", ")
+                            clusters = clusterNames.join(", ")
+                        } else {
+                            clusters = 'None'
+                        }
 
                         // the reason and date for the next version
                         reasonNext = JSON.parse(version[13])
