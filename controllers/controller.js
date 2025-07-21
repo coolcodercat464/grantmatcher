@@ -1646,15 +1646,22 @@ const signuppost = async (req, res, next) => {
             return
         }
 
-        // add validation to name - name cannot just be spaced
-        if (x.name.replace(/<[^>]*>/g, '').trim() === '') {
+        // get the form info
+        username = x.name.replace(/<[^>]*>/g, '')
+        password = x.password
+        email = x.email.replace(/<[^>]*>/g, '')
+        authcode = x.authcode
+        rememberme = x.rememberme
+
+        // add validation to name - name cannot just be spaces
+        if (name.trim() === '') {
             // give them an error pop-up
             res.send({alert: 'Please ensure your name isn\'t empty!'});
             return
         } 
 
         // add validation to password - password must be at least 5 characters
-        if (x.password.length < 5) {
+        if (password.length < 5) {
             // give them an error pop-up
             res.send({alert: 'Your password must be at least 5 characters long. Please try again!'});
             return
@@ -1666,7 +1673,7 @@ const signuppost = async (req, res, next) => {
         // check if the user is already in the database
         for (u in users) {
             user = users[u];
-            if(x.email === user.email) {
+            if(email === user.email) {
                 // give them an error pop-up if they are already in the database
                 res.send({alert: 'A user with this email already exists. Please try again or login instead.'});
                 return
@@ -1682,7 +1689,7 @@ const signuppost = async (req, res, next) => {
         for (i in codes) {
             code = codes[i]
             // check if the code matches the inputted email
-            if (code.code == x.authcode && code.userEmail == x.email) {
+            if (code.code == authcode && code.userEmail == email) {
                 success = true;
                 role = code.role;
                 break
@@ -1696,7 +1703,7 @@ const signuppost = async (req, res, next) => {
         }
 
         // new user object
-        var newUser = {email: x.email, name: x.name.replace(/<[^>]*>/g, ''), password: x.password};
+        var newUser = {email: email, name: username, password: password};
 
         // add the user to the database
         await save_user(newUser, role);
@@ -2049,6 +2056,8 @@ const deletegrantpost = async (req, res)=>{
         return
     }
 
+    reason = x.reason.replace(/<[^>]*>/g, '')
+
     try {
         // get the grants name
         const result = await queryWithRetry('SELECT "grantName" FROM grants WHERE "grantID" = $1', [id]);
@@ -2094,7 +2103,7 @@ const deletegrantpost = async (req, res)=>{
 
         // add 'grant deleted' change to changelog
         const mq4 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result4 = await queryWithRetry(mq4, [nextChangeID, req.session.useremail, 'Grant Deleted', date, `The grant "${grantName}" has been deleted. The reason provided was "${x.reason.replace(/<[^>]*>/g, '')}"`, '{}']);
+        const result4 = await queryWithRetry(mq4, [nextChangeID, req.session.useremail, 'Grant Deleted', date, `The grant "${grantName}" has been deleted. The reason provided was "${reason}"`, '{}']);
 
         res.send({success: 'success'})
     } catch (err) {
@@ -2258,6 +2267,8 @@ const addclusterspost = async (req, res)=>{
         return
     }
 
+    generatedClusters = x.generatedClusters
+
     try {
          // get all clusters
         const result = await queryWithRetry('SELECT "clusterID" FROM clusters');
@@ -2272,8 +2283,8 @@ const addclusterspost = async (req, res)=>{
         }
 
         // add each cluster to the database
-        for (i in x.generatedClusters) {
-            clusterName = x.generatedClusters[i].replace(/<[^>]*>/g, '')
+        for (i in generatedClusters) {
+            clusterName = generatedClusters[i].replace(/<[^>]*>/g, '')
 
             // add the cluster to the database
             await queryWithRetry('INSERT INTO clusters ("clusterID", name) VALUES ($1, $2)', [maxClusterID+1, clusterName]);
@@ -2680,6 +2691,16 @@ const addcodepost = async (req, res)=>{
         return
     }
 
+    email = x.email.replace(/<[^>]*>/g, '')
+    code = x.code.replace(/<[^>]*>/g, '')
+    role = x.role.replace(/<[^>]*>/g, '')
+
+    // ensure code is correct length
+    if (code.length != 8) {
+        res.send({alert: 'Something went wrong. Please try regenerate the code. If this issue persists, please let me know.'})
+        return
+    }
+
     try {
         // get the current date
         now = new Date();
@@ -2693,7 +2714,7 @@ const addcodepost = async (req, res)=>{
         date = `${day}-${month}-${year}`
 
         // add the researcher
-        await queryWithRetry('INSERT INTO codes ("userEmail", code, "role", "dateAdded") VALUES ($1, $2, $3, $4)', [x.email.replace(/<[^>]*>/g, ''), x.code.replace(/<[^>]*>/g, ''), x.role.replace(/<[^>]*>/g, ''), date]);
+        await queryWithRetry('INSERT INTO codes ("userEmail", code, "role", "dateAdded") VALUES ($1, $2, $3, $4)', [email, code, role, date]);
         
         // get the current xp
         const mq2 = 'SELECT xp FROM users WHERE email = $1'
@@ -2727,7 +2748,7 @@ const addcodepost = async (req, res)=>{
 
         // add 'code added' change to changelog
         const mq5 = 'INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)'
-        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Code Added', date, `A new code has been added for a new user with the email ${x.email.replace(/<[^>]*>/g, '')}.`, '{}']);
+        const result5 = await queryWithRetry(mq5, [nextChangeID, req.session.useremail, 'Code Added', date, `A new code has been added for a new user with the email ${email}.`, '{}']);
         
         res.send({success: 'success'})
     } catch (err) {
@@ -2779,6 +2800,8 @@ const removecodepost = async (req, res)=>{
         return
     }
 
+    code = x.code.replace(/<[^>]*>/g, '')
+
     try {
         // get the current date
         now = new Date();
@@ -2792,7 +2815,7 @@ const removecodepost = async (req, res)=>{
         date = `${day}-${month}-${year}`
 
         // try find the code
-        const result2 = await queryWithRetry('SELECT "userEmail" FROM codes WHERE code = $1', [x.code.replace(/<[^>]*>/g, '')]);
+        const result2 = await queryWithRetry('SELECT "userEmail" FROM codes WHERE code = $1', [code]);
         codeToDelete = result2.rows
 
         // ensure that the code exists
@@ -2805,7 +2828,7 @@ const removecodepost = async (req, res)=>{
         userEmail = codeToDelete.userEmail
 
         // remove the code
-        await queryWithRetry('DELETE FROM codes WHERE code = $1', [x.code.replace(/<[^>]*>/g, '')]);
+        await queryWithRetry('DELETE FROM codes WHERE code = $1', [code]);
         
         // get all changes
         const mq4 = 'SELECT "changeID" FROM changelog'
@@ -2862,9 +2885,9 @@ const deleteresearcherpost = async (req, res)=>{
     if (!x.reason) {
         res.send({alert: 'It looks like no reason for researcher deletion was provided. Please try again.'});
         return
-    } else {
-        reason = x.reason.replace(/<[^>]*>/g, '')
     }
+
+    reason = x.reason.replace(/<[^>]*>/g, '')
 
     try {
         // get the researcher's name
@@ -3346,24 +3369,29 @@ const addticketpost = async (req, res)=>{
                 return
             }
 
+            title = x.title.replace(/<[^>]*>/g, '')
+            content = x.content.replace(/<[^>]*>/g, '')
+            members = x.members
+            tags = x.tags
+
             // ensure title and content arent empty
-            if (x.title.replace(/<[^>]*>/g, '').trim() == '' || x.content.replace(/<[^>]*>/g, '').trim() == '') {
+            if (title.trim() == '' || content.trim() == '') {
                 res.send({status: 'error', alert: 'Please make sure you filled in all the fields!'})
                 return
             }
 
             // add the developer to the members list if not in there already
-            if (!x.members.includes(developerEmail)) {
-                x.members.push(developerEmail)
+            if (!members.includes(developerEmail)) {
+                members.push(developerEmail)
             }
 
             // add the user to the members list if not in there already
-            if (!x.members.includes(req.session.useremail)) {
-                x.members.push(req.session.useremail)
+            if (!members.includes(req.session.useremail)) {
+                members.push(req.session.useremail)
             }
 
-            // ensure each item in x.tags is valid
-            for (i in x.tags) {
+            // ensure each item in tags is valid
+            for (i in tags) {
                 if (!['bug', 'feedback', 'inquiry', 'report', 'help', 'other'].includes(x.tags[i])) {
                     res.send({status: 'error', alert: 'Your tags are invalid. Please retry.'})
                     return
@@ -3376,15 +3404,15 @@ const addticketpost = async (req, res)=>{
                 excludedUsers[i] = excludedUsers[i].email
             }
 
-            // ensure each email in x.members is valid
-            for (i in x.members) {
-                index = excludedUsers.indexOf(x.members[i]) // get index of user
+            // ensure each email in members is valid
+            for (i in members) {
+                index = excludedUsers.indexOf(members[i]) // get index of user
                 if (index == -1) {
                     res.send({status: 'error', alert: 'Your members list is invalid. Please retry.'})
                     return
                 }
 
-                excludedUsers.splice(index, 1) // remove from excluded users (because if this user is in x.members, they arent excluded from view)
+                excludedUsers.splice(index, 1) // remove from excluded users (because if this user is in members, they arent excluded from view)
             }
 
             console.log(excludedUsers)
@@ -3402,7 +3430,7 @@ const addticketpost = async (req, res)=>{
             }
 
             // add ticket to database
-            await queryWithRetry('INSERT INTO tickets ("ticketID", "userEmail", "ticketDate", title, content, members, tags, replies, "resolutionDetails", "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [maxTicketID+1, req.session.useremail, date, x.title.replace(/<[^>]*>/g, ''), x.content.replace(/<[^>]*>/g, ''), x.members, x.tags, [], [], []])
+            await queryWithRetry('INSERT INTO tickets ("ticketID", "userEmail", "ticketDate", title, content, members, tags, replies, "resolutionDetails", "versionInformation") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [maxTicketID+1, req.session.useremail, date, title, content, members, tags, [], [], []])
 
             // get all changes
             const result2 = await queryWithRetry('SELECT "changeID" FROM changelog');
@@ -3420,7 +3448,7 @@ const addticketpost = async (req, res)=>{
             nextChangeID = maxChangeID + 1
 
             //update changelog
-            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Created', date, `A ticket called "${x.title.replace(/<[^>]*>/g, '')}" has been created by ${req.session.useremail}. Check it out now!`, excludedUsers]);
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Created', date, `A ticket called "${title}" has been created by ${req.session.useremail}. Check it out now!`, excludedUsers]);
 
             res.send({id: maxTicketID+1});
         } catch (err) {
@@ -3468,13 +3496,17 @@ const addreplypost = async (req, res)=>{
                 return
             }
 
+            content = x.content.replace(/<[^>]*>/g, '')
+
             if (!x.id || !isStringInteger(x.id) || x.id < 0) {
                 res.send({status: 'error', alert: 'It looks like the ticket details are missing or invalid. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
                 return
             }
 
+            id = parseInt(x.id)
+
             // get ticket info
-            ticket = await queryWithRetry('SELECT * FROM tickets WHERE "ticketID" = $1', [x.id])
+            ticket = await queryWithRetry('SELECT * FROM tickets WHERE "ticketID" = $1', [id])
             ticket = ticket.rows
 
             // ensure ticket exists
@@ -3507,7 +3539,7 @@ const addreplypost = async (req, res)=>{
             for (i in ticket.members) {
                 index = excludedUsers.indexOf(ticket.members[i]) // get index of user
                 if (index != -1) {
-                    excludedUsers.splice(index, 1) // remove from excluded users (because if this user is in x.members, they arent excluded from view)
+                    excludedUsers.splice(index, 1) // remove from excluded users (because if this user is in members, they arent excluded from view)
                 }
             }
 
@@ -3527,10 +3559,10 @@ const addreplypost = async (req, res)=>{
             }
 
             // insert the new reply into the table
-            await queryWithRetry('INSERT INTO replies ("ticketID", "replyID", "replyDate", "userEmail", content, "versionInformation") VALUES ($1, $2, $3, $4, $5, $6)', [x.id, maxReplyID+1, date, req.session.useremail, x.content.replace(/<[^>]*>/g, ''), []])
+            await queryWithRetry('INSERT INTO replies ("ticketID", "replyID", "replyDate", "userEmail", content, "versionInformation") VALUES ($1, $2, $3, $4, $5, $6)', [id, maxReplyID+1, date, req.session.useremail, content, []])
 
             // add reply id to ticket
-            await queryWithRetry('UPDATE tickets SET replies = replies || $1 WHERE "ticketID" = $2', [[maxReplyID+1], x.id])
+            await queryWithRetry('UPDATE tickets SET replies = replies || $1 WHERE "ticketID" = $2', [[maxReplyID+1], id])
 
             // get all changes
             const result = await queryWithRetry('SELECT "changeID" FROM changelog');
@@ -3596,18 +3628,24 @@ const editreplypost = async (req, res)=>{
                 return
             }
 
+            content = x.content.replace(/<[^>]*>/g, '')
+
             if (!x.reason || x.reason.replace(/<[^>]*>/g, '').trim() == '') {
                 res.send({status: 'error', alert: 'It looks like the edit reason is missing / empty. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
                 return
             }
+
+            reason = x.reason.replace(/<[^>]*>/g, '')
 
             if (!x.id || !isStringInteger(x.id) || x.id < 0) {
                 res.send({status: 'error', alert: 'It looks like the reply details are missing or invalid. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
                 return
             }
 
+            id = parseInt(x.id)
+
             // get reply info
-            reply = await queryWithRetry('SELECT * FROM replies WHERE "replyID" = $1', [x.id])
+            reply = await queryWithRetry('SELECT * FROM replies WHERE "replyID" = $1', [id])
             reply = reply.rows
 
             // ensure reply exists
@@ -3653,21 +3691,21 @@ const editreplypost = async (req, res)=>{
             for (i in ticket.members) {
                 index = excludedUsers.indexOf(ticket.members[i]) // get index of user
                 if (index != -1) {
-                    excludedUsers.splice(index, 1) // remove from excluded users (because if this user is in x.members, they arent excluded from view)
+                    excludedUsers.splice(index, 1) // remove from excluded users (because if this user is in members, they arent excluded from view)
                 }
             }
 
             console.log(excludedUsers)
 
             // get the previous version
-            previousVersion = [reply.content, x.reason.replace(/<[^>]*>/g, ''), date]
+            previousVersion = [reply.content, reason, date]
 
             // update version information
             versionInformation = reply.versionInformation
             versionInformation.push(previousVersion)
 
             // update the table
-            await queryWithRetry('UPDATE replies SET content = $1, "versionInformation" = $2 WHERE "replyID" = $3', [x.content.replace(/<[^>]*>/g, ''), versionInformation, x.id])
+            await queryWithRetry('UPDATE replies SET content = $1, "versionInformation" = $2 WHERE "replyID" = $3', [content, versionInformation, id])
 
             // get all changes
             const result = await queryWithRetry('SELECT "changeID" FROM changelog');
@@ -3685,7 +3723,7 @@ const editreplypost = async (req, res)=>{
             nextChangeID = maxChangeID + 1
 
             //update changelog
-            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Reply Edited', date, `A reply in a ticket called "${ticket.title.replace(/<[^>]*>/g, '')}" has been edited by ${req.session.username} for the reason: ${x.reason.replace(/<[^>]*>/g, '')}`, excludedUsers]);
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Reply Edited', date, `A reply in a ticket called "${ticket.title}" has been edited by ${req.session.username} for the reason: ${reason}`, excludedUsers]);
 
             res.send({status: 'success'});
         } catch (err) {
@@ -3739,19 +3777,26 @@ const editticketpost = async (req, res)=>{
                 return
             }
 
+            title = x.title.replace(/<[^>]*>/g, '')
+            content = x.content.replace(/<[^>]*>/g, '')
+            reason = x.reason.replace(/<[^>]*>/g, '')
+            members = x.members
+            tags = x.tags
+            id = x.id
+
             // add the developer to the members list if not in there already
-            if (!x.members.includes(developerEmail)) {
-                x.members.push(developerEmail)
+            if (!members.includes(developerEmail)) {
+                members.push(developerEmail)
             }
 
             // add the user to the members list if not in there already
-            if (!x.members.includes(req.session.useremail)) {
-                x.members.push(req.session.useremail)
+            if (!members.includes(req.session.useremail)) {
+                members.push(req.session.useremail)
             }
 
-            // ensure each item in x.tags is valid
-            for (i in x.tags) {
-                if (!['bug', 'feedback', 'inquiry', 'report', 'help', 'other'].includes(x.tags[i])) {
+            // ensure each item in tags is valid
+            for (i in tags) {
+                if (!['bug', 'feedback', 'inquiry', 'report', 'help', 'other'].includes(tags[i])) {
                     res.send({status: 'error', alert: 'Your tags are invalid. Please retry.'})
                     return
                 }
@@ -3763,21 +3808,21 @@ const editticketpost = async (req, res)=>{
                 excludedUsers[i] = excludedUsers[i].email
             }
 
-            // ensure each email in x.members is valid
-            for (i in x.members) {
-                index = excludedUsers.indexOf(x.members[i]) // get index of user
+            // ensure each email in members is valid
+            for (i in members) {
+                index = excludedUsers.indexOf(members[i]) // get index of user
                 if (index == -1) {
                     res.send({status: 'error', alert: 'Your members list is invalid. Please retry.'})
                     return
                 }
 
-                excludedUsers.splice(index, 1) // remove from excluded users (because if this user is in x.members, they arent excluded from view)
+                excludedUsers.splice(index, 1) // remove from excluded users (because if this user is in members, they arent excluded from view)
             }
 
             console.log(excludedUsers)
 
             // get ticket info
-            ticket = await queryWithRetry('SELECT * FROM tickets WHERE "ticketID" = $1', [x.id])
+            ticket = await queryWithRetry('SELECT * FROM tickets WHERE "ticketID" = $1', [id])
             ticket = ticket.rows
 
             // ensure ticket exists
@@ -3801,14 +3846,14 @@ const editticketpost = async (req, res)=>{
             }
 
             // get previous version
-            previousVersion = [ticket.title, ticket.content, JSON.stringify(ticket.members), JSON.stringify(ticket.tags), JSON.stringify(ticket.resolutionDetails), x.reason.replace(/<[^>]*>/g, ''), date]
+            previousVersion = [ticket.title, ticket.content, JSON.stringify(ticket.members), JSON.stringify(ticket.tags), JSON.stringify(ticket.resolutionDetails), reason, date]
 
             // handle version information
             versionInformation = ticket.versionInformation
             versionInformation.push(previousVersion)
 
             // update ticket
-            await queryWithRetry('UPDATE tickets SET title = $1, content = $2, members = $3, tags = $4, "versionInformation" = $5 WHERE "ticketID" = $6', [x.title.replace(/<[^>]*>/g, ''), x.content.replace(/<[^>]*>/g, ''), x.members, x.tags, versionInformation, x.id])
+            await queryWithRetry('UPDATE tickets SET title = $1, content = $2, members = $3, tags = $4, "versionInformation" = $5 WHERE "ticketID" = $6', [title, content, members, tags, versionInformation, id])
             
             // get all changes
             const result = await queryWithRetry('SELECT "changeID" FROM changelog');
@@ -3826,7 +3871,7 @@ const editticketpost = async (req, res)=>{
             nextChangeID = maxChangeID + 1
 
             //update changelog
-            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Edited', date, `A ticket called "${x.title.replace(/<[^>]*>/g, '')}" has been edited by ${req.session.useremail}. Check it out now!`, excludedUsers]);
+            await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Ticket Edited', date, `A ticket called "${title}" has been edited by ${req.session.useremail}. Check it out now!`, excludedUsers]);
 
             res.send({status: 'success'});
         } catch (err) {
@@ -3876,9 +3921,6 @@ const resolvepost = async (req, res)=>{
             }
             
             id = x.id
-            reason = x.reason
-            reply = x.reply
-            user = x.user
 
             // ensure title and content arent empty
             if (x.reason.replace(/<[^>]*>/g, '').trim() == '' || x.reply == '' || x.user == '') {
@@ -3886,7 +3928,11 @@ const resolvepost = async (req, res)=>{
                 return
             }
 
-            if (await get_user_by_email(x.user) == undefined) {
+            reason = x.reason.replace(/<[^>]*>/g, '')
+            reply = x.reply
+            user = x.user
+
+            if (await get_user_by_email(user) == undefined) {
                 res.send({status: 'error', alert: 'The most helpful user field is invalid. Please retry.'})
                 return
             }
@@ -3942,8 +3988,7 @@ const resolvepost = async (req, res)=>{
             console.log(excludedUsers)
 
             // get the resolution details
-            // TODO: move all the replace to a variable
-            resolutionDetails = [reason.replace(/<[^>]*>/g, ''), reply, user, date]
+            resolutionDetails = [reason, reply, user, date]
 
             // update ticket
             await queryWithRetry('UPDATE tickets SET "resolutionDetails" = $1 WHERE "ticketID" = $2', [resolutionDetails, id])
@@ -4036,9 +4081,9 @@ const changenamepost = async (req, res)=>{
                 if (!x.reason || x.reason.trim() == '' || x.reason.length < 5) {
                     res.send({status: 'error', alert: 'It looks like the reason field is missing or too short. If this issue persists, please let me know at flyingbutter213@gmail.com.'})
                     return
-                } else {
-                    reason = x.reason.trim().replace(/<[^>]*>/g, '')
                 }
+
+                reason = x.reason.trim().replace(/<[^>]*>/g, '')
                 
                 // get user info
                 user = await get_user_by_email(email)
