@@ -110,16 +110,64 @@
                 <span class="close" id="close4">&times;</span>
             </div>
 
+            <% if (!['manager', 'developer', 'user'].includes(theuser.role)) { %>
+                <!-- They are suspended -->
+                
+                <% 
+                // get suspension details
+                suspensionDetails = theuser.role.split(':')
+
+                // get suspension details
+                duration = parseInt(suspensionDetails[1])
+                date = suspensionDetails[2]
+                returnRole = suspensionDetails[3] 
+
+                if (duration == NaN) { duration = 0 }
+
+                // get date unsuspended
+                date = new Date(date.split('-')[2], parseInt(date.split('-')[1]) - 1, date.split('-')[0])
+
+                // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+                year = date.getFullYear()
+                month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(date)
+                day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date)
+
+                // stringify it
+                dateString = `${day}-${month}-${year}`
+
+                // get date of unsuspension
+                unsuspended = new Date()
+                unsuspended.setDate(date.getDate() + duration);
+
+                // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+                year = unsuspended.getFullYear()
+                month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(unsuspended)
+                day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(unsuspended)
+
+                // stringify it
+                unsuspendedString = `${day}-${month}-${year}`
+                %>
+                <!-- display suspension details -->
+                <p>This user has already been suspended since <%= dateString %>. They will be automatically unsuspended once they login to the site at any time after <%= unsuspendedString %>. 
+                    They will return as a <%= returnRole %> after <%= duration %> days of suspension. If you submit this form, it will override the previous suspension details.</p>
+            <% } %>
+
             <div class="together">
                 <div style="width: 100%">
                     <label><b>SUSPENSION DURATION 
-                        <!-- in days  (TODO add tooltip)-->
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="How many days until they are unsuspended?">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
                     </b></label>
                     <input type="number" min="0" id="suspensionLength" class="form-control" style="width: 100%">
                 </div>
                 <div style="width: 100%">
                     <label><b>RETURNING ROLE
-                        <!-- in days  (TODO add tooltip)-->
+                        <button type="button" class="btn" data-toggle="tooltip" data-placement="top" title="The role they will return as when they are unsuspended.">
+                            <!-- Makes the tooltip circular -->
+                            <i class="fa fa-question" style="border-radius: 70%; border: 2px solid black; padding: 1px 5px 1px 4px;"></i>
+                        </button>
                     </b></label>
                     <select id="suspensionRole" style="width: 100%" class="form-control" style="width: 100%">
                         <option value="user">User</option>
@@ -229,8 +277,7 @@
                                     </p>
                                 <% } else { %>
                                     <label><b>NEW ROLE:</b></label>
-                                    <p>If you want to suspend this user, head to the Danger Zone by scrolling down.</p>
-                                    <!-- TODO: scroll to the danger zone feature-->
+                                    <p>If you want to suspend this user, head to the <a href="#dangerzone">Danger Zone</a> by scrolling down.</p>
                                     <select name="role" id="newRole" style="width: 100%" class="form-control">
                                         <option value="user">User</option>
                                         <option value="manager">Manager</option>
@@ -288,7 +335,7 @@
             </div>
 
             <% if (['manager', 'developer'].includes(role) && theuser.role != 'developer') { %>
-                <div style="padding-top: 10px; padding-bottom: 10px; height: 100%">
+                <div style="padding-top: 10px; padding-bottom: 10px; height: 100%" id="dangerzone">
                     <section>
                         <h2>Danger Zone!</h2>
                         <button class="buttonStyle" style="background-color: red; color: white;" onclick="openModal(3)">Delete Account</button>
@@ -369,7 +416,7 @@
                         document.getElementById('showAlert').textContent = result.alert
                         openModal(2)
                     } else {
-                        window.location.href = '/'
+                        window.location.reload()
                     }
                 })
             }
@@ -406,7 +453,7 @@
                         document.getElementById('showAlert').textContent = result.alert
                         openModal(2)
                     } else {
-                        window.location.href = '/'
+                        window.location.reload()
                     }
                 })
             }

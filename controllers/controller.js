@@ -173,6 +173,14 @@ async function get_user_by_email(useremail) {
     return theuser
 }
 
+// add days to a date object in js
+function addDays(date, days) {
+  var result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+// check if the user is suspended or not
 async function verifyUser(req) {
     theuser = await get_user_by_email(req.session.useremail)
 
@@ -182,25 +190,41 @@ async function verifyUser(req) {
             suspensionDetails = theuser.role.split(':')
 
             // `get suspension details
-            duration = suspensionDetails[1]
+            duration = parseInt(suspensionDetails[1])
             date = suspensionDetails[2]
             role = suspensionDetails[3]
 
+            if (duration == NaN) { duration = 0 }
+
             // get date unsuspended
-            unsuspended = new Date(date.split('-')[2], parseInt(date.split('-')[1]) - 1, date.split('-')[0])
-            unsuspended.setDate(unsuspended.getDate() + duration);
+            date = new Date(date.split('-')[2], parseInt(date.split('-')[1]) - 1, date.split('-')[0])
 
             // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
-            year = unsuspended.getFullYear()
-            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(unsuspended)
-            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(unsuspended)
+            year = date.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(date)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date)
 
-            now = new Date() // get today's date
+            // stringify it
+            dateString = `${day}-${month}-${year}`
+
+            // get date of unsuspension
+            unsuspended = addDays(date, duration)
+
+            // get today's date
+            now = new Date()
+
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = now.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(now)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(now)
+
+            nowString = `${day}-${month}-${year}`
 
             // if it is past the unsuspension date
             if (now >= unsuspended) {
                 try {
                     await queryWithRetry('UPDATE users SET role = $1 WHERE email = $2', [role, req.session.useremail])
+                    await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, theuser.email, 'User Unsuspended', nowString, `${theuser.name} has been automatically unsuspended. They are returning as ${role}.`, []]);
                     return 'success'
                 } catch (err) {
                     console.log(err)
@@ -209,8 +233,13 @@ async function verifyUser(req) {
                 }
             }
 
+            // separate the parts of the date and ensure month and day are always two digits (e.g., 05 not 5)
+            year = unsuspended.getFullYear()
+            month = new Intl.DateTimeFormat('en', { month: '2-digit' }).format(unsuspended)
+            day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(unsuspended)
+
             // stringify it
-            unsuspended = `${day}-${month}-${year}`
+            unsuspendedString = `${day}-${month}-${year}`
 
             // get reason for suspension
             reason = suspensionDetails[4]
@@ -220,7 +249,7 @@ async function verifyUser(req) {
                 reason += suspensionDetails[i]
             }
 
-            return {duration: duration, date: date, unsuspended: unsuspended, reason: reason}
+            return {duration: duration, date: dateString, unsuspended: unsuspendedString, reason: reason}
         } else {
             return 'success'
         }
@@ -229,6 +258,7 @@ async function verifyUser(req) {
     }
 }
 
+// check if something is a string or not
 function isString(variable) {
   return typeof variable === 'string';
 }
