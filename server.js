@@ -120,6 +120,12 @@ app.use((err, req, res, next) => {
     err = err.stack
     console.error('Express error:', err);
 
+    if (err.slice(0, 12) == 'Error: EPERM') {
+        // this is some kind of session rename thing that isn't a fatal error
+        // just ignore it
+        return
+    }
+
     // create transporter
     let transporter = nodemailer.createTransport({
         service: 'gmail',

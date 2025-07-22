@@ -198,7 +198,13 @@ If you are the ticket poster and you have found a solution and wish to resolve y
 The dropdown for selecting the most helpful reply contains the reply numbers. You can exit the modal and find the reply number (#1 for the first reply, #2 for the second reply, and so on) of the reply you wish to select. Each reply has the reply number displayed. Note that your progress will be saved if you exit the modal.
 
 ### Managing Your Account
-TODO
+To manage your own account, click the user icon in the navigation bar (you might have to click the hamburger icon first if you are on a mobile phone), then click the "Profile" option in the dropdown. This will send you to the _profile page_ (`/profile`).
+
+To edit your name, simply change your name under the "Edit Name" section. You can also change your password, but you do need your current password to change it. Please make sure you remember your new password since you can't change it otherwise. It is a great idea to have a password manager.
+
+Underneath these edit forms, you can see some information about your account, such as your XP and role.
+
+Finally, there is the Danger Zone where you can delete your account. If you choose to delete your account, you must provide a reason why. This action is irreversible.
 
 ### Errors
 If the site crashes, you will see this:
