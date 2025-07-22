@@ -184,7 +184,7 @@ The last section is the replies to the ticket. You can see each of the replies i
 If you are the ticket poster, you can also see an edit icon in the top right corner of the _ticket page_ of your ticket. Clicking that would open a modal. This modal looks exactly the same as the modal where you opened your ticket, but this time all the fields are filled in with its current values. Additionally, you also have to state the reason you are editing this ticket. Once you filled in all fields, you can confirm your changes and the window will be refreshed.
 
 #### Reply to Tickets
-If you want to reply to a ticket, scroll down to the end of the _ticket page_ and type your reply in the text area. You highlight text and click on some of the formatting buttons to format it. However, please note that your reply won't be rendered as you formatted (it will still be in its raw state). This will be changed in the future. The window will be reloaded.
+If you want to reply to a ticket, scroll down to the end of the _ticket page_ and type your reply in the text area. You highlight text and click on some of the formatting buttons to format it. However, please note that your reply won't be rendered properly if you nest the formatting (e.g., but an italic inside a bold). The window will be reloaded.
 
 #### Edit Ticket Replies
 In the _ticket page_, all your replies should have a pink edit button. Clicking that button will open a modal. Change the content of your reply and state your reason for editing the reply. The window will be reloaded.

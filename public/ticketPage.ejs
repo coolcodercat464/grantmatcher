@@ -365,8 +365,13 @@
 
                 <section>
                     <h2>Replies</h2>
-                    <!-- TODO: handle formatting -->
                     <% for (var r = 0; r < replies.length; r ++) { %>
+                        <!-- parse the reply content -->
+                        <% reply = replies[r].content %>
+                        <% reply = reply.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); %>
+                        <% reply = reply.replace(/\*(.+?)\*/g, '<i>$1</i>'); %>
+                        <% reply = reply.replace(/_(.+?)_/g, '<u>$1</u>'); %>
+                        <% reply = reply.replace(/-(.+?)-/g, '<s>$1</s>'); %>
                         <!-- add vertical line -->
                         <% if (r > 0) { %>
                             <div class="vl"></div>
@@ -378,7 +383,7 @@
                             <div style="border-radius: 15px; border: 2px solid black; padding: 10px;">
                         <% } %>
                         <% if (replies[r].userEmail == user) { %>
-                                <div id="replyContent<%= parseInt(r) + 1 %>" style="overflow: auto;"><%= replies[r].content %></div>
+                                <div id="replyContent<%= parseInt(r) + 1 %>" style="overflow: auto;"><%- reply %></div>
                                 
                                 <div style="display: flex; justify-content: right; align-items: flex-end;" style="overflow: auto;">
                                     <p style="margin: 0">#<%= parseInt(r) + 1 %> -<%= replies[r].username %> on <%= replies[r].replyDate %></p>
@@ -390,7 +395,7 @@
                                 </div>
                             </div>
                         <% } else { %>
-                                <div id="replyContent<%= parseInt(r) + 1 %>" style="overflow: auto;"><%= replies[r].content %></div>
+                                <div id="replyContent<%= parseInt(r) + 1 %>" style="overflow: auto;"><%- reply %></div>
                                 
                                 <div style="display: flex; justify-content: right;" style="overflow: auto;">
                                     <p style="margin: 0">#<%= parseInt(r) + 1 %> -<%= replies[r].username %> on <%= replies[r].replyDate %></p>
