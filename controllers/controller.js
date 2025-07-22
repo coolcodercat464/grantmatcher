@@ -812,7 +812,7 @@ const grantpageget = async (req, res)=>{
     console.log(suspensionDetails)
 
     // get the grant data
-    result = await queryWithRetry('SELECT * FROM grant WHERE "grantID" = $1', [id]);
+    result = await queryWithRetry('SELECT * FROM grants WHERE "grantID" = $1', [id]);
     grant = result.rows
 
     // ensure that grant exists
