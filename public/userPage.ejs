@@ -254,22 +254,26 @@
                                 </div>
                             </div>
                             <div style="width: 100%">
-                                <h2>Edit XP</h2>
-                                <label><b>NEW XP:</b></label>
-                                <input type="number" id="newXp" class="form-control" style="width: 100%" min=0 value="<%= theuser.xp %>"><br>
+                                <h2>Edit Grants Matched</h2>
+                                <label><b>GRANTS MATCHED:</b></label>
+                                <input type="number" id="newMatch" class="form-control" style="width: 100%" min=0 value="<%= theuser.grantsMatched %>"><br>
                                 <label><b>REASON FOR EDIT:</b></label>
-                                <p>Why do you want to change their XP? Briefly explain your changes.</p>
-                                <textarea style="width: 100%" id="xpReason" rows="6" class="form-control"></textarea><br>
+                                <p>Why do you want to change their number of grants matched? Briefly explain your changes.</p>
+                                <textarea style="width: 100%" id="matchReason" rows="6" class="form-control"></textarea><br>
                                 <div style="display: flex">
-                                    <button class="buttonStyle pink" style="width: 100%" onclick="confirmXp()">Confirm</button>
-                                    <button class="buttonStyle blue" style="width: 100%" onclick="resetXp()">Reset</button>
+                                    <button class="buttonStyle pink" style="width: 100%" onclick="confirmMatch()">Confirm</button>
+                                    <button class="buttonStyle blue" style="width: 100%" onclick="resetMatch()">Reset</button>
                                 </div>
                             </div>
                         </div><br>
                         <div class="together" style="align-items: flex-start">
                             <div style="width: 100%">
                                 <h2>Edit Role</h2>
-                                <% if (theuser.role == 'developer' && role != 'developer') { %>
+                                <% if (theuser.email == currentuser.email && role != 'developer') { %>
+                                    <!-- can't edit your own role -->
+                                    <p>You can't edit your own role ;)
+                                    </p>
+                                <% } else if (theuser.role == 'developer' && role != 'developer') { %>
                                     <!-- can't edit the developer's role unless the user is a developer -->
                                     <p>Since this user is a developer and you aren't a developer, you aren't authorized
                                         to edit the roles of this user.
@@ -292,16 +296,22 @@
                                 <% } %>
                             </div>
                             <div style="width: 100%">
-                                <h2>Edit Grants Matched</h2>
-                                <label><b>GRANTS MATCHED:</b></label>
-                                <input type="number" id="newMatch" class="form-control" style="width: 100%" min=0 value="<%= theuser.grantsMatched %>"><br>
-                                <label><b>REASON FOR EDIT:</b></label>
-                                <p>Why do you want to change their number of grants matched? Briefly explain your changes.</p>
-                                <textarea style="width: 100%" id="matchReason" rows="6" class="form-control"></textarea><br>
-                                <div style="display: flex">
-                                    <button class="buttonStyle pink" style="width: 100%" onclick="confirmMatch()">Confirm</button>
-                                    <button class="buttonStyle blue" style="width: 100%" onclick="resetMatch()">Reset</button>
-                                </div>
+                                <h2>Edit XP</h2>
+                                <% if (theuser.email == currentuser.email && role != 'developer') { %>
+                                    <!-- can't edit your own xp -->
+                                    <p>You can't edit your own XP ;)
+                                    </p>
+                                <% } else { %>        
+                                    <label><b>NEW XP:</b></label>
+                                    <input type="number" id="newXp" class="form-control" style="width: 100%" min=0 value="<%= theuser.xp %>"><br>
+                                    <label><b>REASON FOR EDIT:</b></label>
+                                    <p>Why do you want to change their XP? Briefly explain your changes.</p>
+                                    <textarea style="width: 100%" id="xpReason" rows="6" class="form-control"></textarea><br>
+                                    <div style="display: flex">
+                                        <button class="buttonStyle pink" style="width: 100%" onclick="confirmXp()">Confirm</button>
+                                        <button class="buttonStyle blue" style="width: 100%" onclick="resetXp()">Reset</button>
+                                    </div>
+                                <% } %>
                             </div>
                         </div><br>
                     </section>

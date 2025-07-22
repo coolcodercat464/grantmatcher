@@ -129,19 +129,35 @@ After approximately ~15 seconds of computation time, a table will be displayed s
 
 ### Managing Users
 #### Managing Codes
-TODO
+If you are a manager or a developer, you can click the second icon above the users' table to head to the _manage codes page_ (`/managecodes`). See more about authentication codes in the *Getting Started* section. Essentially, they allow *Grant Matcher* to be invite-only. To invite a person to Grant Matcher, you need to add a code for them. Click the plus-sign icon above the table, then enter the new user's email and their role (user, manager, or developer). An authentication code will be randomly generated and shown to you. You can copy the code and send it to the new user, which will let them signup to *Grant Matcher*. 
+
+You can also see all of the codes in the table. Click the search button above the table to open a search modal to search for codes. In the table, there is a column called `claimed`, which tells you whether that code has been used already or not, acting as a useful security feature. Another important column is the delete column (you might have to scroll horizontally to find it). Clicking that icon will open a confirmation modal before deleting that code. When you remove a code, that means it can't be used to signup. Feel free to delete all claimed codes. 
 
 #### Viewing Users
-TODO
+In the _user page_ (`user/:userEmail`), you can also view each user's information, such as:
+- Name
+- Email
+- XP
+- Role
+- Number of Grants Matched
+- Date Joined
 
 #### Editing Users
-TODO
+If you are a manager or a developer, you can also edit a user's information, such as:
+- Name
+- XP
+- Role
+- Number of Grants Matched
+
+Forms to edit these fields are also present in the _user page_. Note that you are required to enter a reason for your changes. Additionally, you can't edit the developer's role unless you are a developer. You also can't edit your own role or XP unless you are a developer.
 
 #### Deleting Users
-TODO
+If you are a manager or a developer, you can delete users in the _user page_. Simply scroll all the way down to the *Danger Zone*, then click the "Delete Account" button. A modal should appear. After you enter the reason why you want to delete the user, the user will be deleted.
 
 #### Suspending Users
-TODO
+If you are a manager or a developer, you can suspend users in the _user page_. Simply scroll all the way down to the *Danger Zone*, then click the "Suspend" button. A modal should appear. You must enter (1) how many days they will be suspended, (2) the role they will return as, and (3) the reason for the suspension. 
+
+If the user is already suspended, you can suspend them again but it will override the previous suspension details. The app will warn you if they have already been suspended. To unsuspend users, simply change their role to a user, manager, or a developer.
 
 ### Managing Clusters
 TODO

@@ -1467,7 +1467,7 @@ const userpageget = async (req, res)=>{
 
         // check if the user exists
         if (theuser != undefined) {
-            res.render('userPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no', theuser: user, role: role});
+            res.render('userPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no', theuser: user, role: role, currentuser: currentuser});
         } else {
             res.render('userPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, theuser: [], role: role, showAlert: 'We couldn\'t find the user you were looking for. Please try again. Feel free to contact me if this issue persists.'});
         }
@@ -4129,6 +4129,12 @@ const changexppost = async (req, res)=>{
             return
         }
 
+        // ensure the user isnt editing themselves
+        if (email == req.session.useremail && editingUser.role != 'developer') {
+            res.send({status: 'error', alert: 'You cannot change your own XP.'});
+            return
+        }
+
         // store the old xp
         oldXp = user.xp
 
@@ -4227,6 +4233,12 @@ const changerolepost = async (req, res)=>{
         // ensure that the user is a manager/dev
         if (!editingUser || !['manager', 'developer'].includes(editingUser.role)) {
             res.send({status: 'error', alert: 'It looks like you aren\'t a manager or a developer, so you aren\'t authorized to edit the details of other users.'})
+            return
+        }
+
+        // ensure the user isnt editing themselves
+        if (email == req.session.useremail && editingUser.role != 'developer') {
+            res.send({status: 'error', alert: 'You cannot change your own role.'});
             return
         }
 
