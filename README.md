@@ -24,7 +24,7 @@ To login, head to the _login page_ (`/login`). Enter your university email (shou
 There will be a "Remember Me" checkbox at the end of the form. If you check this, a cookie will be stored in your browser. If you do not wish to have this cookie, leave the box unchecked. This would mean that your session will expire every time you close the browser, which would result in more logins.
 
 #### The Dashboard
-After you login or signup, you will be redirected to the _dashboard_ (`/`). The dashboard contains a table for each table in *Grant Matcher*'s database. In all tables, you can search and sort the data. 
+After you login or signup, you will be redirected to the _dashboard_ (`/`). The _dashboard_ contains a table for each table in *Grant Matcher*'s database. In all tables, you can search and sort the data. 
 
 If there are too many columns, a horizontal scroll-bar will be activated so you can scroll through the table horizontally. The rows will be divided into pages, each page having five rows. Above the table, there will be some icons on the left and a sort-by dropdown on the right. Note that sorting is always in ascending order. 
 
@@ -95,7 +95,7 @@ You can view a researcher's data by clicking on the link present in the research
 In this page, you can see all of the researcher's information. Under this should be the Version Information section. This consists of an accordion which stores all previous versions of the researcher's data. The reason for the most recent edit is shown above the accordion. The reason for the other edits are shown in the accordion items.
 
 #### Adding Researchers
-In the researchers' table in the dashboard, you can click the plus-sign icon to go to the _add researcher page_ (`/addresearcher`). You must fill in all text-input, number, and dropdown fields. However, the cluster and keyword selectors are all optional. Once you add the researcher, you will be redirected to their page (see above for more details).
+In the researchers' table in the _dashboard_, you can click the plus-sign icon to go to the _add researcher page_ (`/addresearcher`). You must fill in all text-input, number, and dropdown fields. However, the cluster and keyword selectors are all optional. Once you add the researcher, you will be redirected to their page (see above for more details).
 
 #### Editing Researchers
 The _edit researcher page_ (`/editresearcher/:researcherEmail`) looks exactly the same as the _add researcher page_, but this time all the fields are filled in with their current values. Additionally, you also have to state the reason you are editing this researcher. Once you filled in all fields, you can confirm your changes and you will be redirected to their page.
@@ -110,7 +110,7 @@ You can view a grant's data by clicking on the link present in the grants' table
 In this page, you can see all of the grant's information. Under this should be the Version Information section. This consists of an accordion which stores all previous versions of the grant's data. The reason for the most recent edit is shown above the accordion. The reason for the other edits are shown in the accordion items.
 
 #### Adding Grants
-In the grants' table in the dashboard, you can click the plus-sign icon to go to the _add grant page_ (`/addgrant`). You must fill in all text, number, date, and dropdown fields. However, the cluster and keyword selectors are all optional. Once you add the grant, you will be redirected to its page (see above for more details).
+In the grants' table in the _dashboard_, you can click the plus-sign icon to go to the _add grant page_ (`/addgrant`). You must fill in all text, number, date, and dropdown fields. However, the cluster and keyword selectors are all optional. Once you add the grant, you will be redirected to its page (see above for more details).
 
 #### Editing Grants
 The _edit grant page_ (`/editgrant/:grantID`) looks exactly the same as the _add grant page_, but this time all the fields are filled in with its current values. Additionally, you also have to state the reason you are editing this grant. Once you filled in all fields, you can confirm your changes and you will be redirected to its page.
@@ -119,7 +119,7 @@ The _edit grant page_ (`/editgrant/:grantID`) looks exactly the same as the _add
 You can delete grants by heading to its page (`/grant/:grantID`) and clicking the trash icon next to its name. A modal will be opened. Enter the reason you want to delete this grant and the grant will be removed from the database. Please note that this action is irreversible.
 
 #### Matching Grants
-Matching grants are one of the core features of *Grant Matcher*. This allows you to match researchers to a particular grant. In the _match grant page_ (`/match/:grantID`), the first step is to do preliminary filtering. This will 'hard-filter' the researchers, meaning that any researchers who don't fit the criteria will be immediately excluded. The form for preliminary filtering is similar to the search modal above the researchers' table in the dashboard (and works in a similar way too). The remaining researchers form a candidate pool. 
+Matching grants are one of the core features of *Grant Matcher*. This allows you to match researchers to a particular grant. In the _match grant page_ (`/match/:grantID`), the first step is to do preliminary filtering. This will 'hard-filter' the researchers, meaning that any researchers who don't fit the criteria will be immediately excluded. The form for preliminary filtering is similar to the search modal above the researchers' table in the _dashboard_ (and works in a similar way too). The remaining researchers form a candidate pool. 
 
 The next stage is a 'soft-filter,' which is more flexible and assigns each researcher in the candidate pool a relevancy score. The higher this score, the more likely they are to be eligible for the grant. For 'soft-filtering,' you have to enter some keywords that the researchers must be relevant with. Note the grants keywords would have automatically been added to the keyword selector. Next, you have to choose either `number` or `strictness`. If you provide `number`, then the top `number` researchers will be displayed. If you provide `strictness`, the bottom `strictness`% of researchers will be discarded. These form the cutoff parameters. 
 
@@ -160,7 +160,7 @@ If you are a manager or a developer, you can suspend users in the _user page_. S
 If the user is already suspended, you can suspend them again but it will override the previous suspension details. The app will warn you if they have already been suspended. To unsuspend users, simply change their role to a user, manager, or a developer.
 
 ### Managing Clusters
-TODO
+In the clusters' table in the _dashboard_, click the edit button to go to the _manage clusters page_. All the clusters will be automatically added to an editable keyword selector, allowing you to add, remove, and edit the clusters. Finally, press the pink button to confirm your changes.
 
 ### Using Tickets
 #### Open Tickets
