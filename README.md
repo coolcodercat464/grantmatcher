@@ -160,29 +160,53 @@ If you are a manager or a developer, you can suspend users in the _user page_. S
 If the user is already suspended, you can suspend them again but it will override the previous suspension details. The app will warn you if they have already been suspended. To unsuspend users, simply change their role to a user, manager, or a developer.
 
 ### Managing Clusters
-In the clusters' table in the _dashboard_, click the edit button to go to the _manage clusters page_. All the clusters will be automatically added to an editable keyword selector, allowing you to add, remove, and edit the clusters. Finally, press the pink button to confirm your changes.
+In the clusters' table in the _dashboard_, click the edit button to go to the _manage clusters page_ (`/manageclusters`). All the clusters will be automatically added to an editable keyword selector, allowing you to add, remove, and edit the clusters. Finally, press the pink button to confirm your changes.
 
 ### Using Tickets
+#### View Tickets
+Tickets are a way to report errors and ask questions about *Grant Matcher*. To go to the _tickets_ (`/tickets`), click the "Tickets" link in the navigation bar or in the footer. If you are on a mobile view, you might have to click the hamburger menu first to view the links. 
+
+A table containing all the tickets will be displayed in _tickets_. Like all other tables, you can search, sort, and navigate through it. Each ticket will either have a ✅ symbol or a ⭕ symbol. ✅ means the ticket has been resolved and the ticket is locked, while ⭕ means that the ticket is unresolved and the poster is still waiting for a solution.
+
 #### Open Tickets
-TODO
+To open a new ticket, click the plus-sign icon in _tickets_ above the table. Fill in all the fields. Tags refers to some broad categories that your ticket might fall into (you can select more than one). You can also select members, who are other people who can view your ticket. By default, you and the developer are automatically added as members, but you can also add other members.
+
+Note there are multi-select dropdown. To select multiple values, hold down `ctrl` when clicking.
+
+#### View a Ticket
+To view a specific ticket, click the link to the ticket in _tickets_. You will be redirected to the _ticket page_ (`/ticket/:ticketID`). In the first section, you can see the ticket title, the date, the poster, and the content. On the right side, you can also hover over the "+ `number` others" text to see the members.
+
+The second section is the Version Information. This consists of an accordion which stores all previous versions of the ticket's data. The reason for the most recent edit is shown above the accordion. The reason for the other edits are shown in the accordion items.
+
+The last section is the replies to the ticket. You can see each of the replies in boxes. Underneath all the replies, there is a text area where you can send your own reply.
 
 #### Edit Tickets
-TODO
+If you are the ticket poster, you can also see an edit icon in the top right corner of the _ticket page_ of your ticket. Clicking that would open a modal. This modal looks exactly the same as the modal where you opened your ticket, but this time all the fields are filled in with its current values. Additionally, you also have to state the reason you are editing this ticket. Once you filled in all fields, you can confirm your changes and the window will be refreshed.
 
 #### Reply to Tickets
-TODO
+If you want to reply to a ticket, scroll down to the end of the _ticket page_ and type your reply in the text area. You highlight text and click on some of the formatting buttons to format it. However, please note that your reply won't be rendered as you formatted (it will still be in its raw state). This will be changed in the future. The window will be reloaded.
 
 #### Edit Ticket Replies
-TODO
+In the _ticket page_, all your replies should have a pink edit button. Clicking that button will open a modal. Change the content of your reply and state your reason for editing the reply. The window will be reloaded.
+
+#### View Reply Edits
+To view a ticket reply's version history, click the grey button in the reply whose history you want to view. A modal containing the reply's Version Information will pop up. This consists of an accordion which stores all previous versions of the reply's content. The reason for the most recent edit is shown above the accordion. The reason for the other edits are shown in the accordion items.
 
 #### Resolve Tickets
-TODO
+If you are the ticket poster and you have found a solution and wish to resolve your ticket, click the "Resolve Ticket" button in the _ticket page_. A modal will pop-up. Enter why you wish to resolve your ticket, explaining what conclusion was reached, and provide the most helpful reply and ticket member. 
+
+The dropdown for selecting the most helpful reply contains the reply numbers. You can exit the modal and find the reply number (#1 for the first reply, #2 for the second reply, and so on) of the reply you wish to select. Each reply has the reply number displayed. Note that your progress will be saved if you exit the modal.
 
 ### Managing Your Account
 TODO
 
-### Trouble-shooting
-TODO
+### Errors
+If the site crashes, you will see this:
+`{status: 'error', alert: 'Something went wrong. Please try again. If this problem persists, please email me at flyingbutter213@gmail.com.'}`
+
+If this appears, please email me. All errors are automatically sent to my email, so I will get errors fixed ASAP.
 
 ## Conclusion
-TODO
+Thank you for reading through the documentation! I hope that you enjoy using *Grant Matcher* and it is useful for supporting your researchers and diversifying your grants.
+
+If you have any questions about the site or want to report any errors, please open a ticket in *Grant Matcher* or email me at flyingbutter213@gmail.com.

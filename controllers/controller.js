@@ -1362,7 +1362,12 @@ const ticketpageget = async (req, res)=>{
         } else {
             // get the poster's name from their email
             poster = await get_user_by_email(ticket[0].userEmail)
-            ticket[0].username = poster.name
+
+            if (poster == undefined) {
+                ticket[0].username = 'a deleted user'
+            } else {
+                ticket[0].username = poster.name
+            }
 
             // get the members names from their emails
             ticket[0].membersNames = []
@@ -1378,7 +1383,11 @@ const ticketpageget = async (req, res)=>{
             if (ticket[0].resolutionDetails.length > 0) {
                 helpfulUser = ticket[0].resolutionDetails[2]
                 helpfulUser = await get_user_by_email(helpfulUser)
-                ticket[0].resolutionDetails.push(helpfulUser.name) // add name to the list
+                if (poster == undefined) {
+                    ticket[0].resolutionDetails.push('a deleted user')
+                } else {
+                    ticket[0].resolutionDetails.push(helpfulUser.name) // add name to the list
+                }
             }
         }
 
@@ -1393,7 +1402,11 @@ const ticketpageget = async (req, res)=>{
                 // get the poster for each reply
                 poster = await get_user_by_email(replies[r].userEmail)
                 // add it to the json dictionary
-                replies[r].username = poster.name
+                if (poster == undefined) {
+                    replies[r].username = 'a deleted user'
+                } else {
+                    replies[r].username = poster.name
+                }
             }
 
             res.render('ticketPage.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn, showAlert: 'no', ticketList: ticket, user: req.session.useremail, replies: replies});
