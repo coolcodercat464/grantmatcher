@@ -2052,3 +2052,83 @@ fetch('/db/users').then(response => response.json()).then(async data => {
         }
     })
 })
+
+// DOWNLOADS
+function downloadCSV(tableNumber, filename = 'data.csv') {
+    data = tableData[tableNumber].showRows
+    const keys = Object.keys(data[0]);
+    const csv = [
+        keys.join(','), // header
+        ...data.map(row => keys.map(k => JSON.stringify(row[k] || '')).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+function downloadGrant(id, filename = 'data.csv') {
+    fetch('/db/grants').then(response => response.json()).then(data => {
+        for (var i = 0; i < data.length; i++) {
+            row = data[i]
+            // the name should be a link
+            uniqueId = row.grantID
+
+            if (uniqueId == id) {
+                grant = [row]
+                const keys = Object.keys(grant[0]);
+                const csv = [
+                    keys.join(','), // header
+                    ...grant.map(row => keys.map(k => JSON.stringify(row[k] || '')).join(','))
+                ].join('\n');
+
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+
+                URL.revokeObjectURL(url);
+                break
+            }
+        }
+    })
+}
+
+function downloadResearcher(email, filename = 'data.csv') {
+    fetch('/db/researchers').then(response => response.json()).then(data => {
+        for (var i = 0; i < data.length; i++) {
+            row = data[i]
+            // the name should be a link
+            uniqueId = row.email
+
+            if (uniqueId == email) {
+                researcher = [row]
+                const keys = Object.keys(researcher[0]);
+                const csv = [
+                    keys.join(','), // header
+                    ...researcher.map(row => keys.map(k => JSON.stringify(row[k] || '')).join(','))
+                ].join('\n');
+
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+
+                URL.revokeObjectURL(url);
+                break
+            }
+        }
+    })
+}

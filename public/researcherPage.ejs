@@ -131,15 +131,7 @@
                 <div>
                     <div style="display: flex; align-items: baseline; gap: 0.5rem;">
                         <h1><%= name %></h1>
-                        <div class="dropdown">
-                            <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa fa-download"></i>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#">XML</a></li>
-                                <li><a class="dropdown-item" href="#">CSV</a></li>
-                            </ul>
-                        </div>
+                        <i class="fa fa-download" onclick="downloadResearcher('<%= email %>')"></i>
                     </div>
                 </div>
                 <div>
