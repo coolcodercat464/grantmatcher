@@ -19,7 +19,7 @@ const spawn = require('child_process').spawn;
 
 // Provide the path of the python executable, if python is available as 
 // environment variable then you can use only "python"
-var pythonExecutable = "python";
+var pythonExecutable = "../venvs/myenv/bin/python3"
 
 // the email for the developer (for making tickets)
 var developerEmail = 'flyingbutter213@gmail.com'
@@ -645,7 +645,7 @@ const nlpmatch = async (req, res) => {
         if (!error) {
         error = true;
 
-        console.log(data.toString())
+        console.error(data.toString())
         res.send({status: 'error', alert: "Something wrong happened while matching researchers. Please try again. If this problem persists, please open a ticket to let me know."})
         return
         }
@@ -709,7 +709,7 @@ const nlprecalculate = async (req, res) => {
 
     // Handle error output
     scriptExecution.stderr.on('data', (data) => {
-    console.log(data.toString())
+    console.error(data.toString())
     
     // ensure that no errors occured already (otherwise a message would have already been sent)
     if (!error) {
@@ -735,7 +735,7 @@ const nlprecalculate = async (req, res) => {
 // the home-page
 const indexget = async (req, res)=>{
     console.log("INDEX GET")
-    console.log(req.isAuthenticated())
+    console.log(req.isAuthenticated());
 
     // dashboard if the user is signed-in, and landing page if they arent
     if (req.isAuthenticated()) {
@@ -760,7 +760,18 @@ const indexget = async (req, res)=>{
     } else {
         res.render('landing.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut});
     }
-} 
+}
+
+// present the tutorial page
+const tutorialget = async (req, res) => {
+    console.log('TUTORIAL GET')
+
+    if (req.isAuthenticated()) {
+        res.render('tutorial.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedIn});
+    } else {
+        res.render('tutorial.ejs', {root: path.join(__dirname, '../public'), head: headpartial, footer: partialfooterLoggedOut});
+    }
+}
 
 // present the login page
 const loginget = async (req, res)=>{
@@ -1568,7 +1579,7 @@ const signuppost = async (req, res, next) => {
     rememberme = x.rememberme
 
     // add validation to name - name cannot just be spaces
-    if (name.trim() === '') {
+    if (username.trim() === '') {
         // give them an error pop-up
         res.send({alert: 'Please ensure your name isn\'t empty!'});
         return
@@ -2343,7 +2354,7 @@ const confirmrecalculationpost = async (req, res)=>{
                         return item != undefined
                     });
                     newValue = newValue.map(item => item.toString().replace(/<[^>]*>/g, ''));
-                } else {
+                } else if (typeof newValue === 'string') {
                     newValue = newValue.replace(/<[^>]*>/g, '')
                 }
                 
@@ -2409,7 +2420,7 @@ const confirmrecalculationpost = async (req, res)=>{
                     });
                     console.log(newValue)
                     newValue = newValue.map(item => item.toString().replace(/<[^>]*>/g, ''));
-                } else {
+                } else if (typeof newValue === 'string'){
                     newValue = newValue.replace(/<[^>]*>/g, '')
                 }
 
@@ -4523,6 +4534,7 @@ module.exports = {
     nlprecalculate,
 
     indexget,
+    tutorialget,
     loginget,
     signupget,
     addgrantget,

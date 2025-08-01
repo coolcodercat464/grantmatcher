@@ -34,7 +34,7 @@ with suppress_output():
 
     # Initialise the sentence transformer model
     # slightly less accurate but faster
-    model = SentenceTransformer("./paraphrase-MiniLM-L3-v2")
+    model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
 
     # string matching
     from fuzzywuzzy import fuzz

@@ -929,8 +929,6 @@
         selectedEmails = [] // stores the emails of the selected researchers
 
         function emailResearchers() {
-            navigator.clipboard.writeText(selectedEmails.join(", "));
-
             fetch('/confirmmatch/<%= id %>', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -940,6 +938,7 @@
                     document.getElementById('showAlert').textContent = data.alert
                     openModal(2)
                 } else {
+		    navigator.clipboard.writeText(selectedEmails.join(", "));
                     window.open("https://outlook.office.com/mail/")
                     window.location.href = `/grant/<%= id %>`
                 }

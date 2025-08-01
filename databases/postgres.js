@@ -6,7 +6,7 @@ require('dotenv').config();
 // taken from
 
 const pool = new Pool({
-  user: "postgres",
+  user: "myuser",
   host: "localhost",
   database: "grantmatcher",
   password: process.env.DB_PASSWORD,

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>GrantMatcher - Tutorial</title>
+    <%- head %>
+</head>
+<body>
+    <!-- Navigation (sticky header). Links and dropdown collapse into a hamburger menu when the screen size is small. -->
+    <nav class="navbar navbar-expand-lg navbar-dark px-3" id="navbar">
+        <!-- Brand on the left -->
+        <a class="navbar-brand bigBrand" href="/" id="navbar-brand">Grant Matcher</a>
+
+        <!-- Toggler (for mobile view) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" id="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar links on the right -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Links here -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tickets">Tickets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/tutorial">Tutorial</a>
+                </li>
+
+                <!-- Dropdown (user menu) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-user-circle-o"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <!-- Logout button (opens a modal) -->
+                        <li><button class="dropdown-item" id="modalBtn1" onclick="openModal(1)">Logout</button></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- The modal the logout button in the navigation bar opens -->
+    <div id="modal1" class="modal">
+        <div class="modal-body">
+            <div class="together">
+                <h2>Log out</h2>
+                <!-- Numbering the IDs so I can use many modals (code reuse) -->
+                <span class="close" id="close1">&times;</span>
+            </div>
+            
+            <!-- Confirmation message (for user control) -->
+            <p>Are you sure you want to log out?</p>
+            <div style="display: flex">
+                <form method="post" action="/">
+                    <input type="submit" value="Logout!" class="buttonStyle">
+                </form>
+                <button id='cancel1' class="buttonStyle">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The main content -->
+    <main>
+        <section>
+            <h1>Test</h1>
+        </section>
+	<hr/>
+
+	<section>
+<h2>Introduction</h2>
+<b>Grant Matcher</b> is an app built for university staff members who want to better support their university's researchers. <b>Grant Matcher</b> provides a neat and organised system to store data for researchers and grant opportunities, allowing users to find all eligible researchers for a certain grant opportunity. This will help diversify the grant opportunities your researchers apply for.
+<br><br>
+While currently only intended for staff of the University of Sydney (USYD) who support researchers from the Faculty of Science, if you are interested, you can contact me directly at flyingbutter213@gmail.com and I will provide you with a separate database.
+<br><br>
+<h2>Legal Notice</h2>
+<b>Grant Matcher</b> values the privacy of our users. We store your data in a secure PostgreSQL database and we only store what is necessary. Before adding any researcher's data to <b>Grant Matcher</b>, please ensure you have the researcher's consent to store the data related to their researcher. <b>Grant Matcher</b> has excellent security features that ensure that only USYD staff members have access to this data. 
+<br><br>
+<h2>Tutorial</h2>
+<h3>Getting Started</h3>
+<h4>Signup</h4>
+If you don't have an account, you can go to the <em>signup page</em> (<code>/signup</code>). For security reasons, you will need an authentication code (which would have been provided to you by the manager or myself) to ensure that the right people have access to the researcher's data. This authentication code should be an 8-character mix of letters, numbers, and symbols. This is a reliable way to ensure that <b>Grant Matcher</b> stays invite-only and its data is secure. If you do not have an authentication code, please contact me at flyingbutter213@gmail.com.
+<br><br>
+In the <em>signup page</em>, enter your name, your university's email (should end in @sydney.edu.au), and your authentication code. Please note that to protect against XSS attacks, your name and email will automatically be filtered for any HTML tags and they will be removed without warning. Thank you for helping <b>Grant Matcher</b> stay secure.
+<br><br>
+Next, enter a password of your choosing. This password must be at least 5 characters long. HTML tags won't be removed in this case. Passwords are automatically hashed before being stored in the database, ensuring that your data is safe and secure.
+<br><br>
+There will be a "Remember Me" checkbox at the end of the form. If you check this, a cookie will be stored in your browser. If you do not wish to have this cookie, leave the box unchecked. This would mean that your session will expire every time you close the browser, which would result in more logins.
+<br><br>
+<h4>Login</h4>
+To login, head to the <em>login page</em> (<code>/login</code>). Enter your university email (should end in @sydney.edu.au). This should be the same email as you used when signing up. You must also enter your password.
+<br><br>
+There will be a "Remember Me" checkbox at the end of the form. If you check this, a cookie will be stored in your browser. If you do not wish to have this cookie, leave the box unchecked. This would mean that your session will expire every time you close the browser, which would result in more logins.
+<br><br>
+<h4>The Dashboard</h4>
+After you login or signup, you will be redirected to the <em>dashboard</em> (<code>/</code>). The <em>dashboard</em> contains a table for each table in <b>Grant Matcher</b>'s database. In all tables, you can search and sort the data. 
+<br><br>
+If there are too many columns, a horizontal scroll-bar will be activated so you can scroll through the table horizontally. The rows will be divided into pages, each page having five rows. Above the table, there will be some icons on the left and a sort-by dropdown on the right. Note that sorting is always in ascending order. 
+<br><br>
+At the bottom of the table, there is a download button on the left and navigation buttons on the right. Clicking this button would download a CSV file of the data in the table. The navigation buttons allow you to view different pages of the table. THe first button brings you to the first page, the second one brings you to the previous page, the third one brings you to the next page, and the fourth one brings you to the last page.
+<br><br>
+<b>1. Researchers</b>
+The first icon will open a search modal. Enter in the details in the search modal. Note that you do not have to fill in all of the fields in the search modal. There is also a reset button at the bottom of the modal, which will clear the fields in the modal and reset the table.
+<br><br>
+The second icon will redirect you to the <em>add researcher page</em>. In this page, you can enter details to add a researcher. More details are provided in that page's dedicated section.
+<br><br>
+The third icon will redirect you to the <em>recalculation page</em>. Here, you can recalculate the researcher's data. The app will automatically scrape a publicly-available database, saving your team crucial time. Again, more details are provided in that page's dedicated section.
+<br><br>
+If you click on the name of the researcher, it will bring you to that researcher's dedicated page.
+<br><br>
+<b>2. Grants</b>
+The first icon will open a search modal. Enter in the details in the search modal. Note that you do not have to fill in all of the fields in the search modal. There is also a reset button at the bottom of the modal, which will clear the fields in the modal and reset the table.
+<br><br>
+The second icon will redirect you to the <em>add grant page</em>. In this page, you can enter details to add a grant. More details are provided in that page's dedicated section.
+<br><br>
+If you click on the name of the grant, it will bring you to that grants's dedicated page.
+<br><br>
+<b>3. Clusters</b>
+Clusters are categories of research interests (e.g., 'climate change' or 'artificial intelligence'). These are used to better categorise and organise researchers.
+<br><br>
+The first icon will open a search modal. Enter in the details in the search modal. Note that you do not have to fill in all of the fields in the search modal. There is also a reset button at the bottom of the modal, which will clear the fields in the modal and reset the table.
+<br><br>
+The second icon will redirect you to the <em>manage clusters page</em>. In this page, you can edit the cluster list. More details are provided in that page's dedicated section.
+<br><br>
+<b>4. Users</b>
+The first icon will open a search modal. Enter in the details in the search modal. Note that you do not have to fill in all of the fields in the search modal. There is also a reset button at the bottom of the modal, which will clear the fields in the modal and reset the table.
+<br><br>
+If you are a manager or developer, the second icon will redirect you to the <em>manage codes page</em>. In this page, you can manage the authentication codes. More details are provided in that page's dedicated section.
+<br><br>
+If you click on the name of the user, it will bring you to that user's dedicated page.
+<br><br>
+<b>5. Changelog</b>
+The changelog stores all the changes that have occurred, which helps track edits and makes it easier to restore previous versions or revert previous decisions. Each change consists of the type of change (e.g., 'Researcher Added'), the user responsible for that change, the date of the change, and text involving the details about that change.
+<br><br>
+The first icon will open a search modal. Enter in the details in the search modal. Note that you do not have to fill in all of the fields in the search modal. There is also a reset button at the bottom of the modal, which will clear the fields in the modal and reset the table.
+<br><br>
+If you double-click on the row, a modal will open up providing more details about the change.
+<br><br>
+<h3>Form Elements</h3>
+<h4>Cluster Selector</h4>
+Cluster selectors allow you to quickly and easily select clusters. It consists of two lists. Blue clusters in the blue list are unselected and pink clusters in the pink list are selected. To select or unselect a cluster, simply click it, and it will move between the lists. You can sort and search each list separately. To search, simply type in the cluster's name and press the search button. You can reset the list by clicking the refresh icon next to eh search icon.
+<br><br>
+<h4>Keyword Selector</h4>
+Keyword selectors allow you to quickly and easily add a list of keywords. To add a keyword, type it into the input field and press the button next to it. A new keyword will be displayed in the list. To remove it, click the trash icon next to the keyword. There are also editable keyword selectors, which also allow you to edit the contents of each keyword. These are only used in the manage clusters page.
+<br><br>
+<h3>Managing Researchers</h3>
+<h4>Recalculating the Researcher's Data</h4>
+With <b>Grant Matcher</b>, you don't have to spend hours manually adding researchers. Instead, you can head to the <em>recalculation page</em> (<code>/recalculate</code>) and let <b>Grant Matcher</b> add researchers for you! When recalculating the researcher's data, the app scrapes the researcher's data off a publicly-avaiable database on USYD's site.
+<br><br>
+In the recalculation page, there is a table of researchers who you can select for recalculation. You can select researchers by checking the checkbox on their row (you might have to scroll horizontally to see it). If you select some researchers, only those researcher's data will be overwritten. There is a blue button underneath the table that allows you to select all researchers. This would only allow the app to edit the existing researchers, rather than adding new researchers. However, if you don't select any researchers, the app will overwrite the information of all researchers it finds on the database. There is also a select all button. 
+<br><br>
+Next, you have to select the fields you want to recalculate. Other fields will be left untouched. Note that name and email are automatically calculated no matter what. Additionally, if you select "Clusters" or "Keywords," you will have to provide a few more parameters (the forms for these parameters will pop up when you select those fields). 
+<br><br>
+Finally, press recalculate. It might take approximately ~30 seconds to finish. Afterwards, another table would appear, containing the recalculated data of the researchers. You can go through these, check that they all make sense, then check the checkbox on the row to confirm that researcher's edits. Alternatively, you can press the blue button below the table to confirm all researchers. Once you are happy with the researchers you have confirmed, finalise your changes by pressing the pink button below the table.
+<br><br>
+<h4>Viewing Researchers</h4>
+You can view a researcher's data by clicking on the link present in the researchers' table (see more in the Dashboard section). This is the <em>researcher page</em> (<code>/researcher/:researcherEmail</code>). Next to the researcher's name should be a download button, which downloads a CSV file of the researcher's data. To the right of the download button are two icons. The first one sends you to the <em>edit researcher page</em>, and the second one opens a modal to delete the researcher. Simply enter the reason you want to delete this researcher and the researcher will be removed from the database. Please note that this action is irreversible.
+<br><br>
+In this page, you can see all of the researcher's information. Under this should be the Version Information section. This consists of an accordion which stores all previous versions of the researcher's data. The reason for the most recent edit is shown above the accordion. The reason for the other edits are shown in the accordion items.
+<br><br>
+<h4>Adding Researchers</h4>
+In the researchers' table in the <em>dashboard</em>, you can click the plus-sign icon to go to the <em>add researcher page</em> (<code>/addresearcher</code>). You must fill in all text-input, number, and dropdown fields. However, the cluster and keyword selectors are all optional. Once you add the researcher, you will be redirected to their page (see above for more details).
+<br><br>
+<h4>Editing Researchers</h4>
+The <em>edit researcher page</em> (<code>/editresearcher/:researcherEmail</code>) looks exactly the same as the <em>add researcher page</em>, but this time all the fields are filled in with their current values. Additionally, you also have to state the reason you are editing this researcher. Once you filled in all fields, you can confirm your changes and you will be redirected to their page.
+<br><br>
+<h4>Deleting Researchers</h4>
+You can delete researchers by heading to their page and clicking the trash icon next to their name. A modal will be opened. Enter the reason you want to delete this researcher and the researcher will be removed from the database. Please note that this action is irreversible.
+<br><br>
+<h3>Managing Grants</h3>
+<h4>Viewing Grants</h4>
+You can view a grant's data by clicking on the link present in the grants' table (see more in the Dashboard section). This is the <em>grant page</em> (<code>/grant/:grantID</code>). Next to the grant's name should be a download button, which downloads a CSV file of the grant's data. To the right of the download button are three icons. The first one sends you to the <em>edit grant page</em>, the second one sends you to the <em>match grant page</em>, and the third one opens a modal to delete the grant. Simply enter the reason you want to delete this grant and the grant will be removed from the database. Please note that this action is irreversible.
+<br><br>
+In this page, you can see all of the grant's information. Under this should be the Version Information section. This consists of an accordion which stores all previous versions of the grant's data. The reason for the most recent edit is shown above the accordion. The reason for the other edits are shown in the accordion items.
+<br><br>
+<h4>Adding Grants</h4>
+In the grants' table in the <em>dashboard</em>, you can click the plus-sign icon to go to the <em>add grant page</em> (<code>/addgrant</code>). You must fill in all text, number, date, and dropdown fields. However, the cluster and keyword selectors are all optional. Once you add the grant, you will be redirected to its page (see above for more details).
+<br><br>
+<h4>Editing Grants</h4>
+The <em>edit grant page</em> (<code>/editgrant/:grantID</code>) looks exactly the same as the <em>add grant page</em>, but this time all the fields are filled in with its current values. Additionally, you also have to state the reason you are editing this grant. Once you filled in all fields, you can confirm your changes and you will be redirected to its page.
+<br><br>
+<h4>Deleting Grants</h4>
+You can delete grants by heading to its page (<code>/grant/:grantID</code>) and clicking the trash icon next to its name. A modal will be opened. Enter the reason you want to delete this grant and the grant will be removed from the database. Please note that this action is irreversible.
+<br><br>
+<h4>Matching Grants</h4>
+Matching grants are one of the core features of <b>Grant Matcher</b>. This allows you to match researchers to a particular grant. In the <em>match grant page</em> (<code>/match/:grantID</code>), the first step is to do preliminary filtering. This will 'hard-filter' the researchers, meaning that any researchers who don't fit the criteria will be immediately excluded. The form for preliminary filtering is similar to the search modal above the researchers' table in the <em>dashboard</em> (and works in a similar way too). The remaining researchers form a candidate pool. 
+<br><br>
+The next stage is a 'soft-filter,' which is more flexible and assigns each researcher in the candidate pool a relevancy score. The higher this score, the more likely they are to be eligible for the grant. For 'soft-filtering,' you have to enter some keywords that the researchers must be relevant with. Note the grants keywords would have automatically been added to the keyword selector. Next, you have to choose either <code>number</code> or <code>strictness</code>. If you provide <code>number</code>, then the top <code>number</code> researchers will be displayed. If you provide <code>strictness</code>, the bottom <code>strictness</code>% of researchers will be discarded. These form the cutoff parameters. 
+<br><br>
+Finally, you can pick either <b>Direct Matching</b> or <b>Cluster Matching</b>. <b>Direct Matching</b> works by directly comparing the researcher's keywords with the keywords you provided. <b>Cluster Matching</b> works by comparing the keywords you provided with clusters, and then comparing those clusters with the researchers' clusters. If you don't have many clusters, use <b>Direct Matching</b> or add some clusters before using <b>Cluster Matching</b>. Note that <b>Direct Matching</b> tends to be more specific.
+<br><br>
+After approximately ~15 seconds of computation time, a table will be displayed showing the details of all the researchers who were found. You can order the researchers by score and head to the last page to look at the highest-scoring researchers. Please note that the program's goal is to avoid false negatives so relevant researchers won't miss out, meaning that some irrelevant researchers might appear in the table. Simply ignore them and only select all relevant researchers. Once you are done, click the email button. This will update the database and open Outlook in a separate tab. The email sof the researchers you have selected would have been copied into your clipboard, so you can paste them into the recipients in Outlook and send them an email informing them about the grant opportunity.
+<br><br>
+<h3>Managing Users</h3>
+<h4>Managing Codes</h4>
+If you are a manager or a developer, you can click the second icon above the users' table to head to the <em>manage codes page</em> (<code>/managecodes</code>). See more about authentication codes in the <b>Getting Started</b> section. Essentially, they allow <b>Grant Matcher</b> to be invite-only. To invite a person to Grant Matcher, you need to add a code for them. Click the plus-sign icon above the table, then enter the new user's email and their role (user, manager, or developer). An authentication code will be randomly generated and shown to you. You can copy the code and send it to the new user, which will let them signup to <b>Grant Matcher</b>. 
+<br><br>
+You can also see all of the codes in the table. Click the search button above the table to open a search modal to search for codes. In the table, there is a column called <code>claimed</code>, which tells you whether that code has been used already or not, acting as a useful security feature. Another important column is the delete column (you might have to scroll horizontally to find it). Clicking that icon will open a confirmation modal before deleting that code. When you remove a code, that means it can't be used to signup. Feel free to delete all claimed codes. 
+<br><br>
+<h4>Viewing Users</h4>
+In the <em>user page</em> (<code>user/:userEmail</code>), you can also view each user's information, such as:
+<ul>
+<li>Name</li>
+<li>Email</li>
+<li>XP</li>
+<li>Role</li>
+<li>Number of Grants Matched</li>
+<li>Date Joined</li>
+</ul>
+<br>
+<h4>Editing Users</h4>
+If you are a manager or a developer, you can also edit a user's information, such as:
+<ul>
+<li>Name</li>
+<li>XP</li>
+<li>Role</li>
+<li>Number of Grants Matched</li>
+</ul>
+<br>
+Forms to edit these fields are also present in the <em>user page</em>. Note that you are required to enter a reason for your changes. Additionally, you can't edit the developer's role unless you are a developer. You also can't edit your own role or XP unless you are a developer.
+<br><br>
+<h4>Deleting Users</h4>
+If you are a manager or a developer, you can delete users in the <em>user page</em>. Simply scroll all the way down to the <b>Danger Zone</b>, then click the "Delete Account" button. A modal should appear. After you enter the reason why you want to delete the user, the user will be deleted.
+<br><br>
+<h4>Suspending Users</h4>
+If you are a manager or a developer, you can suspend users in the <em>user page</em>. Simply scroll all the way down to the <b>Danger Zone</b>, then click the "Suspend" button. A modal should appear. You must enter (1) how many days they will be suspended, (2) the role they will return as, and (3) the reason for the suspension. 
+<br><br>
+If the user is already suspended, you can suspend them again but it will override the previous suspension details. The app will warn you if they have already been suspended. To unsuspend users, simply change their role to a user, manager, or a developer.
+<br><br>
+<h3>Managing Clusters</h3>
+In the clusters' table in the <em>dashboard</em>, click the edit button to go to the <em>manage clusters page</em> (<code>/manageclusters</code>). All the clusters will be automatically added to an editable keyword selector, allowing you to add, remove, and edit the clusters. Finally, press the pink button to confirm your changes.
+<br><br>
+<h3>Using Tickets</h3>
+<h4>View Tickets</h4>
+Tickets are a way to report errors and ask questions about <b>Grant Matcher</b>. To go to the <em>tickets</em> (<code>/tickets</code>), click the "Tickets" link in the navigation bar or in the footer. If you are on a mobile view, you might have to click the hamburger menu first to view the links. 
+<br><br>
+A table containing all the tickets will be displayed in <em>tickets</em>. Like all other tables, you can search, sort, and navigate through it. Each ticket will either have a ✅ symbol or a ⭕ symbol. ✅ means the ticket has been resolved and the ticket is locked, while ⭕ means that the ticket is unresolved and the poster is still waiting for a solution.
+<br><br>
+<h4>Open Tickets</h4>
+To open a new ticket, click the plus-sign icon in <em>tickets</em> above the table. Fill in all the fields. Tags refers to some broad categories that your ticket might fall into (you can select more than one). You can also select members, who are other people who can view your ticket. By default, you and the developer are automatically added as members, but you can also add other members.
+<br><br>
+Note there are multi-select dropdown. To select multiple values, hold down <code>ctrl</code> when clicking.
+<br><br>
+<h4>View a Ticket</h4>
+To view a specific ticket, click the link to the ticket in <em>tickets</em>. You will be redirected to the </em>ticket page</em> (<code>/ticket/:ticketID</code>). In the first section, you can see the ticket title, the date, the poster, and the content. On the right side, you can also hover over the "+ <code>number</code> others" text to see the members.
+<br><br>
+The second section is the Version Information. This consists of an accordion which stores all previous versions of the ticket's data. The reason for the most recent edit is shown above the accordion. The reason for the other edits are shown in the accordion items.
+<br><br>
+The last section is the replies to the ticket. You can see each of the replies in boxes. Underneath all the replies, there is a text area where you can send your own reply.
+<br><br>
+<h4>Edit Tickets</h4>
+If you are the ticket poster, you can also see an edit icon in the top right corner of the </em>ticket page</em> of your ticket. Clicking that would open a modal. This modal looks exactly the same as the modal where you opened your ticket, but this time all the fields are filled in with its current values. Additionally, you also have to state the reason you are editing this ticket. Once you filled in all fields, you can confirm your changes and the window will be refreshed.
+<br><br>
+<h4>Reply to Tickets</h4>
+If you want to reply to a ticket, scroll down to the end of the </em>ticket page</em> and type your reply in the text area. You highlight text and click on some of the formatting buttons to format it. However, please note that your reply won't be rendered properly if you nest the formatting (e.g., but an italic inside a bold). The window will be reloaded.
+<br><br>
+<h4>Edit Ticket Replies</h4>
+In the </em>ticket page</em>, all your replies should have a pink edit button. Clicking that button will open a modal. Change the content of your reply and state your reason for editing the reply. The window will be reloaded.
+<br><br>
+<h4>View Reply Edits</h4>
+To view a ticket reply's version history, click the grey button in the reply whose history you want to view. A modal containing the reply's Version Information will pop up. This consists of an accordion which stores all previous versions of the reply's content. The reason for the most recent edit is shown above the accordion. The reason for the other edits are shown in the accordion items.
+<br><br>
+<h4>Resolve Tickets</h4>
+If you are the ticket poster and you have found a solution and wish to resolve your ticket, click the "Resolve Ticket" button in the </em>ticket page</em>. A modal will pop-up. Enter why you wish to resolve your ticket, explaining what conclusion was reached, and provide the most helpful reply and ticket member. 
+<br><br>
+The dropdown for selecting the most helpful reply contains the reply numbers. You can exit the modal and find the reply number (#1 for the first reply, #2 for the second reply, and so on) of the reply you wish to select. Each reply has the reply number displayed. Note that your progress will be saved if you exit the modal.
+<br><br>
+<h3>Managing Your Account</h3>
+To manage your own account, click the user icon in the navigation bar (you might have to click the hamburger icon first if you are on a mobile phone), then click the "Profile" option in the dropdown. This will send you to the </em>profile page</em> (<code>/profile</code>).
+<br><br>
+To edit your name, simply change your name under the "Edit Name" section. You can also change your password, but you do need your current password to change it. Please make sure you remember your new password since you can't change it otherwise. It is a great idea to have a password manager.
+<br><br>
+Underneath these edit forms, you can see some information about your account, such as your XP and role.
+<br><br>
+Finally, there is the Danger Zone where you can delete your account. If you choose to delete your account, you must provide a reason why. This action is irreversible.
+<br><br>
+<h2>Errors</h2>
+If the site crashes, you will see this:
+<pre>{status: 'error', alert: 'Something went wrong. Please try again. If this problem persists, please email me at flyingbutter213@gmail.com.'}</pre>
+<br>
+If this appears, please email me. All errors are automatically sent to my email, so I will get errors fixed ASAP.
+<br><br>
+<h2>Conclusion</h2>
+Thank you for reading through the documentation! I hope that you enjoy using <b>Grant Matcher</b> and it is useful for supporting your researchers and diversifying your grants.
+<br><br>
+If you have any questions about the site or want to report any errors, please open a ticket in <b>Grant Matcher</b> or email me at flyingbutter213@gmail.com.
+	</section>
+    </main>
+    
+    <!-- EJS partial (for code reuse and efficiency) -->
+    <%- footer %>
+
+    <!-- Bootstrap for JS -->
+    <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <!-- This file allows for the user to interact with the elements on the site and for the site to give feedback to the user -->
+    <script src="script.js"></script>
+    <!-- JQuery for the tooltip -->
+    <script>
+        $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+    </script>
+</body>
+</html>

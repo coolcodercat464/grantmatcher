@@ -1,4 +1,6 @@
 // setup
+console.log = function () {}; // make sure stuff isnt exposed in logs
+
 const express = require('express');                       // import express
 const path = require('path');                             // install path
 var nodemailer = require('nodemailer');                   // for sending emails
@@ -89,7 +91,7 @@ app.get(['/db/grants', '/db/researchers', '/db/users', '/db/clusters', '/db/chan
 app.post(['/clustermatch', '/match', '/recalculate'], routes) 
 
 // essentials
-app.get(['/', '/login', '/signup'], routes)
+app.get(['/', '/login', '/signup', '/tutorial'], routes)
 app.post(['/', '/login', '/signup'], routes)
 
 // grants
@@ -115,16 +117,20 @@ app.post(['/changename', '/changepassword', '/deleteaccount', '/changexp', '/cha
 app.get(['/user/:id'], routes)
 
 // error handling
-app.use((err, req, res, next) => {
+app.use(async (err, req, res, next) => {
     // if you need to refresh the credentials, use: https://dev.to/chandrapantachhetri/sending-emails-securely-using-node-js-nodemailer-smtp-gmail-and-oauth2-g3a
-    err = err.stack
     console.error('Express error:', err);
 
-    if (err.slice(0, 12) == 'Error: EPERM') {
+    if (err?.stack?.startsWith('Error: EPERM')) {
         // this is some kind of session rename thing that isn't a fatal error
         // just ignore it
         return
     }
+
+    res.status(500).send({
+	status:'error',
+	alert: 'Something went wrong. Please try again or contact me at flyingbutter213@gmail.com'
+    });
 
     // create transporter
     let transporter = nodemailer.createTransport({
@@ -144,22 +150,17 @@ app.use((err, req, res, next) => {
         from: 'flyingbutter213@gmail.com',
         to: 'flyingbutter213@gmail.com',
         subject: '[URGENT] GRANT MATCHER ERROR AT ' + req.originalUrl,
-        html: err
+        html: `<pre>${err.stack || err}</pre>`
     };
 
     // emails flying butter when there is an error
-    transporter.sendMail(mailOptions, function(error, info){
-        if (error) {
-            console.log(error);
-        } else {
-            console.log('Email sent: ' + info.response);
-        }
-    });
-
-    res.status(500).send({status: 'error', alert: 'Something went wrong. Please try again. If this problem persists, please email me at flyingbutter213@gmail.com.'});
+    try {
+	const info = await transporter.sendMail(mailOptions)
+	console.log('email sent:', info.response);
+    } catch (mailErr) {
+	console.error('failed to send mail:', mailErr);
+    }
 });
 
 // listen to port
-app.listen(port, () => {
-    console.log("Backend is listening on port 3000");
-})
+app.listen(port, '0.0.0.0');

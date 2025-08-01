@@ -40,7 +40,7 @@ section {
 /* page title */
 h1 {
   font-family: "Lexend", sans-serif;
-  font-size: 25px !important;
+  font-size: 28px !important;
   font-optical-sizing: auto;
   padding-top: 15px; /* adds spacing between nav-bar and the title */
   font-style: normal;
@@ -48,7 +48,7 @@ h1 {
 
 /* subheadings */
 h2 {
-  font-size: 20px !important;
+  font-size: 24px !important;
   font-family: "Montserrat", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
@@ -56,10 +56,15 @@ h2 {
 }
 
 h3 {
-  font-size: 18px !important;
+  font-size: 20px !important;
   font-family: "Gantari", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
+}
+
+h4 {
+  font-size: 18px !important;
+  font-family: "Gantari", sans-serif;
 }
 
 /* normal text */

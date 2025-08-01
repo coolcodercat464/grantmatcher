@@ -32,6 +32,8 @@ router.post('/recalculate', control.nlprecalculate)
 router.get('/', control.indexget)
 router.post('/', control.indexpost)
 
+router.get('/tutorial', control.tutorialget)
+
 router.get('/managecodes', control.managecodesget)
 
 router.post('/addcode', control.addcodepost)
