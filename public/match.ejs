@@ -938,9 +938,14 @@
                     document.getElementById('showAlert').textContent = data.alert
                     openModal(2)
                 } else {
-		    navigator.clipboard.writeText(selectedEmails.join(", "));
-                    window.open("https://outlook.office.com/mail/")
-                    window.location.href = `/grant/<%= id %>`
+		    window.open("https://outlook.office.com/mail/")
+		    try {
+		    	navigator.clipboard.writeText(selectedEmails.join(", "));
+			window.location.href = `/grant/<%= id %>`                  
+		    } catch {
+			document.getElementById("showAlert").innerHTML = `Looks like we cannot copy the researchers' emails to your clipboard as this is a HTTP link. Please manually copy the researchers' emails:<br>${selectedEmails.join(", ")}`
+			openModal(2)
+		    }
                 }
             })
         }
