@@ -55,7 +55,7 @@ with suppress_output():
 
     # Initialise the sentence transformer model
     # slightly less accurate but faster
-    model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
+    model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # get the score for a particular keyword list
 def getSimilarity(model, keywords, categories):
