@@ -1508,6 +1508,7 @@ const indexpost = (req, res, next) => {
     // destroy the session
     req.session.destroy()
     // send them page to the login page
+    urlinit = '/'
     res.redirect('/login')
 }
 
