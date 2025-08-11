@@ -2363,7 +2363,7 @@ const confirmrecalculationpost = async (req, res)=>{
                     await queryWithRetry('UPDATE researchers SET clusters = clusters || $1 WHERE email = $2;', [newValue, researcherEmail]);
                 } else {
                     // update that value
-                    await queryWithRetry('UPDATE researchers SET "' + column + '" = $1 WHERE email = $2;', [newValue, researcherEmail]);
+                    await queryWithRetry(`UPDATE researchers SET "${column}" = $1 WHERE email = $2;`, [newValue, researcherEmail]);
                 }
             }
         })
@@ -2425,7 +2425,7 @@ const confirmrecalculationpost = async (req, res)=>{
                 }
 
                 // update that value
-                await queryWithRetry('UPDATE researchers SET "' + column + '" = $1 WHERE email = $2;', [newValue, researcherEmail]);
+                await queryWithRetry(`UPDATE researchers SET "${column}" = $1 WHERE email = $2;`, [newValue, researcherEmail]);
             }
         })
     }
