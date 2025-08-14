@@ -4440,7 +4440,7 @@ const suspenduserpost = async (req, res)=>{
         email = x.email
 
         // ensure the suspension duration is valid
-        if (!x.duration || parseInt(x.duration) < 0) {
+        if (!x.duration || !Number.isInteger(x.duration) || parseInt(x.duration) < 0) {
             res.send({status: 'error', alert: 'The suspension duration is invalid. Please ensure that it is a positive integer. If the issue persists, please open a ticket to let me know.'});
             return
         }
