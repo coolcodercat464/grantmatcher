@@ -566,8 +566,8 @@
                             <% for (var v = 0; v < versionInfo.length; v ++) { %>
                                 // get the information of the version
                                 id = <%= v %> + 1
-                                content = '<%= versionInfo[v][0] %>'
-                                reasonNext = '<%= versionInfo[v][1] %>'
+                                content = `<%= versionInfo[v][0] %>`
+                                reasonNext = `<%= versionInfo[v][1] %>`
                                 dateNext = '<%= versionInfo[v][2] %>'
 
                                 // create an accordion item HTML for it
@@ -764,9 +764,9 @@
                 <% for (var v = 0; v < versionInfo.length; v ++) { %>
                     // get the information of the version
                     id = <%= v %> + 1
-                    title = '<%= versionInfo[v][0] %>'
-                    content = '<%= versionInfo[v][1] %>'
-                    reasonNext = '<%= versionInfo[v][5] %>'
+                    title = `<%= versionInfo[v][0] %>`
+                    content = `<%= versionInfo[v][1] %>`
+                    reasonNext = `<%= versionInfo[v][5] %>`
                     dateNext = '<%= versionInfo[v][6] %>'
 
                     // setup tags
