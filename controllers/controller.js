@@ -3609,7 +3609,7 @@ const editticketpost = async (req, res)=>{
         }
 
         // ensure that user is in ticket members
-        if (!ticket.userEmail != req.session.useremail) {
+        if (ticket.userEmail != req.session.useremail) {
             res.send({status: 'error', alert: 'You are not the poster of the ticket so you cannot edit it.'});
             return
         }
@@ -3725,7 +3725,7 @@ const resolvepost = async (req, res)=>{
         }
 
         // ensure that user is in ticket members
-        if (!ticket.userEmail != req.session.useremail) {
+        if (ticket.userEmail != req.session.useremail) {
             res.send({status: 'error', alert: 'You are not the poster of the ticket so you cannot resolve it.'});
             return
         }
