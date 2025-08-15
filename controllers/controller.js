@@ -3070,7 +3070,6 @@ const manageclusterspost = async (req, res)=>{
 
     clustersAdded = 0
     clustersDeleted = 0
-    clustersEdited = 0
 
     // iterate over each inputted cluster
     for (i in inputClusterIds) {
@@ -3085,7 +3084,6 @@ const manageclusterspost = async (req, res)=>{
         } else {
             console.log(clusterId, clusterName)
             await queryWithRetry('UPDATE clusters SET name = $1 WHERE "clusterID" = $2', [clusterName, clusterId]);
-            clustersEdited ++;
         }
     }
 
@@ -3120,7 +3118,7 @@ const manageclusterspost = async (req, res)=>{
     nextChangeID = maxChangeID + 1
 
     //update changelog
-    await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Clusters Edited', date, `${clustersAdded} clusters were added, ${clustersEdited} clusters were edited, and ${clustersDeleted} clusters were deleted.`, '{}']);
+    await queryWithRetry('INSERT INTO changelog ("changeID", "userEmail", "type", date, description, "excludedFromView") VALUES ($1, $2, $3, $4, $5, $6)', [nextChangeID, req.session.useremail, 'Clusters Edited', date, `${clustersAdded} clusters were added and ${clustersDeleted} clusters were deleted.`, '{}']);
 
     res.send({success: 'success'})
 } 
