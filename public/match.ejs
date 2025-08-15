@@ -940,8 +940,7 @@
                 } else {
 		    window.open("https://outlook.office.com/mail/")
 		    try {
-		    	navigator.clipboard.writeText(selectedEmails.join(", "));
-			window.location.href = `/grant/<%= id %>`                  
+		    	navigator.clipboard.writeText(selectedEmails.join(", "));            
 		    } catch {
 			document.getElementById("showAlert").innerHTML = `Looks like we cannot copy the researchers' emails to your clipboard as this is a HTTP link. Please manually copy the researchers' emails:<br>${selectedEmails.join(", ")}`
 			openModal(2)
