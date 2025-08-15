@@ -852,7 +852,7 @@
 
                             // the name should be a link
                             uniqueId = row.email.split("@")[0]
-                            row.nameLink = `<a href='/researcher/${uniqueId.replace(".", "")}'>${row.name}</a>`
+                            row.nameLink = `<a href='/researcher/${row.email}'>${row.name}</a>`
                             row.score = matchResults[row.email]
                             row.keywordsString = row.keywords.join(", ")
                             row.uniqueId = uniqueId
