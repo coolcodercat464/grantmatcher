@@ -2656,7 +2656,7 @@ const removecodepost = async (req, res)=>{
 
     // try find the code
     const result2 = await queryWithRetry('SELECT "userEmail" FROM codes WHERE code = $1', [code]);
-    codeToDelete = result2.rows
+    codeToDelete = result2.rows[0]
 
     // ensure that the code exists
     if (codeToDelete.length == 0) {
