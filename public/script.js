@@ -355,9 +355,9 @@ function deleteEditableKeyword(id, kwid) {
         
         // replace it with an element that has a different background color
         if ((i+1) % 2 == 0) {
-            keywordElement = `<li id='kw${id}-${i-1}' class='listboxliwhite'><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteKeyword(${id}, ${i-1})"></i> <span contenteditable="true" id='${spanId}'>${keyword}</span></li>`
+            keywordElement = `<li id='kw${id}-${i-1}' class='listboxliwhite'><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteEditableKeyword(${id}, ${i-1})"></i> <span contenteditable="true" id='${spanId}'>${keyword}</span></li>`
         } else {
-            keywordElement = `<li id='kw${id}-${i-1}' class='listboxligray'><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteKeyword(${id}, ${i-1})"></i> <span contenteditable="true" id='${spanId}'>${keyword}</span></li>`
+            keywordElement = `<li id='kw${id}-${i-1}' class='listboxligray'><i class="fa fa-trash" style="margin-right: 5px;" onclick="deleteEditableKeyword(${id}, ${i-1})"></i> <span contenteditable="true" id='${spanId}'>${keyword}</span></li>`
         }
 
         ul.innerHTML += keywordElement
