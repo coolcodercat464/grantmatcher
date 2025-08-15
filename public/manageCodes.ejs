@@ -342,7 +342,7 @@
     <script>
         function handleDelete(element) {
             code = element.split('-')[1]
-            document.getElementById("confirmDelete").setAttribute("onclick", `deleteCode(${code})`)
+            document.getElementById("confirmDelete").setAttribute("onclick", `deleteCode("${code}")`)
             openModal(4)
         }
 
