@@ -1383,7 +1383,7 @@ async function searchCluster(tableNumber, modalNumber, dbclick=null, idField=nul
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ clusters: clusterTableData, matchTo: matchTo })
+        body: JSON.stringify({ clusters: clusterTableData, matchTo: inputMatch })
     }).then(response => response.json()).then(data => {
         clusterTableData = data.relevant
 
