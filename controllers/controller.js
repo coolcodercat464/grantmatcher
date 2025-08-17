@@ -2849,7 +2849,7 @@ const editresearcherpost = async (req, res)=>{
     }
 
     if (!['geoscience', 'philosophy', 'chemistry', 'biology', 'mathematics', 'physics', 'psychology', 'veterinary'].includes(school)) {
-        res.send({alert: 'The gender field is invalid. Please try again.'});
+        res.send({alert: 'The school field is invalid. Please try again.'});
         return
     }
 
