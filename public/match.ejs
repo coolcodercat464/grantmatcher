@@ -955,9 +955,9 @@
             // go through each researcher
             for (r in selectedNames) {
                 researcherName = selectedNames[r]
-                researcherId = selectedIds[r]
+                researcherEmail = selectedEmails[r]
                 // add the researcher's link to the list of links
-                output.push(`<a href='/researcher/${researcherId}'>${researcherName}</a>`)
+                output.push(`<a href='/researcher/${researcherEmail}'>${researcherName}</a>`)
             }
 
             // substitute the list of links for the selectedResearchers element
