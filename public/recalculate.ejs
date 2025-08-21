@@ -793,9 +793,9 @@
             for (r in confirmedNames) {
                 // get the info of the confirmed researcher
                 researcherName = confirmedNames[r]
-                researcherId = confirmedIds[r]
+                researcherEmail = confirmedEmails[r]
                 // add the researcher's link to the list of links
-                output.push(`<a href='/researcher/${researcherId}'>${researcherName}</a>`)
+                output.push(`<a href='/researcher/${researcherEmail}'>${researcherName}</a>`)
             }
 
             // substitute the list of links for the confirmedResearchers element
@@ -809,9 +809,9 @@
             for (r in selectedNames) {
                 // get the info of the selected researcher
                 researcherName = selectedNames[r]
-                researcherId = selectedIds[r]
+                researcherEmail = confirmedEmails[r]
                 // add the researcher's link to the list of links
-                output.push(`<a href='/researcher/${researcherId}'>${researcherName}</a>`)
+                output.push(`<a href='/researcher/${researcherEmail}'>${researcherName}</a>`)
             }
 
             // substitute the list of links for the selectedResearchers element
