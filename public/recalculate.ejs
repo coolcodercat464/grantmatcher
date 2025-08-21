@@ -809,7 +809,7 @@
             for (r in selectedNames) {
                 // get the info of the selected researcher
                 researcherName = selectedNames[r]
-                researcherEmail = confirmedEmails[r]
+                researcherEmail = selectedEmails[r]
                 // add the researcher's link to the list of links
                 output.push(`<a href='/researcher/${researcherEmail}'>${researcherName}</a>`)
             }
