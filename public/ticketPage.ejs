@@ -161,7 +161,6 @@
                     <label><b>MOST HELPFUL REPLY</b></label>
                     <select name="helpfulReply" id="helpfulReply" style="width: 100%" class="form-control">
                         <option value="" selected>Select</option>
-                        <option value="0">None</option>
                         <% for (var r = 0; r < replies.length; r ++) { %>
                             <option value="<%= replies[r].replyID %>">Post #<%= parseInt(r) + 1 %></option>
                         <% } %>
