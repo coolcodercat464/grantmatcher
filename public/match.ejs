@@ -747,6 +747,7 @@
                     document.getElementById("loadingSpinner").style.display = 'none' // remove the spinner
                     fetch('/db/researchers').then(response => response.json()).then(data => {
                         // iterate over the researchers
+						tableData[6].dataSet = []
                         for (var i = 0; i < data.length; i++) {
                             row = data[i]
 
@@ -755,7 +756,7 @@
 
                             // the name should be a link
                             uniqueId = row.email.split("@")[0]
-                            row.nameLink = `<a href='/researcher/${uniqueId.replace(".", "")}'>${row.name}</a>`
+                            row.nameLink = `<a href='/researcher/${row.email}'>${row.name}</a>`
                             row.score = matchResults[row.email]
                             row.keywordsString = row.keywords.join(", ")
                             row.uniqueId = uniqueId
@@ -844,6 +845,7 @@
                     document.getElementById("loadingSpinner").style.display = 'none' // remove the spinner
                     fetch('/db/researchers').then(response => response.json()).then(data => {
                         // iterate over the researchers
+						tableData[6].dataSet = []
                         for (var i = 0; i < data.length; i++) {
                             row = data[i]
 
