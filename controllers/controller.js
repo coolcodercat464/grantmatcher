@@ -2555,6 +2555,18 @@ const addcodepost = async (req, res)=>{
         return
     }
 
+    if (!['user', 'manager', 'developer'].includes(role)) {
+        res.send({alert: 'The role specified is invalid. Please retry.'})
+        return
+    }
+
+    // ensure there are no duplicates (code is the unique key)
+    duplicates = await queryWithRetry('SELECT FROM codes WHERE code = $1', [code]);
+    if (duplicates.rows.length != 0) {
+        res.send({alert: 'Something went wrong. Please try regenerate the code. If this issue persists, please let me know.'})
+        return
+    }
+
     // get the current date
     now = new Date();
 
